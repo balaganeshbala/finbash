@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Portfolio</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f1f5f9; color:#0f172a; min-height:100vh; }
+
+    /* ── SETUP SCREEN ── */
+    .setup-card { background:white; border-radius:20px; padding:40px 48px; max-width:580px; width:100%; box-shadow:0 25px 60px rgba(0,0,0,0.4); }
+    .setup-icon { font-size:48px; text-align:center; margin-bottom:12px; }
+    .setup-card h2 { font-size:22px; font-weight:800; text-align:center; color:#0f172a; margin-bottom:6px; }
+    .setup-card > p { font-size:13.5px; color:#64748b; text-align:center; margin-bottom:28px; line-height:1.6; }
+    .steps { display:flex; flex-direction:column; gap:14px; margin-bottom:24px; }
+    .step { display:flex; gap:14px; align-items:flex-start; }
+    .step-num { width:26px; height:26px; background:#3b82f6; color:white; border-radius:50%; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+    .step-body strong { font-size:13.5px; color:#1e293b; display:block; margin-bottom:2px; }
+    .step-body p { font-size:12.5px; color:#64748b; line-height:1.5; }
+    .step-body a { color:#2563eb; text-decoration:none; }
+    .step-body a:hover { text-decoration:underline; }
+    code { background:#f1f5f9; padding:2px 6px; border-radius:4px; font-family:monospace; font-size:11.5px; color:#0f172a; }
+    .rules-box { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; font-size:11.5px; font-family:monospace; color:#334155; line-height:1.7; margin-top:6px; white-space:pre; overflow-x:auto; }
+    .setup-note { background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:14px 16px; font-size:12.5px; color:#1e40af; margin-top:8px; }
+
+    /* ── LOGIN SCREEN ── */
+    .login-screen { min-height:100vh; background:linear-gradient(135deg,#0f172a,#1e3a5f); display:flex; align-items:center; justify-content:center; }
+    .login-card { background:white; border-radius:20px; padding:48px 52px; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.4); max-width:380px; width:100%; margin:20px; }
+    .login-logo { font-size:54px; margin-bottom:14px; }
+    .login-card h2 { font-size:24px; font-weight:800; color:#0f172a; }
+    .login-card p { font-size:14px; color:#64748b; margin:8px 0 30px; line-height:1.5; }
+    .btn-google { display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:13px 20px; background:white; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; font-weight:600; color:#374151; cursor:pointer; transition:all 0.2s; }
+    .btn-google:hover { background:#f8fafc; border-color:#cbd5e1; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    .btn-google svg { width:20px; height:20px; }
+
+    /* ── APP HEADER ── */
+    .header { background:linear-gradient(135deg,#0f172a,#1a3a6b,#1e40af); color:white; padding:16px 40px; display:flex; justify-content:space-between; align-items:center; }
+    .header h1 { font-size:20px; font-weight:800; }
+    .header-sub { font-size:12px; opacity:0.6; margin-top:2px; }
+    .header-right { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .user-avatar { width:30px; height:30px; border-radius:50%; border:2px solid rgba(255,255,255,0.3); }
+    .user-name-text { font-size:13px; font-weight:600; }
+    .btn-add { background:#3b82f6; color:white; border:none; padding:8px 16px; border-radius:8px; font-size:12.5px; font-weight:700; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; gap:5px; }
+    .btn-add:hover { background:#2563eb; }
+    .btn-logout { background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.25); padding:7px 14px; border-radius:8px; font-size:12px; cursor:pointer; transition:background 0.2s; }
+    .btn-logout:hover { background:rgba(255,255,255,0.2); }
+    .btn-partners { background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.25); padding:7px 14px; border-radius:8px; font-size:12px; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; gap:5px; }
+    .btn-partners:hover { background:rgba(255,255,255,0.2); }
+    .view-banner { background:linear-gradient(135deg,#6d28d9,#a855f7); color:white; padding:10px 40px; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px; }
+
+    /* ── PARTNERS MODAL ── */
+    .partner-list { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; min-height:44px; }
+    .partner-item { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#f8fafc; border-radius:9px; border:1px solid #e2e8f0; }
+    .partner-email { font-size:13px; color:#1e293b; font-weight:600; }
+    .partner-meta { font-size:11px; color:#64748b; margin-top:2px; }
+    .btn-remove-partner { background:none; border:1px solid #fecaca; color:#ef4444; padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+    .btn-remove-partner:hover { background:#fef2f2; }
+    .add-partner-row { display:flex; gap:10px; }
+    .add-partner-row input { flex:1; padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:9px; font-size:13.5px; color:#0f172a; outline:none; transition:border-color 0.15s; }
+    .add-partner-row input:focus { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
+    .btn-add-partner { background:#3b82f6; color:white; border:none; padding:9px 18px; border-radius:9px; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; transition:background 0.15s; }
+    .btn-add-partner:hover:not(:disabled) { background:#2563eb; }
+    .btn-add-partner:disabled { background:#93c5fd; cursor:not-allowed; }
+    .no-partners { text-align:center; color:#94a3b8; font-size:13px; padding:20px; }
+
+    /* ── TABS ── */
+    .tab-bar { background:white; border-bottom:2px solid #e2e8f0; padding:0 40px; display:flex; gap:0; }
+    .tab-btn { background:none; border:none; border-bottom:3px solid transparent; padding:14px 22px; font-size:13.5px; font-weight:700; color:#64748b; cursor:pointer; display:flex; align-items:center; gap:8px; transition:all 0.2s; margin-bottom:-2px; }
+    .tab-btn:hover { color:#1e293b; background:#f8fafc; }
+    .tab-btn.active { color:#1e40af; border-bottom-color:#1e40af; }
+    .tab-btn svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+    @media(max-width:768px){ .tab-bar { padding:0 20px; } .tab-btn { padding:12px 16px; font-size:12.5px; } }
+
+    /* ── GOLD PRICE BAR ── */
+    .gold-price-bar { background:linear-gradient(135deg,#78350f,#b45309); color:white; border-radius:14px; padding:16px 20px; margin-bottom:18px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .gold-price-bar label { font-size:11.5px; font-weight:700; opacity:0.8; display:block; margin-bottom:4px; }
+    .gold-price-input { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:white; padding:7px 12px; border-radius:8px; font-size:13px; font-weight:600; width:130px; outline:none; }
+    .gold-price-input::placeholder { color:rgba(255,255,255,0.5); }
+    .gold-price-input:focus { background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.6); }
+    @media(max-width:600px){
+      .gold-price-bar { display:grid; grid-template-columns:1fr 1fr; align-items:start; gap:12px; padding:14px 16px; }
+      .gold-price-bar > svg { display:none; }
+      .gold-price-bar > div { display:flex; flex-direction:column; }
+      .gold-price-input { width:100%; box-sizing:border-box; }
+      .btn-update-price { grid-column:1/-1; width:100%; padding:10px; font-size:13px; }
+      .gold-price-updated { grid-column:1/-1; text-align:center; margin-left:0; }
+    }
+    .btn-update-price { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:white; padding:8px 18px; border-radius:8px; font-size:12.5px; font-weight:700; cursor:pointer; transition:background 0.15s; white-space:nowrap; }
+    .btn-update-price:hover { background:rgba(255,255,255,0.3); }
+    .gold-price-updated { font-size:11px; opacity:0.65; margin-left:auto; }
+
+    /* ── GOLD TABLE BADGES ── */
+    .badge-24k { background:#fef3c7; color:#92400e; }
+    .badge-22k { background:#fde68a; color:#78350f; }
+    .badge-gift { background:#f3e8ff; color:#6b21a8; }
+
+    /* ── CONTAINER ── */
+    .container { max-width:1440px; margin:0 auto; padding:24px 40px; }
+
+    /* ── LOADING ── */
+    .loading-state { display:flex; align-items:center; justify-content:center; padding:80px; flex-direction:column; gap:16px; }
+    .spinner { width:36px; height:36px; border:3px solid #e2e8f0; border-top-color:#3b82f6; border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-text { font-size:14px; color:#64748b; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align:center; padding:70px 24px; }
+    .empty-icon { font-size:64px; margin-bottom:16px; }
+    .empty-state h2 { font-size:22px; font-weight:800; color:#1e293b; margin-bottom:8px; }
+    .empty-state p { font-size:14px; color:#64748b; margin-bottom:30px; line-height:1.6; max-width:420px; margin-left:auto; margin-right:auto; }
+    .empty-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .btn-primary { background:#3b82f6; color:white; border:none; padding:11px 22px; border-radius:9px; font-size:14px; font-weight:700; cursor:pointer; transition:background 0.2s; }
+    .btn-primary:hover { background:#2563eb; }
+    .btn-secondary { background:white; color:#374151; border:1.5px solid #e2e8f0; padding:10px 22px; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+    .btn-secondary:hover { border-color:#cbd5e1; background:#f8fafc; }
+
+    /* ── KPI CARDS ── */
+    .kpi-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:14px; margin-bottom:22px; }
+    .kpi-card { background:white; border-radius:14px; padding:18px 20px; box-shadow:0 1px 4px rgba(0,0,0,0.07); transition:transform 0.15s,box-shadow 0.15s; }
+    .kpi-card:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,0.1); }
+    .kpi-icon { margin-bottom:8px; display:flex; }
+    .kpi-icon svg { width:22px; height:22px; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .kpi-card.primary .kpi-icon svg, .kpi-card.success .kpi-icon svg { stroke:rgba(255,255,255,0.85); }
+    .icon { display:inline-block; vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+    .kpi-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#64748b; }
+    .kpi-value { font-size:20px; font-weight:800; color:#0f172a; margin:4px 0 2px; line-height:1.1; }
+    .kpi-sub { font-size:11px; color:#94a3b8; }
+    .kpi-card.primary { background:linear-gradient(135deg,#1e40af,#3b82f6); }
+    .kpi-card.primary .kpi-label,.kpi-card.primary .kpi-sub { color:rgba(255,255,255,0.6); }
+    .kpi-card.primary .kpi-value { color:white; }
+    .kpi-card.success { background:linear-gradient(135deg,#064e3b,#059669); }
+    .kpi-card.success .kpi-label,.kpi-card.success .kpi-sub { color:rgba(255,255,255,0.6); }
+    .kpi-card.success .kpi-value { color:white; }
+
+    /* ── CHART CARDS ── */
+    .card { background:white; border-radius:14px; padding:22px; box-shadow:0 1px 4px rgba(0,0,0,0.07); }
+    .card-title { font-size:13px; font-weight:700; color:#1e293b; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+    .card-title::before { content:''; width:3px; height:15px; background:#3b82f6; border-radius:2px; display:inline-block; flex-shrink:0; }
+    .row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:20px; }
+    .row-2 { display:grid; grid-template-columns:3fr 2fr; gap:16px; margin-bottom:20px; }
+
+    /* ── UPCOMING LIST ── */
+    .upcoming-card { display:flex; flex-direction:column; }
+    .upcoming-card .upcoming-scroll { flex:1; overflow-y:auto; padding-right:2px; min-height:0; }
+    .upcoming-scroll::-webkit-scrollbar { width:4px; }
+    .upcoming-scroll::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:2px; }
+    .upcoming-item { display:flex; justify-content:space-between; align-items:center; padding:10px 13px; border-radius:9px; margin-bottom:7px; border-left:3px solid; }
+    .upcoming-item.urgent { background:#fff1f2; border-color:#ef4444; }
+    .upcoming-item.warn   { background:#fff7ed; border-color:#f97316; }
+    .upcoming-item.normal { background:#eff6ff; border-color:#3b82f6; }
+    .up-name { font-size:12px; font-weight:700; color:#1e293b; max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .up-meta { font-size:11px; color:#64748b; margin-top:1px; }
+    .up-right { text-align:right; flex-shrink:0; margin-left:8px; }
+    .up-date { font-size:12px; font-weight:700; color:#1e293b; }
+    .up-days { font-size:11px; color:#64748b; }
+
+    /* ── TABLE ── */
+    .table-controls { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+    .table-controls input,.table-controls select { padding:8px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:12.5px; color:#374151; outline:none; background:white; transition:border-color 0.15s; }
+    .table-controls input:focus,.table-controls select:focus { border-color:#3b82f6; }
+    .search-input { flex:1; min-width:200px; }
+    .table-count { font-size:11px; color:#94a3b8; margin-top:12px; padding-top:10px; border-top:1px solid #f1f5f9; }
+    table { width:100%; border-collapse:collapse; font-size:12.5px; }
+    thead th { background:#f8fafc; padding:10px 12px; text-align:left; font-weight:700; font-size:10.5px; color:#475569; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; white-space:nowrap; }
+    thead th.r { text-align:right; }
+    thead th.sortable { cursor:pointer; user-select:none; }
+    thead th.sortable:hover { background:#f1f5f9; color:#1e293b; }
+    thead th.sortable::after { content:' ⇅'; opacity:0.25; font-size:10px; }
+    thead th.sort-asc::after  { content:' ↑'; opacity:1; color:#3b82f6; }
+    thead th.sort-desc::after { content:' ↓'; opacity:1; color:#3b82f6; }
+    tbody tr { border-bottom:1px solid #f1f5f9; transition:background 0.1s; }
+    tbody tr:hover { background:#f8fafc; }
+    tbody td { padding:9px 12px; color:#334155; vertical-align:middle; }
+    .bond-name { font-weight:600; color:#1e293b; font-size:12px; }
+    .num { text-align:right; font-variant-numeric:tabular-nums; }
+    .badge { display:inline-flex; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .badge-active  { background:#dcfce7; color:#15803d; }
+    .badge-matured { background:#fee2e2; color:#b91c1c; }
+    .badge-sm { background:#dbeafe; color:#1d4ed8; }
+    .badge-ai { background:#e0f2fe; color:#0369a1; }
+    .badge-gp { background:#d1fae5; color:#065f46; }
+    .badge-ww { background:#fef9c3; color:#92400e; }
+
+    /* ── ACTION BUTTONS ── */
+    .actions { display:flex; gap:3px; }
+    .btn-icon { background:none; border:none; cursor:pointer; padding:5px; border-radius:6px; display:flex; align-items:center; justify-content:center; transition:background 0.15s; }
+    .btn-icon:hover { background:#f1f5f9; }
+    .btn-icon svg { width:15px; height:15px; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+    .bi-edit svg   { stroke:#3b82f6; }
+    .bi-toggle svg { stroke:#f97316; }
+    .bi-restore svg{ stroke:#059669; }
+    .bi-del svg    { stroke:#ef4444; }
+
+    /* ── BOND MODAL ── */
+    .overlay { position:fixed; inset:0; background:rgba(15,23,42,0.65); display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px; backdrop-filter:blur(4px); }
+    .overlay.hidden { display:none; }
+    .modal { background:white; border-radius:18px; padding:28px 32px; max-width:620px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 25px 50px rgba(0,0,0,0.35); }
+    .modal-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
+    .modal-title { font-size:18px; font-weight:800; color:#0f172a; }
+    .modal-x { background:none; border:none; cursor:pointer; font-size:22px; color:#94a3b8; line-height:1; padding:2px 4px; border-radius:4px; transition:color 0.15s; }
+    .modal-x:hover { color:#374151; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .form-grid .full { grid-column:1/-1; }
+    .field { display:flex; flex-direction:column; gap:5px; }
+    .field label { font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.6px; }
+    .field input,.field select { padding:9px 12px; border:1.5px solid #e2e8f0; border-radius:9px; font-size:13.5px; color:#0f172a; outline:none; background:white; transition:border-color 0.15s,box-shadow 0.15s; width:100%; }
+    .field input:focus,.field select:focus { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.1); }
+    .field .hint { font-size:11px; color:#94a3b8; }
+    .field-row { display:flex; align-items:center; gap:10px; padding:10px 0; }
+    .field-row input[type=checkbox] { width:16px; height:16px; cursor:pointer; accent-color:#3b82f6; }
+    .field-row label { font-size:13.5px; font-weight:600; color:#374151; cursor:pointer; }
+    .modal-footer { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; padding-top:18px; border-top:1px solid #f1f5f9; }
+    .btn-cancel { background:white; color:#374151; border:1.5px solid #e2e8f0; padding:9px 20px; border-radius:9px; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.15s; }
+    .btn-cancel:hover { background:#f8fafc; }
+    .btn-save { background:#3b82f6; color:white; border:none; padding:9px 22px; border-radius:9px; font-size:13px; font-weight:700; cursor:pointer; transition:background 0.15s; }
+    .btn-save:hover:not(:disabled) { background:#2563eb; }
+    .btn-save:disabled { background:#93c5fd; cursor:not-allowed; }
+
+    /* ── CONFIRM MODAL ── */
+    .confirm-box { background:white; border-radius:16px; padding:26px 30px; max-width:380px; width:100%; box-shadow:0 25px 50px rgba(0,0,0,0.35); }
+    .confirm-title { font-size:18px; font-weight:800; color:#0f172a; margin-bottom:10px; }
+    .confirm-text { font-size:13.5px; color:#475569; margin-bottom:24px; line-height:1.6; }
+    .confirm-footer { display:flex; gap:10px; justify-content:flex-end; }
+    .btn-danger { background:#ef4444; color:white; border:none; padding:9px 20px; border-radius:9px; font-size:13px; font-weight:700; cursor:pointer; transition:background 0.15s; }
+    .btn-danger:hover { background:#dc2626; }
+
+    /* ── INTEREST TRACKER ── */
+    .tracker-summary { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:18px; }
+    .tracker-stat { background:#f8fafc; border-radius:10px; padding:12px 18px; flex:1; min-width:140px; }
+    .tracker-stat-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; color:#64748b; margin-bottom:4px; }
+    .tracker-stat-value { font-size:18px; font-weight:800; color:#0f172a; }
+    .tracker-stat.done { background:linear-gradient(135deg,#064e3b,#059669); }
+    .tracker-stat.done .tracker-stat-label { color:rgba(255,255,255,0.65); }
+    .tracker-stat.done .tracker-stat-value { color:white; }
+    .tracker-row { display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:9px; margin-bottom:4px; transition:background 0.1s; }
+    .tracker-row:hover { background:#f8fafc; }
+    .tracker-row.received { background:#f0fdf4; }
+    .tracker-num { font-size:11px; color:#94a3b8; width:20px; flex-shrink:0; }
+    .tracker-name { font-size:12.5px; font-weight:600; color:#1e293b; flex:1; min-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .tracker-schedule { font-size:11px; color:#64748b; width:100px; flex-shrink:0; }
+    .tracker-amount { font-size:12.5px; font-weight:700; color:#0f172a; width:90px; text-align:right; flex-shrink:0; }
+    .tracker-investor { font-size:11px; color:#64748b; width:150px; flex-shrink:0; }
+    .btn-mark { border:none; padding:5px 14px; border-radius:6px; font-size:11.5px; font-weight:700; cursor:pointer; transition:all 0.15s; flex-shrink:0; }
+    .btn-mark.pending { background:#f1f5f9; color:#64748b; }
+    .btn-mark.pending:hover { background:#e2e8f0; color:#334155; }
+    .btn-mark.received-btn { background:#dcfce7; color:#15803d; }
+    .btn-mark.received-btn:hover { background:#bbf7d0; }
+    .tracker-divider { border:none; border-top:1px solid #f1f5f9; margin:6px 0; }
+    @media(max-width:640px) {
+      .tracker-summary { gap:10px; }
+      .tracker-stat { padding:10px 14px; min-width:100px; }
+      .tracker-stat-value { font-size:15px; }
+    }
+
+    /* ── TOAST ── */
+    .toast { position:fixed; bottom:24px; right:24px; padding:14px 20px; border-radius:12px; font-size:13.5px; font-weight:600; color:white; box-shadow:0 8px 24px rgba(0,0,0,0.2); z-index:2000; transform:translateY(80px); opacity:0; transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); max-width:340px; }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .toast.success { background:#059669; }
+    .toast.error   { background:#ef4444; }
+    .toast.info    { background:#3b82f6; }
+
+    /* ── MOBILE HEADER ── */
+    .header-mobile { display:none; align-items:center; gap:8px; }
+    .btn-hamburger { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25); color:white; width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.2s; flex-shrink:0; }
+    .btn-hamburger:hover { background:rgba(255,255,255,0.2); }
+    .btn-hamburger svg { width:18px; height:18px; stroke:white; fill:none; stroke-width:2; stroke-linecap:round; }
+    /* ── MOBILE MENU ── */
+    .mobile-menu { background:linear-gradient(180deg,#1a2f5e,#0f172a); border-bottom:1px solid rgba(255,255,255,0.08); padding:0 20px 16px; display:none; flex-direction:column; gap:6px; }
+    .mobile-menu.open { display:flex; }
+    .mob-menu-user { display:flex; align-items:center; gap:12px; padding:14px 0 16px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:6px; }
+    .mob-menu-name { color:white; font-size:14px; font-weight:700; }
+    .mob-menu-email { color:rgba(255,255,255,0.45); font-size:11px; margin-top:2px; }
+    .btn-mob { background:rgba(255,255,255,0.07); color:white; border:1px solid rgba(255,255,255,0.1); padding:11px 16px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; text-align:left; display:flex; align-items:center; gap:10px; transition:background 0.15s; }
+    .btn-mob:hover { background:rgba(255,255,255,0.14); }
+    .btn-mob svg { width:16px; height:16px; fill:none; stroke:rgba(255,255,255,0.7); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+    .btn-mob-danger { background:rgba(239,68,68,0.1); border-color:rgba(239,68,68,0.25); color:#fca5a5; }
+    .btn-mob-danger:hover { background:rgba(239,68,68,0.2); }
+    .btn-mob-danger svg { stroke:#fca5a5; }
+
+    /* Gold KPI grid: 4 columns by default (overrides the 6-col base) */
+    #goldKpiGrid { grid-template-columns:repeat(4,1fr); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:1200px){ .kpi-grid{grid-template-columns:repeat(3,1fr);} #goldKpiGrid{grid-template-columns:repeat(2,1fr);} }
+    @media(max-width:900px){
+      .row-3{grid-template-columns:1fr 1fr;}
+      .row-2{grid-template-columns:1fr;}
+      .container,.header{padding:16px 20px;}
+      .kpi-grid{grid-template-columns:repeat(2,1fr);}
+      #goldKpiGrid{grid-template-columns:repeat(2,1fr);}
+    }
+    @media(max-width:768px){
+      .header-right { display:none !important; }
+      .header-mobile { display:flex; }
+      .header { padding:14px 20px; }
+    }
+    @media(max-width:600px){
+      .row-3{grid-template-columns:1fr;}
+      .form-grid{grid-template-columns:1fr;}
+      .form-grid .full{grid-column:1;}
+      #goldKpiGrid{grid-template-columns:repeat(2,1fr);}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  LOGIN SCREEN                                                   -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="login-screen" style="display:none">
+  <div class="login-screen">
+    <div class="login-card">
+      <div class="login-logo"><svg style="width:54px;height:54px;fill:none;stroke:#1e40af;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7 12 2"/></svg></div>
+      <h2>FinBash Portfolio</h2>
+      <p>Sign in to track your assets securely.</p>
+      <button id="btn-google-login" class="btn-google">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Sign in with Google
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  APP SCREEN                                                     -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="app-screen" style="display:none">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h1><svg class="icon" style="width:30px;height:30px;stroke:white;margin-right:8px" viewBox="0 0 24 30"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7 12 2" stroke-linejoin="round"/></svg>FinBash Portfolio</h1>
+      <div class="header-sub" id="header-sub">Loading…</div>
+    </div>
+    <div class="header-right">
+      <img id="user-avatar" class="user-avatar" src="" alt="" style="display:none">
+      <span id="user-name" class="user-name-text"></span>
+      <button id="btn-partners" class="btn-partners"><svg class="icon" style="width:15px;height:15px;stroke:white" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Partners</button>
+      <button id="btn-logout" class="btn-logout">Sign Out</button>
+    </div>
+    <!-- Mobile: avatar + hamburger -->
+    <div class="header-mobile">
+      <img id="user-avatar-mob" class="user-avatar" src="" alt="" style="display:none">
+      <button id="btn-hamburger" class="btn-hamburger" aria-label="Menu">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile dropdown menu -->
+  <div id="mobile-menu" class="mobile-menu">
+    <div class="mob-menu-user">
+      <img id="mob-avatar" class="user-avatar" src="" alt="" style="display:none">
+      <div>
+        <div class="mob-menu-name" id="mob-user-name"></div>
+        <div class="mob-menu-email" id="mob-user-email"></div>
+      </div>
+    </div>
+    <button id="mob-btn-partners" class="btn-mob">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Partners
+    </button>
+    <button id="mob-btn-logout" class="btn-mob btn-mob-danger">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out
+    </button>
+  </div>
+
+  <!-- View-mode banner (shown when logged in as a viewer) -->
+  <div id="view-banner" style="display:none" class="view-banner">
+    <svg class="icon" style="width:16px;height:16px;stroke:white" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Viewing <span id="view-owner-name">portfolio</span> &nbsp;—&nbsp; Read Only
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="bonds">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7 12 2"/></svg>
+      Bonds
+    </button>
+    <button class="tab-btn" data-tab="gold">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+      Gold
+    </button>
+  </div>
+
+  <div class="container">
+
+  <!-- ── BONDS TAB ── -->
+  <div id="tab-bonds" class="tab-panel active">
+
+    <!-- Loading -->
+    <div id="loading-state" class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading your portfolio…</div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" style="display:none" class="empty-state">
+      <div class="empty-icon"><svg style="width:64px;height:64px;fill:none;stroke:#7e868e;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <h2>No bonds yet</h2>
+      <p>Add your first bond to get started.</p>
+      <div class="empty-btns">
+        <button id="btn-add-first" class="btn-primary">＋ Add First Bond</button>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" style="display:none">
+
+      <!-- KPIs -->
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <!-- Charts Row 1 -->
+      <div class="row-3">
+        <div class="card"><div class="card-title">Platform Allocation</div><canvas id="platformChart" height="230"></canvas></div>
+        <div class="card"><div class="card-title">Investor Split</div><canvas id="investorChart" height="230"></canvas></div>
+        <div class="card"><div class="card-title">Demat Account Breakdown</div><canvas id="dematChart" height="230"></canvas></div>
+      </div>
+
+      <!-- Bond Table -->
+      <div class="card">
+        <div class="card-title">All Holdings</div>
+        <div class="table-controls">
+          <input type="text" id="searchInput" class="search-input" placeholder="🔍  Search by bond name…">
+          <select id="platformFilter">
+            <option value="">All Platforms</option>
+            <option>Stable Money</option><option>Aionion</option>
+            <option>GoldenPi</option><option>WintWealth</option>
+          </select>
+          <select id="investorFilter">
+            <option value="">All Investors</option>
+          </select>
+          <select id="statusFilter">
+            <option value="">All Status</option>
+            <option value="active" selected>Active</option>
+            <option value="matured">Matured / Withdrawn</option>
+          </select>
+          <button id="btn-add-bond" class="btn-add" style="margin-left:auto">
+            <svg class="icon" style="width:14px;height:14px;stroke:white" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Bond
+          </button>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="sortable" data-sort="name">Bond Name</th>
+                <th class="sortable" data-sort="platform">Platform</th>
+                <th class="r sortable" data-sort="faceValue">Face Value</th>
+                <th class="r sortable" data-sort="coupon">Coupon</th>
+                <th class="r sortable" data-sort="ytm">YTM</th>
+                <th class="sortable" data-sort="investedOn">Invested On</th>
+                <th class="sortable" data-sort="maturity">Matures On</th>
+                <th class="r sortable" data-sort="monthly">Monthly Int.</th>
+                <th class="sortable" data-sort="frequency">Pay Schedule</th>
+                <th class="sortable" data-sort="by">Investor</th>
+                <th class="sortable" data-sort="demat">Demat Account</th>
+                <th class="sortable" data-sort="matured">Status</th>
+                <th id="th-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div class="table-count" id="tableCount"></div>
+      </div>
+
+      <!-- Interest Tracker -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">Interest Tracker — <span id="tracker-month-label"></span></div>
+        <div class="tracker-summary" id="tracker-summary"></div>
+        <div style="overflow-x:auto"><div id="tracker-body" style="min-width:720px"></div></div>
+      </div>
+
+      <!-- Maturity Distribution & Upcoming -->
+      <div class="row-2" style="margin-top:28px">
+        <div class="card"><div class="card-title">Maturity Distribution by Year</div><canvas id="maturityChart" height="180"></canvas></div>
+        <div class="card upcoming-card">
+          <div class="card-title">Upcoming Maturities – Next 12 Months</div>
+          <div class="upcoming-scroll" id="upcomingList"></div>
+        </div>
+      </div>
+
+    </div><!-- /dashboard -->
+  </div><!-- /tab-bonds -->
+
+  <!-- ── GOLD TAB ── -->
+  <div id="tab-gold" class="tab-panel">
+
+    <!-- Gold Loading -->
+    <div id="gold-loading" class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading gold portfolio…</div>
+    </div>
+
+    <!-- Gold Empty -->
+    <div id="gold-empty" style="display:none" class="empty-state">
+      <div class="empty-icon"><svg style="width:64px;height:64px;fill:none;stroke:#7e868e;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+      <h2>No gold records yet</h2>
+      <p>Add your first gold item to get started.</p>
+      <div class="empty-btns">
+        <button id="btn-add-first-gold" class="btn-primary">＋ Add First Item</button>
+      </div>
+    </div>
+
+    <!-- Gold Dashboard -->
+    <div id="gold-dashboard" style="display:none">
+
+      <!-- Gold Price Bar -->
+      <div class="gold-price-bar">
+        <svg style="width:22px;height:22px;fill:none;stroke:rgba(255,255,255,0.9);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 000 4h4a2 2 0 010 4H8"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
+        <div>
+          <label>22K Price / gram</label>
+          <input type="number" id="price-22k" class="gold-price-input" placeholder="e.g. 13445" step="0.01">
+        </div>
+        <div>
+          <label>24K Price / gram</label>
+          <input type="number" id="price-24k" class="gold-price-input" placeholder="e.g. 14678" step="0.01">
+        </div>
+        <button class="btn-update-price" id="btn-update-price">Save Prices</button>
+        <span class="gold-price-updated" id="gold-price-updated"></span>
+      </div>
+
+      <!-- Gold KPIs -->
+      <div class="kpi-grid" id="goldKpiGrid" style="margin-bottom:22px"></div>
+
+      <!-- Gold Charts -->
+      <div class="row-3" style="margin-bottom:20px">
+        <div class="card"><div class="card-title">By Karat (Weight)</div><canvas id="goldTypeChart" height="230"></canvas></div>
+        <div class="card"><div class="card-title">Year-wise Accumulation</div><canvas id="goldYearChart" height="230"></canvas></div>
+        <div class="card"><div class="card-title">Invested vs Current Value</div><canvas id="goldValueChart" height="230"></canvas></div>
+      </div>
+
+      <!-- Gold Table -->
+      <div class="card">
+        <div class="card-title">All Gold Holdings</div>
+        <div class="table-controls">
+          <input type="text" id="goldSearchInput" class="search-input" placeholder="Search by name…">
+          <select id="goldTypeFilter">
+            <option value="">All Karats</option>
+            <option value="22K">22K</option>
+            <option value="24K">24K</option>
+          </select>
+          <select id="goldGiftFilter">
+            <option value="">All</option>
+            <option value="gifted">Gifted Away</option>
+            <option value="received">Received as Gift</option>
+            <option value="owned">Purchased</option>
+          </select>
+          <button id="btn-add-gold" class="btn-add" style="margin-left:auto">
+            <svg class="icon" style="width:14px;height:14px;stroke:white" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Gold
+          </button>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th class="sortable" data-gsort="name">Name</th>
+                <th class="sortable" data-gsort="type">Karat</th>
+                <th class="r sortable" data-gsort="weight">Weight (g)</th>
+                <th class="r sortable" data-gsort="paidPerGram">Paid/g</th>
+                <th class="r sortable" data-gsort="totalInvested">Invested</th>
+                <th class="r sortable" data-gsort="currentValue">Current Value</th>
+                <th class="r sortable" data-gsort="profit">Profit</th>
+                <th class="sortable" data-gsort="date">Date</th>
+                <th>Status</th>
+                <th id="gth-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="goldTableBody"></tbody>
+          </table>
+        </div>
+        <div class="table-count" id="goldTableCount"></div>
+      </div>
+
+    </div><!-- /gold-dashboard -->
+  </div><!-- /tab-gold -->
+
+  </div><!-- /container -->
+</div><!-- /app-screen -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  BOND MODAL  (Add / Edit)                                       -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="bond-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-title">Add New Bond</div>
+      <button class="modal-x" id="modal-close-btn">✕</button>
+    </div>
+    <form id="bond-form" autocomplete="off">
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>Bond / Company Name *</label>
+          <input type="text" id="f-name" placeholder="e.g. NAVI FINSERV LIMITED" required>
+        </div>
+
+        <div class="field">
+          <label>Platform *</label>
+          <input type="text" id="f-platform" placeholder="e.g. Stable Money" required>
+        </div>
+
+        <div class="field">
+          <label>Invested By *</label>
+          <input type="text" id="f-by" placeholder="e.g. Bala" required>
+        </div>
+
+        <div class="field">
+          <label>Face Value (₹) *</label>
+          <input type="number" id="f-faceValue" placeholder="100000" min="1" step="any" required>
+        </div>
+
+        <div class="field">
+          <label>Purchase Price (₹)</label>
+          <input type="number" id="f-purchase" placeholder="Optional" min="0" step="any">
+        </div>
+
+        <div class="field">
+          <label>Coupon Rate (%) *</label>
+          <input type="number" id="f-coupon" placeholder="10.50" step="0.01" min="0" max="100" required>
+        </div>
+
+        <div class="field">
+          <label>YTM (%) *</label>
+          <input type="number" id="f-ytm" placeholder="11.25" step="0.01" min="0" max="100" required>
+        </div>
+
+        <div class="field">
+          <label>Invested On *</label>
+          <input type="date" id="f-investedOn" required>
+        </div>
+
+        <div class="field">
+          <label>Maturity Date *</label>
+          <input type="date" id="f-maturity" required>
+        </div>
+
+        <div class="field">
+          <label>Monthly Interest (₹)</label>
+          <input type="number" id="f-monthly" placeholder="Auto-calculated" step="0.01" min="0">
+          <div class="hint">Auto-fills when you enter Face Value &amp; Coupon Rate</div>
+        </div>
+
+        <div class="field">
+          <label>Pay Schedule</label>
+          <input type="text" id="f-frequency" placeholder="e.g. 15 - Monthly">
+          <div class="hint">Day of month &amp; frequency (e.g. 02 - Monthly)</div>
+        </div>
+
+        <div class="field">
+          <label>Demat Account *</label>
+          <input type="text" id="f-demat" placeholder="e.g. Zerodha - Bala" required>
+        </div>
+
+        <div class="field full">
+          <div class="field-row">
+            <input type="checkbox" id="f-matured">
+            <label for="f-matured">Mark as Matured / Withdrawn</label>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" id="cancel-btn">Cancel</button>
+        <button type="submit" class="btn-save" id="save-btn">Add Bond</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  CONFIRM DELETE MODAL                                           -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="confirm-modal" class="overlay hidden">
+  <div class="confirm-box">
+    <div class="confirm-title"><svg class="icon" style="width:18px;height:18px;stroke:#ef4444;margin-right:6px" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>Delete Bond?</div>
+    <div class="confirm-text" id="confirm-text">This will permanently delete this bond. This cannot be undone.</div>
+    <div class="confirm-footer">
+      <button class="btn-cancel" id="confirm-cancel">Cancel</button>
+      <button class="btn-danger" id="confirm-delete">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  PARTNERS MODAL                                                 -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="partners-modal" class="overlay hidden">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-hdr">
+      <div class="modal-title"><svg class="icon" style="width:18px;height:18px;stroke:#0f172a;margin-right:6px" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Partner Access</div>
+      <button class="modal-x" id="partners-close-btn">✕</button>
+    </div>
+    <p style="font-size:13px;color:#64748b;margin-bottom:20px;line-height:1.6">
+      Partners can <strong>view</strong> your portfolio in read-only mode. They sign in with their own Google account at <strong>bondbash.netlify.app</strong> and will see your data automatically.
+    </p>
+    <div class="card-title" style="margin-bottom:12px">Current Partners</div>
+    <div id="partner-list" class="partner-list">
+      <div class="no-partners">No partners added yet</div>
+    </div>
+    <div class="card-title" style="margin-bottom:12px">Add New Partner</div>
+    <div class="add-partner-row">
+      <input type="email" id="partner-email-input" placeholder="partner@gmail.com">
+      <button class="btn-add-partner" id="btn-add-partner-action">Add</button>
+    </div>
+    <p style="font-size:11px;color:#94a3b8;margin-top:8px">They'll have view access the next time they sign in.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  GOLD MODAL  (Add / Edit)                                       -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="gold-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="gold-modal-title">Add Gold Item</div>
+      <button class="modal-x" id="gold-modal-close">✕</button>
+    </div>
+    <form id="gold-form" autocomplete="off">
+      <div class="form-grid">
+        <div class="field full">
+          <label>Name *</label>
+          <input type="text" id="gf-name" placeholder="e.g. Gold Coin - GRT" required>
+        </div>
+        <div class="field">
+          <label>Karat *</label>
+          <select id="gf-type" required>
+            <option value="">Select…</option>
+            <option value="22K">22K</option>
+            <option value="24K">24K</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Date *</label>
+          <input type="date" id="gf-date" required>
+        </div>
+        <div class="field">
+          <label>Weight (grams) *</label>
+          <input type="number" id="gf-weight" placeholder="e.g. 8" step="0.01" min="0" required>
+        </div>
+        <div class="field">
+          <label>Paid per gram (₹)</label>
+          <input type="number" id="gf-paidPerGram" placeholder="0 if gifted" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label>Total Invested (₹)</label>
+          <input type="number" id="gf-totalInvested" placeholder="Auto-calculated" step="0.01" min="0">
+          <div class="hint">Auto-fills from weight × paid/gram</div>
+        </div>
+        <div class="field full">
+          <div class="field-row">
+            <input type="checkbox" id="gf-gifted">
+            <label for="gf-gifted">Gifted away</label>
+          </div>
+        </div>
+        <div class="field full" id="gf-gifted-for-field" style="display:none">
+          <label>Gifted For</label>
+          <input type="text" id="gf-giftedFor" placeholder="e.g. Keerthi Marriage">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" id="gold-cancel-btn">Cancel</button>
+        <button type="submit" class="btn-save" id="gold-save-btn">Add Item</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  FIREBASE APP SCRIPT                                            -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<script type="module">
+
+import { initializeApp }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp, writeBatch, getDoc, setDoc }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+/* ─────────────────────────────────────────────────────────────────
+   🔑  FIREBASE CONFIG
+   Replace REPLACE_WITH_* values with your Firebase project config.
+   Get them from: Firebase Console → Project Settings → Your apps
+   ───────────────────────────────────────────────────────────────── */
+const firebaseConfig = {
+  apiKey: "AIzaSyDjhl-leKVZo4tNSPtR5GUqwcSpoBZhkro",
+  authDomain: "bond-portfolio-c50e2.firebaseapp.com",
+  projectId: "bond-portfolio-c50e2",
+  storageBucket: "bond-portfolio-c50e2.firebasestorage.app",
+  messagingSenderId: "1055478108669",
+  appId: "1:1055478108669:web:d41e388bc60f6b92488994"
+};
+
+/* ─────────────────────────────────────────────────────────────────
+   CONSTANTS & HELPERS
+   ───────────────────────────────────────────────────────────────── */
+const TODAY = (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })();
+const MS_DAY = 86400000;
+const fmt = n => '₹' + Number(n).toLocaleString('en-IN');
+const fmtDate = s => new Date(s).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+const groupSum = (arr, key, val) => arr.reduce((acc,b) => { acc[b[key]] = (acc[b[key]]||0)+(b[val]||0); return acc; }, {});
+const PLATFORM_BADGE = {'Stable Money':'badge-sm','Aionion':'badge-ai','GoldenPi':'badge-gp','WintWealth':'badge-ww'};
+const PLATFORM_COLORS = {'Stable Money':'#3b82f6','Aionion':'#06b6d4','GoldenPi':'#10b981','WintWealth':'#f59e0b'};
+
+/* ─────────────────────────────────────────────────────────────────
+   STATE
+   ───────────────────────────────────────────────────────────────── */
+let currentUser = null;
+let bonds = [];
+let editingBondId = null;
+let pendingDeleteId = null;
+let firestoreUnsub = null;
+let chartInst = {};
+let isViewMode = false;
+let viewOwnerUid = null;
+let viewOwnerName = '';
+let currentViewers = [];
+let sortCol = null;
+let sortDir = 'asc';
+let goldItems = [];
+let editingGoldId = null;
+let goldUnsub = null;
+let goldChartInst = {};
+let goldSortCol = null;
+let goldSortDir = 'asc';
+let goldPrices = { price22k: 0, price24k: 0 };
+let activeTab = 'bonds';
+
+/* ─────────────────────────────────────────────────────────────────
+   TOAST
+   ───────────────────────────────────────────────────────────────── */
+let toastTimer;
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type}`;
+  clearTimeout(toastTimer);
+  requestAnimationFrame(() => t.classList.add('show'));
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   UI STATE SWITCHERS
+   ───────────────────────────────────────────────────────────────── */
+function showSection(id) {
+  ['login-screen','app-screen'].forEach(s => {
+    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+  });
+  if (id === 'login-screen')
+    document.getElementById('login-screen').querySelector('.login-screen').style.display = 'flex';
+}
+
+function setDashboardState(state) {
+  document.getElementById('loading-state').style.display = state === 'loading' ? 'flex' : 'none';
+  document.getElementById('empty-state').style.display   = state === 'empty'   ? 'block' : 'none';
+  document.getElementById('dashboard').style.display     = state === 'data'    ? 'block' : 'none';
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   FIREBASE INIT
+   ───────────────────────────────────────────────────────────────── */
+const isConfigured = !firebaseConfig.apiKey.startsWith('REPLACE_');
+
+if (!isConfigured) {
+  showSection('login-screen');
+} else {
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  /* ── AUTH ── */
+  document.getElementById('btn-google-login').addEventListener('click', async () => {
+    try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+    catch (e) { toast('Sign-in failed: ' + (e.code || e.message), 'error'); }
+  });
+
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    if (firestoreUnsub) { firestoreUnsub(); firestoreUnsub = null; }
+    if (goldUnsub) { goldUnsub(); goldUnsub = null; }
+    bonds = []; goldItems = []; isViewMode = false; viewOwnerUid = null; currentViewers = [];
+    await signOut(auth);
+  });
+
+  onAuthStateChanged(auth, async user => {
+    currentUser = user;
+    if (user) {
+      document.getElementById('app-screen').style.display = 'block';
+      document.getElementById('login-screen').style.display = 'none';
+      const av = document.getElementById('user-avatar');
+      if (user.photoURL) { av.src = user.photoURL; av.style.display = 'block'; } else { av.style.display = 'none'; }
+      document.getElementById('user-name').textContent = user.displayName || user.email;
+      // Mobile user info
+      ['user-avatar-mob','mob-avatar'].forEach(id => {
+        const el = document.getElementById(id);
+        if (user.photoURL) { el.src = user.photoURL; el.style.display = 'block'; } else { el.style.display = 'none'; }
+      });
+      document.getElementById('mob-user-name').textContent = user.displayName || '';
+      document.getElementById('mob-user-email').textContent = user.email;
+      document.getElementById('header-sub').textContent =
+        new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+      setDashboardState('loading');
+
+      // Check if this user is a viewer of someone else's portfolio
+      try {
+        const viewerSnap = await getDoc(doc(db, 'viewerOf', user.email));
+        if (viewerSnap.exists()) {
+          isViewMode = true;
+          viewOwnerUid = viewerSnap.data().ownerUid;
+          viewOwnerName = viewerSnap.data().ownerName || 'Owner';
+          document.getElementById('view-banner').style.display = 'flex';
+          document.getElementById('view-owner-name').textContent = viewOwnerName + "'s";
+          document.getElementById('btn-partners').style.display = 'none';
+          document.getElementById('mob-btn-partners').style.display = 'none';
+          document.getElementById('th-actions').style.display = 'none';
+          document.getElementById('gth-actions').style.display = 'none';
+          document.getElementById('btn-add-gold').style.display = 'none';
+          document.getElementById('btn-add-bond').style.display = 'none';
+          startListening(db, viewOwnerUid);
+          startListeningGold(db, viewOwnerUid);
+          loadGoldPrices(db, viewOwnerUid);
+        } else {
+          isViewMode = false; viewOwnerUid = null;
+          document.getElementById('view-banner').style.display = 'none';
+          document.getElementById('btn-partners').style.display = '';
+          document.getElementById('mob-btn-partners').style.display = '';
+          document.getElementById('th-actions').style.display = '';
+          document.getElementById('gth-actions').style.display = '';
+          document.getElementById('btn-add-gold').style.display = '';
+          document.getElementById('btn-add-bond').style.display = '';
+          startListening(db, user.uid);
+          startListeningGold(db, user.uid);
+          loadGoldPrices(db, user.uid);
+          loadPartners(db, user.uid);
+        }
+      } catch {
+        // If viewerOf lookup fails (e.g. rules not yet updated), fall back to owner mode
+        isViewMode = false;
+        startListening(db, user.uid);
+        startListeningGold(db, user.uid);
+        loadGoldPrices(db, user.uid);
+        loadPartners(db, user.uid);
+      }
+    } else {
+      if (firestoreUnsub) { firestoreUnsub(); firestoreUnsub = null; }
+      if (goldUnsub) { goldUnsub(); goldUnsub = null; }
+      bonds = []; goldItems = []; isViewMode = false;
+      showSection('login-screen');
+    }
+  });
+
+  /* ── FIRESTORE LISTENER ── */
+  function startListening(db, uid) {
+    firestoreUnsub = onSnapshot(
+      collection(db, 'users', uid, 'bonds'),
+      snap => {
+        bonds = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        bonds.length === 0 ? setDashboardState('empty') : (setDashboardState('data'), renderDashboard());
+      },
+      err => {
+        toast('Could not load data. Check your Firestore security rules.', 'error');
+        setDashboardState('empty');
+      }
+    );
+  }
+
+  /* ── CRUD ── */
+  const bondsRef = () => collection(db, 'users', currentUser.uid, 'bonds');
+  const bondDoc  = id => doc(db, 'users', currentUser.uid, 'bonds', id);
+
+  async function addBond(data) {
+    await addDoc(bondsRef(), { ...data, createdAt: serverTimestamp() });
+  }
+  async function updateBond(id, data) {
+    await updateDoc(bondDoc(id), { ...data, updatedAt: serverTimestamp() });
+  }
+  async function deleteBond(id) {
+    await deleteDoc(bondDoc(id));
+  }
+
+
+
+  /* ─────────────────────────────────────────────────────────────
+     DASHBOARD RENDERING
+     ───────────────────────────────────────────────────────────── */
+  function destroyCharts() {
+    Object.keys(chartInst).forEach(k => { if (chartInst[k]) { chartInst[k].destroy(); chartInst[k] = null; } });
+  }
+
+  function renderDashboard() {
+    const active = bonds.filter(b => !b.matured);
+    const matured = bonds.filter(b => b.matured);
+    const totalFV      = active.reduce((s,b) => s+(b.faceValue||0), 0);
+    const totalMonthly = active.reduce((s,b) => s+(b.monthly||0), 0);
+    const annualInt    = totalMonthly * 12;
+    const avgYTM       = active.length ? active.reduce((s,b) => s+(b.ytm||0),0)/active.length : 0;
+    const avgCoupon    = active.length ? active.reduce((s,b) => s+(b.coupon||0),0)/active.length : 0;
+
+    /* KPIs */
+    const KSVG = (d,s='#94a3b8') => `<svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:${s};stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${d}</svg>`;
+    document.getElementById('kpiGrid').innerHTML = [
+      { icon: KSVG('<circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 000 4h4a2 2 0 010 4H8"/><line x1="12" y1="6" x2="12" y2="18"/>','white'),        label:'Total Invested',   value:fmt(totalFV),                  sub:'Active bonds only',          cls:'primary' },
+      { icon: KSVG('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>','white'), label:'Monthly Interest', value:fmt(Math.round(totalMonthly)), sub:'Expected per month',          cls:'success' },
+      { icon: KSVG('<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>','#059669'),      label:'Annual Interest',  value:fmt(Math.round(annualInt)),     sub:'Projected yearly income',     cls:'' },
+      { icon: KSVG('<line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/>','#3b82f6'), label:'Active Bonds',     value:active.length,                 sub:`${matured.length} matured/withdrawn`, cls:'' },
+      { icon: KSVG('<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>','#8b5cf6'),              label:'Avg YTM',          value:avgYTM.toFixed(2)+'%',         sub:'Yield to maturity',           cls:'' },
+      { icon: KSVG('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>','#f59e0b'),                              label:'Avg Coupon',       value:avgCoupon.toFixed(2)+'%',      sub:'Across active holdings',      cls:'' },
+    ].map(k => `<div class="kpi-card ${k.cls}">
+      <div class="kpi-icon">${k.icon}</div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+
+    destroyCharts();
+
+    /* Platform donut */
+    const pd = groupSum(active, 'platform', 'faceValue');
+    chartInst.platform = new Chart(document.getElementById('platformChart'), {
+      type:'doughnut',
+      data:{ labels:Object.keys(pd), datasets:[{ data:Object.values(pd), backgroundColor:Object.keys(pd).map(k=>PLATFORM_COLORS[k]||'#94a3b8'), borderWidth:3, borderColor:'#fff', hoverOffset:8 }] },
+      options:{ responsive:true, cutout:'62%', plugins:{ legend:{position:'bottom',labels:{font:{size:11},padding:12,usePointStyle:true}}, tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.raw)} (${(ctx.raw/totalFV*100).toFixed(1)}%)`}} } }
+    });
+
+    /* Investor donut */
+    const id_ = groupSum(active, 'by', 'faceValue');
+    chartInst.investor = new Chart(document.getElementById('investorChart'), {
+      type:'doughnut',
+      data:{ labels:Object.keys(id_), datasets:[{ data:Object.values(id_), backgroundColor:['#4f46e5','#a855f7','#ec4899','#f97316'], borderWidth:3, borderColor:'#fff', hoverOffset:8 }] },
+      options:{ responsive:true, cutout:'62%', plugins:{ legend:{position:'bottom',labels:{font:{size:11},padding:12,usePointStyle:true}}, tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.raw)} (${totalFV?((ctx.raw/totalFV)*100).toFixed(1):0}%)`}} } }
+    });
+
+    /* Demat donut */
+    const dd = groupSum(active, 'demat', 'faceValue');
+    const de = Object.entries(dd).sort((a,b)=>b[1]-a[1]);
+    chartInst.demat = new Chart(document.getElementById('dematChart'), {
+      type:'doughnut',
+      data:{ labels:de.map(([k])=>k), datasets:[{ data:de.map(([,v])=>v), backgroundColor:['#1e3a8a','#2563eb','#60a5fa','#7c3aed','#a78bfa','#0369a1'], borderWidth:3, borderColor:'#fff', hoverOffset:8 }] },
+      options:{ responsive:true, cutout:'62%', plugins:{ legend:{position:'bottom',labels:{font:{size:11},padding:12,usePointStyle:true}}, tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.raw)} (${(ctx.raw/totalFV*100).toFixed(1)}%)`}} } }
+    });
+
+    /* Maturity by year */
+    const mby = active.reduce((acc,b)=>{ if(b.maturity){const yr=new Date(b.maturity).getFullYear(); acc[yr]=(acc[yr]||0)+(b.faceValue||0);} return acc; },{});
+    const yrs = Object.keys(mby).sort();
+    const YC  = ['#ef4444','#f97316','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#10b981'];
+    chartInst.maturity = new Chart(document.getElementById('maturityChart'), {
+      type:'bar',
+      data:{ labels:yrs, datasets:[{ data:yrs.map(y=>mby[y]), backgroundColor:yrs.map((_,i)=>YC[i%YC.length]), borderRadius:7, borderSkipped:false }] },
+      options:{ responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${fmt(ctx.raw)}`}}}, scales:{x:{grid:{display:false},ticks:{font:{size:12,weight:'600'}}},y:{grid:{color:'#f1f5f9'},ticks:{font:{size:10},callback:v=>'₹'+(v/100000).toFixed(0)+'L'}}} }
+    });
+
+    /* Upcoming maturities */
+    const oneYearOut = new Date(); oneYearOut.setFullYear(oneYearOut.getFullYear()+1);
+    const upcoming = active
+      .filter(b => { const m=new Date(b.maturity); return m>=TODAY && m<=oneYearOut; })
+      .sort((a,b)=>new Date(a.maturity)-new Date(b.maturity));
+    document.getElementById('upcomingList').innerHTML = upcoming.length === 0
+      ? '<div style="text-align:center;color:#94a3b8;padding:30px;font-size:13px">No maturities in the next 12 months</div>'
+      : upcoming.map(b => {
+          const days = Math.round((new Date(b.maturity)-TODAY)/MS_DAY);
+          const cls  = days<90 ? 'urgent' : days<180 ? 'warn' : 'normal';
+          return `<div class="upcoming-item ${cls}">
+            <div><div class="up-name">${b.name}</div><div class="up-meta">${b.platform} · ${fmt(b.faceValue)}</div></div>
+            <div class="up-right"><div class="up-date">${fmtDate(b.maturity)}</div><div class="up-days">${days}d away</div></div>
+          </div>`;
+        }).join('');
+
+    updateInvestorOptions();
+    renderTable();
+    renderTracker();
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     INTEREST TRACKER
+     ───────────────────────────────────────────────────────────── */
+  const CURRENT_MONTH = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  })();
+  const MONTH_LABEL = new Date().toLocaleDateString('en-IN', { month:'long', year:'numeric' });
+
+  function renderTracker() {
+    document.getElementById('tracker-month-label').textContent = MONTH_LABEL;
+
+    const active = bonds.filter(b => !b.matured && (b.monthly||0) > 0)
+      .sort((a,b) => {
+        // Sort by pay day (the number before " - Monthly")
+        const da = parseInt(a.frequency)||99;
+        const db_ = parseInt(b.frequency)||99;
+        return da - db_;
+      });
+
+    const receivedCount = active.filter(b => (b.receivedMonths||[]).includes(CURRENT_MONTH)).length;
+    const receivedAmt   = active.filter(b => (b.receivedMonths||[]).includes(CURRENT_MONTH))
+                                .reduce((s,b) => s+(b.monthly||0), 0);
+    const pendingAmt    = active.filter(b => !(b.receivedMonths||[]).includes(CURRENT_MONTH))
+                                .reduce((s,b) => s+(b.monthly||0), 0);
+
+    document.getElementById('tracker-summary').innerHTML = `
+      <div class="tracker-stat done">
+        <div class="tracker-stat-label">Received (${receivedCount}/${active.length})</div>
+        <div class="tracker-stat-value">${fmt(Math.round(receivedAmt))}</div>
+      </div>
+      <div class="tracker-stat">
+        <div class="tracker-stat-label">Pending (${active.length - receivedCount})</div>
+        <div class="tracker-stat-value">${fmt(Math.round(pendingAmt))}</div>
+      </div>
+      <div class="tracker-stat">
+        <div class="tracker-stat-label">Total Expected</div>
+        <div class="tracker-stat-value">${fmt(Math.round(receivedAmt + pendingAmt))}</div>
+      </div>
+    `;
+
+    document.getElementById('tracker-body').innerHTML = active.length === 0
+      ? '<div style="text-align:center;color:#94a3b8;padding:30px;font-size:13px">No active bonds with monthly interest</div>'
+      : active.map((b, i) => {
+          const isReceived = (b.receivedMonths||[]).includes(CURRENT_MONTH);
+          return `
+            <div class="tracker-row ${isReceived ? 'received' : ''}">
+              <span class="tracker-num">${i+1}</span>
+              <span class="tracker-name" title="${b.name}">${b.name}</span>
+              <span class="tracker-schedule">${b.frequency||'—'}</span>
+              <span class="tracker-investor">${b.demat||'—'}</span>
+              <span class="tracker-amount">${fmt(b.monthly)}</span>
+              <button class="btn-mark ${isReceived ? 'received-btn' : 'pending'}"
+                data-tracker-id="${b.id}" data-received="${isReceived}">
+                ${isReceived
+                  ? `<svg style="width:13px;height:13px;fill:none;stroke:#15803d;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;margin-right:4px;vertical-align:middle" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Received`
+                  : `<svg style="width:13px;height:13px;fill:none;stroke:#64748b;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:4px;vertical-align:middle" viewBox="0 0 24 24"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 00-.586-1.414L12 12l-4.414 4.414A2 2 0 007 17.828V22"/><path d="M7 2v4.172a2 2 0 00.586 1.414L12 12l4.414-4.414A2 2 0 0017 6.172V2"/></svg>Pending`}
+              </button>
+            </div>
+          `;
+        }).join('');
+  }
+
+  /* tracker toggle */
+  document.getElementById('tracker-body').addEventListener('click', async e => {
+    const btn = e.target.closest('[data-tracker-id]');
+    if (!btn || isViewMode) return;
+    const id = btn.dataset.trackerId;
+    const wasReceived = btn.dataset.received === 'true';
+    const b = bonds.find(x => x.id === id);
+    if (!b) return;
+    btn.disabled = true;
+    try {
+      const months = b.receivedMonths || [];
+      const updated = wasReceived
+        ? months.filter(m => m !== CURRENT_MONTH)
+        : [...months, CURRENT_MONTH];
+      await updateBond(id, { receivedMonths: updated });
+      // Optimistically update local state so renderTracker is instant
+      b.receivedMonths = updated;
+      renderTracker();
+      toast(wasReceived ? 'Marked as pending' : 'Marked as received ✓', wasReceived ? 'info' : 'success');
+    } catch(err) {
+      toast('Update failed: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  function updateInvestorOptions() {
+    // Derive investor names from actual bond data
+    const names = [...new Set(bonds.map(b => b.by).filter(Boolean))].sort();
+    // Fallback: use logged-in user's first name if no bonds yet
+    if (names.length === 0) {
+      const first = (currentUser?.displayName || 'Me').split(' ')[0];
+      names.push(first);
+    }
+
+    // Update investor filter dropdown (preserve current selection)
+    const filterEl = document.getElementById('investorFilter');
+    if (filterEl) {
+      const prev = filterEl.value;
+      filterEl.innerHTML = '<option value="">All Investors</option>' +
+        names.map(n => `<option value="${n}">${n}</option>`).join('');
+      if (names.includes(prev)) filterEl.value = prev;
+    }
+
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     TABLE
+     ───────────────────────────────────────────────────────────── */
+  function renderTable() {
+    const q   = (document.getElementById('searchInput')?.value||'').toLowerCase();
+    const plt = document.getElementById('platformFilter')?.value||'';
+    const inv = document.getElementById('investorFilter')?.value||'';
+    const sts = document.getElementById('statusFilter')?.value||'';
+
+    const filtered = bonds.filter(b => {
+      if (q   && !(b.name||'').toLowerCase().includes(q)) return false;
+      if (plt && b.platform !== plt) return false;
+      if (inv && b.by !== inv) return false;
+      if (sts === 'active'  &&  b.matured) return false;
+      if (sts === 'matured' && !b.matured) return false;
+      return true;
+    });
+
+    // Sort
+    if (sortCol) {
+      filtered.sort((a, b) => {
+        let va = a[sortCol] ?? '';
+        let vb = b[sortCol] ?? '';
+        if (typeof va === 'string') va = va.toLowerCase();
+        if (typeof vb === 'string') vb = vb.toLowerCase();
+        if (va < vb) return sortDir === 'asc' ? -1 : 1;
+        if (va > vb) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    // Update sort indicators on column headers
+    document.querySelectorAll('thead th.sortable').forEach(th => {
+      th.classList.remove('sort-asc', 'sort-desc');
+      if (th.dataset.sort === sortCol) th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    });
+
+    document.getElementById('tableBody').innerHTML = filtered.map((b,i) => {
+      const days = !b.matured && b.maturity ? Math.round((new Date(b.maturity)-TODAY)/MS_DAY) : null;
+      const ytmColor = (b.ytm||0)>=12 ? '#059669' : (b.ytm||0)>=11.5 ? '#2563eb' : '#475569';
+      const daysChip = days !== null
+        ? `<div style="font-size:10px;font-weight:600;margin-top:2px;color:${days<90?'#ef4444':days<365?'#f97316':'#94a3b8'}">${days}d left</div>`
+        : '';
+      return `<tr>
+        <td style="color:#94a3b8;font-size:11px">${i+1}</td>
+        <td><div class="bond-name">${b.name||'—'}</div></td>
+        <td><span class="badge ${PLATFORM_BADGE[b.platform]||'badge-sm'}">${b.platform||'—'}</span></td>
+        <td class="num">${fmt(b.faceValue||0)}</td>
+        <td class="num">${(b.coupon||0).toFixed(2)}%</td>
+        <td class="num" style="font-weight:700;color:${ytmColor}">${(b.ytm||0).toFixed(2)}%</td>
+        <td>${b.investedOn ? fmtDate(b.investedOn) : '—'}</td>
+        <td style="white-space:nowrap"><div>${b.maturity ? fmtDate(b.maturity) : '—'}</div>${daysChip}</td>
+        <td class="num">${(b.monthly||0)>0 ? fmt(b.monthly) : '—'}</td>
+        <td style="font-size:11.5px;color:#475569">${b.frequency||'—'}</td>
+        <td>${b.by||'—'}</td>
+        <td style="font-size:11px;color:#64748b">${b.demat||'—'}</td>
+        <td><span class="badge ${b.matured?'badge-matured':'badge-active'}">${b.matured?'Matured':'Active'}</span></td>
+        ${!isViewMode ? `<td>
+          <div class="actions">
+            <button class="btn-icon bi-edit"   data-action="edit"   data-id="${b.id}" title="Edit">
+              <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn-icon ${b.matured?'bi-restore':'bi-toggle'}" data-action="toggle" data-id="${b.id}" title="${b.matured?'Mark Active':'Mark Withdrawn'}">
+              ${b.matured
+                ? `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`
+                : `<svg viewBox="0 0 24 24"><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/><polyline points="9 11 12 14 22 4"/></svg>`}
+            </button>
+            <button class="btn-icon bi-del" data-action="delete" data-id="${b.id}" title="Delete">
+              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            </button>
+          </div>
+        </td>` : ''}
+      </tr>`;
+    }).join('');
+    document.getElementById('tableCount').textContent = `Showing ${filtered.length} of ${bonds.length} bonds`;
+  }
+
+  /* table event delegation */
+  document.getElementById('tableBody').addEventListener('click', async e => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const { action, id } = btn.dataset;
+    if (action === 'edit') { openModal(id); return; }
+    if (action === 'toggle') {
+      const b = bonds.find(x=>x.id===id);
+      if (!b) return;
+      try {
+        await updateBond(id, { matured: !b.matured });
+        toast(b.matured ? 'Marked as active ✓' : 'Marked as withdrawn ✓', 'info');
+      } catch { toast('Update failed', 'error'); }
+    }
+    if (action === 'delete') {
+      pendingDeleteId = id;
+      const b = bonds.find(x=>x.id===id);
+      document.getElementById('confirm-text').textContent = `Are you sure you want to permanently delete "${b?.name||'this bond'}"? This cannot be undone.`;
+      document.getElementById('confirm-modal').classList.remove('hidden');
+    }
+  });
+
+  /* table filters */
+  ['searchInput','platformFilter','investorFilter','statusFilter']
+    .forEach(id => document.getElementById(id)?.addEventListener('input', renderTable));
+
+  /* column sort */
+  document.querySelector('thead').addEventListener('click', e => {
+    const th = e.target.closest('th.sortable');
+    if (!th) return;
+    const col = th.dataset.sort;
+    if (sortCol === col) {
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortCol = col;
+      sortDir = 'asc';
+    }
+    renderTable();
+  });
+
+  /* ─────────────────────────────────────────────────────────────
+     MODAL (ADD / EDIT)
+     ───────────────────────────────────────────────────────────── */
+  function openModal(bondId = null) {
+    editingBondId = bondId;
+    const b = bondId ? bonds.find(x=>x.id===bondId) : null;
+    document.getElementById('modal-title').textContent = b ? 'Edit Bond' : 'Add New Bond';
+    document.getElementById('save-btn').textContent    = b ? 'Save Changes' : 'Add Bond';
+    document.getElementById('f-name').value      = b?.name       || '';
+    document.getElementById('f-platform').value  = b?.platform   || '';
+    document.getElementById('f-by').value        = b?.by         || '';
+    document.getElementById('f-faceValue').value = b?.faceValue  || '';
+    document.getElementById('f-purchase').value  = b?.purchase   || '';
+    document.getElementById('f-coupon').value    = b?.coupon     || '';
+    document.getElementById('f-ytm').value       = b?.ytm        || '';
+    document.getElementById('f-investedOn').value= b?.investedOn || '';
+    document.getElementById('f-maturity').value  = b?.maturity   || '';
+    document.getElementById('f-monthly').value   = b?.monthly    || '';
+    document.getElementById('f-demat').value      = b?.demat      || '';
+    document.getElementById('f-frequency').value  = b?.frequency  || '';
+    document.getElementById('f-matured').checked  = b?.matured    || false;
+    document.getElementById('bond-modal').classList.remove('hidden');
+    document.getElementById('f-name').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('bond-modal').classList.add('hidden');
+    document.getElementById('bond-form').reset();
+    editingBondId = null;
+  }
+
+  /* auto-calc monthly interest */
+  ['f-faceValue','f-coupon'].forEach(fid => {
+    document.getElementById(fid).addEventListener('input', () => {
+      const fv = parseFloat(document.getElementById('f-faceValue').value)||0;
+      const c  = parseFloat(document.getElementById('f-coupon').value)||0;
+      if (fv>0 && c>0)
+        document.getElementById('f-monthly').value = ((fv * c/100)/12).toFixed(2);
+    });
+  });
+
+  /* ── TAB SWITCHING ── */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeTab = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + activeTab).classList.add('active');
+    });
+  });
+
+  /* ── HAMBURGER MENU ── */
+  const mobileMenu = document.getElementById('mobile-menu');
+  document.getElementById('btn-hamburger').addEventListener('click', e => {
+    e.stopPropagation();
+    mobileMenu.classList.toggle('open');
+  });
+  document.addEventListener('click', e => {
+    if (!mobileMenu.contains(e.target) && e.target.id !== 'btn-hamburger')
+      mobileMenu.classList.remove('open');
+  });
+  const closeMob = () => mobileMenu.classList.remove('open');
+  document.getElementById('btn-add-bond').addEventListener('click', () => openModal());
+  document.getElementById('mob-btn-partners').addEventListener('click', () => { closeMob(); openPartnersModal(); });
+  document.getElementById('mob-btn-logout').addEventListener('click', async () => {
+    closeMob();
+    if (firestoreUnsub) { firestoreUnsub(); firestoreUnsub = null; }
+    if (goldUnsub) { goldUnsub(); goldUnsub = null; }
+    bonds = []; goldItems = []; isViewMode = false; viewOwnerUid = null; currentViewers = [];
+    await signOut(auth);
+  });
+
+  document.getElementById('btn-add-first').addEventListener('click', () => openModal());
+  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+  document.getElementById('cancel-btn').addEventListener('click', closeModal);
+  document.getElementById('bond-modal').addEventListener('click', e => { if (e.target===e.currentTarget) closeModal(); });
+
+  document.getElementById('bond-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const data = {
+      name:       document.getElementById('f-name').value.trim(),
+      platform:   document.getElementById('f-platform').value,
+      by:         document.getElementById('f-by').value,
+      faceValue:  parseFloat(document.getElementById('f-faceValue').value)||0,
+      purchase:   parseFloat(document.getElementById('f-purchase').value)||0,
+      coupon:     parseFloat(document.getElementById('f-coupon').value)||0,
+      ytm:        parseFloat(document.getElementById('f-ytm').value)||0,
+      investedOn: document.getElementById('f-investedOn').value,
+      maturity:   document.getElementById('f-maturity').value,
+      monthly:    parseFloat(document.getElementById('f-monthly').value)||0,
+      demat:      document.getElementById('f-demat').value.trim(),
+      frequency:  document.getElementById('f-frequency').value.trim(),
+      matured:    document.getElementById('f-matured').checked,
+    };
+    try {
+      if (editingBondId) { await updateBond(editingBondId, data); toast('Bond updated ✓', 'success'); }
+      else               { await addBond(data);                    toast('Bond added ✓', 'success'); }
+      closeModal();
+    } catch (err) {
+      toast('Error: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = editingBondId ? 'Save Changes' : 'Add Bond';
+    }
+  });
+
+  /* ─────────────────────────────────────────────────────────────
+     DELETE CONFIRM
+     ───────────────────────────────────────────────────────────── */
+  const closeConfirm = () => {
+    document.getElementById('confirm-modal').classList.add('hidden');
+    pendingDeleteId = null;
+  };
+  document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
+  document.getElementById('confirm-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeConfirm(); });
+  document.getElementById('confirm-delete').addEventListener('click', async () => {
+    if (!pendingDeleteId) return;
+    try {
+      await deleteBond(pendingDeleteId);
+      toast('Bond deleted', 'info');
+      closeConfirm();
+    } catch (e) {
+      toast('Delete failed: ' + e.message, 'error');
+    }
+  });
+
+  /* ─────────────────────────────────────────────────────────────
+     PARTNERS
+     ───────────────────────────────────────────────────────────── */
+  async function loadPartners(db, uid) {
+    try {
+      const snap = await getDoc(doc(db, 'partnerAccess', uid));
+      currentViewers = snap.exists() ? (snap.data().viewers || []) : [];
+    } catch { currentViewers = []; }
+    renderPartnersList();
+  }
+
+  function renderPartnersList() {
+    const el = document.getElementById('partner-list');
+    if (!el) return;
+    if (currentViewers.length === 0) {
+      el.innerHTML = '<div class="no-partners">No partners added yet</div>';
+      return;
+    }
+    el.innerHTML = currentViewers.map(email => `
+      <div class="partner-item">
+        <div>
+          <div class="partner-email">${email}</div>
+          <div class="partner-meta">Read-only access</div>
+        </div>
+        <button class="btn-remove-partner" data-email="${email}">Remove</button>
+      </div>
+    `).join('');
+  }
+
+  async function addPartnerEmail(db, uid, email) {
+    email = email.trim().toLowerCase();
+    if (!email.includes('@')) { toast('Please enter a valid email address', 'error'); return; }
+    if (currentViewers.includes(email)) { toast('This partner is already added', 'info'); return; }
+    currentViewers = [...currentViewers, email];
+    await setDoc(doc(db, 'partnerAccess', uid), { viewers: currentViewers });
+    await setDoc(doc(db, 'viewerOf', email), {
+      ownerUid: uid,
+      ownerName: currentUser.displayName || currentUser.email,
+      ownerEmail: currentUser.email
+    });
+    renderPartnersList();
+    toast(`${email} can now view your portfolio ✓`, 'success');
+  }
+
+  async function removePartnerEmail(db, uid, email) {
+    currentViewers = currentViewers.filter(e => e !== email);
+    await setDoc(doc(db, 'partnerAccess', uid), { viewers: currentViewers });
+    try { await deleteDoc(doc(db, 'viewerOf', email)); } catch { /* may not exist */ }
+    renderPartnersList();
+    toast(`${email} removed`, 'info');
+  }
+
+  /* partners modal open/close */
+  const openPartnersModal  = () => document.getElementById('partners-modal').classList.remove('hidden');
+  const closePartnersModal = () => {
+    document.getElementById('partners-modal').classList.add('hidden');
+    document.getElementById('partner-email-input').value = '';
+  };
+  document.getElementById('btn-partners').addEventListener('click', openPartnersModal);
+  document.getElementById('partners-close-btn').addEventListener('click', closePartnersModal);
+  document.getElementById('partners-modal').addEventListener('click', e => { if (e.target===e.currentTarget) closePartnersModal(); });
+
+  /* add partner */
+  document.getElementById('btn-add-partner-action').addEventListener('click', async () => {
+    const email = document.getElementById('partner-email-input').value.trim();
+    if (!email) return;
+    const btn = document.getElementById('btn-add-partner-action');
+    btn.disabled = true; btn.textContent = 'Adding…';
+    try { await addPartnerEmail(db, currentUser.uid, email); document.getElementById('partner-email-input').value = ''; }
+    catch (e) { toast('Failed: ' + e.message, 'error'); }
+    finally { btn.disabled = false; btn.textContent = 'Add'; }
+  });
+  document.getElementById('partner-email-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-add-partner-action').click();
+  });
+
+  /* remove partner (event delegation) */
+  document.getElementById('partner-list').addEventListener('click', async e => {
+    const btn = e.target.closest('.btn-remove-partner');
+    if (!btn) return;
+    const email = btn.dataset.email;
+    btn.disabled = true; btn.textContent = 'Removing…';
+    try { await removePartnerEmail(db, currentUser.uid, email); }
+    catch (e) { toast('Failed: ' + e.message, 'error'); btn.disabled = false; btn.textContent = 'Remove'; }
+  });
+
+  /* ═══════════════════════════════════════════════════════════════
+     GOLD TAB
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* ── Gold state helper ── */
+  function setGoldState(state) {
+    document.getElementById('gold-loading').style.display   = state === 'loading' ? 'flex'  : 'none';
+    document.getElementById('gold-empty').style.display     = state === 'empty'   ? 'block' : 'none';
+    document.getElementById('gold-dashboard').style.display = state === 'data'    ? 'block' : 'none';
+  }
+
+  /* ── Gold Firestore refs ── */
+  const goldColRef = uid => collection(db, 'users', uid, 'gold');
+  const goldDocRef = (uid, id) => doc(db, 'users', uid, 'gold', id);
+
+  /* ── Gold CRUD ── */
+  async function addGold(data) {
+    const uid = currentUser.uid;
+    await addDoc(goldColRef(uid), { ...data, createdAt: serverTimestamp() });
+  }
+  async function updateGold(id, data) {
+    const uid = currentUser.uid;
+    await updateDoc(goldDocRef(uid, id), { ...data, updatedAt: serverTimestamp() });
+  }
+  async function deleteGold(id) {
+    const uid = currentUser.uid;
+    await deleteDoc(goldDocRef(uid, id));
+  }
+
+  /* ── Gold price management ── */
+  async function loadGoldPrices(db, uid) {
+    try {
+      const snap = await getDoc(doc(db, 'users', uid, 'settings', 'goldPrice'));
+      if (snap.exists()) {
+        const d = snap.data();
+        goldPrices = { price22k: d.price22k || 0, price24k: d.price24k || 0 };
+        document.getElementById('price-22k').value = goldPrices.price22k || '';
+        document.getElementById('price-24k').value = goldPrices.price24k || '';
+        if (d.updatedAt) {
+          const dt = d.updatedAt.toDate ? d.updatedAt.toDate() : new Date(d.updatedAt);
+          document.getElementById('gold-price-updated').textContent =
+            'Updated ' + dt.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+        }
+      }
+    } catch { /* no prices saved yet */ }
+  }
+
+  async function saveGoldPrices(db, uid) {
+    const p22 = parseFloat(document.getElementById('price-22k').value) || 0;
+    const p24 = parseFloat(document.getElementById('price-24k').value) || 0;
+    goldPrices = { price22k: p22, price24k: p24 };
+    await setDoc(doc(db, 'users', uid, 'settings', 'goldPrice'), {
+      price22k: p22, price24k: p24, updatedAt: serverTimestamp()
+    });
+    document.getElementById('gold-price-updated').textContent = 'Updated just now';
+    renderGoldDashboard();
+    toast('Gold prices updated ✓', 'success');
+  }
+
+  /* ── Calculate current value from stored prices ── */
+  function goldCurrentValue(g) {
+    const price = g.type === '24K' ? goldPrices.price24k : goldPrices.price22k;
+    return price > 0 ? (g.weight || 0) * price : 0;
+  }
+
+  /* ── Gold Firestore listener ── */
+  function startListeningGold(db, uid) {
+    if (goldUnsub) { goldUnsub(); goldUnsub = null; }
+    setGoldState('loading');
+    goldUnsub = onSnapshot(
+      goldColRef(uid),
+      snap => {
+        goldItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        goldItems.length === 0
+          ? setGoldState('empty')
+          : (setGoldState('data'), renderGoldDashboard());
+      },
+      _err => {
+        toast('Could not load gold data. Check Firestore rules.', 'error');
+        setGoldState('empty');
+      }
+    );
+  }
+
+  /* ── Destroy gold charts ── */
+  function destroyGoldCharts() {
+    Object.keys(goldChartInst).forEach(k => {
+      if (goldChartInst[k]) { goldChartInst[k].destroy(); goldChartInst[k] = null; }
+    });
+  }
+
+  /* ── Gold dashboard render ── */
+  function renderGoldDashboard() {
+    const owned  = goldItems.filter(g => !g.gifted);
+    const KSVG   = (d, s='#94a3b8') => `<svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:${s};stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${d}</svg>`;
+
+    const totalWeight       = owned.reduce((s,g) => s + (g.weight||0), 0);
+    const totalInvested     = owned.reduce((s,g) => s + (g.totalInvested||0), 0);
+    const paidItems         = owned.filter(g => (g.totalInvested||0) > 0); // exclude received gifts
+    const paidInvested      = paidItems.reduce((s,g) => s + (g.totalInvested||0), 0);
+    const totalCurrentValue = owned.reduce((s,g) => s + goldCurrentValue(g), 0);
+    const totalProfit       = totalCurrentValue - paidInvested;
+    const profitPct         = paidInvested > 0 ? (totalProfit / paidInvested * 100) : 0;
+    const w22 = goldItems.filter(g=>g.type==='22K').reduce((s,g)=>s+(g.weight||0),0);
+    const w24 = goldItems.filter(g=>g.type==='24K').reduce((s,g)=>s+(g.weight||0),0);
+
+    document.getElementById('goldKpiGrid').innerHTML = [
+      {
+        icon: KSVG('<circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 000 4h4a2 2 0 010 4H8"/><line x1="12" y1="6" x2="12" y2="18"/>','white'),
+        label:'Total Invested', value: fmt(Math.round(paidInvested)),
+        sub:`${goldItems.length} items · ${owned.length} owned`, cls:'primary'
+      },
+      {
+        icon: KSVG('<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>','white'),
+        label:'Current Value',
+        value: totalCurrentValue > 0 ? fmt(Math.round(totalCurrentValue)) : '—',
+        sub: totalCurrentValue > 0
+          ? (profitPct>=0?'▲ ':'▼ ') + Math.abs(profitPct).toFixed(1) + '% gain'
+          : 'Set prices above',
+        cls:'success'
+      },
+      {
+        icon: KSVG('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>','#d97706'),
+        label:'Total Weight', value: totalWeight.toFixed(2) + ' g',
+        sub: `${w22.toFixed(1)}g 22K · ${w24.toFixed(1)}g 24K`, cls:''
+      },
+      {
+        icon: KSVG('<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>','#8b5cf6'),
+        label:'Profit / Loss',
+        value: totalCurrentValue > 0 ? (totalProfit>=0?'+':'')+fmt(Math.round(totalProfit)) : '—',
+        sub:'Based on current prices', cls:''
+      },
+    ].map(k => `<div class="kpi-card ${k.cls}">
+      <div class="kpi-icon">${k.icon}</div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+
+    destroyGoldCharts();
+
+    /* Karat donut (by weight) */
+    const karatData = {};
+    owned.forEach(g => { karatData[g.type||'?'] = (karatData[g.type||'?']||0) + (g.weight||0); });
+    goldChartInst.type = new Chart(document.getElementById('goldTypeChart'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(karatData),
+        datasets: [{ data: Object.values(karatData), backgroundColor:['#d97706','#f59e0b'], borderWidth:3, borderColor:'#fff', hoverOffset:8 }]
+      },
+      options: { responsive:true, cutout:'62%', plugins:{ legend:{position:'bottom',labels:{font:{size:11},padding:12,usePointStyle:true}}, tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${Number(ctx.raw).toFixed(2)}g`}} } }
+    });
+
+    /* Year-wise bar (weight accumulated per year) */
+    const yearData = {};
+    owned.forEach(g => {
+      if (g.date) { const yr = new Date(g.date).getFullYear(); yearData[yr] = (yearData[yr]||0) + (g.weight||0); }
+    });
+    const goldYrs = Object.keys(yearData).sort();
+    const GOLD_COLORS = ['#d97706','#b45309','#92400e','#f59e0b','#fbbf24','#fde68a'];
+    goldChartInst.year = new Chart(document.getElementById('goldYearChart'), {
+      type: 'bar',
+      data: {
+        labels: goldYrs,
+        datasets: [{ data: goldYrs.map(y=>yearData[y]), backgroundColor: goldYrs.map((_,i)=>GOLD_COLORS[i%GOLD_COLORS.length]), borderRadius:7, borderSkipped:false }]
+      },
+      options: { responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${Number(ctx.raw).toFixed(2)}g`}}}, scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'#f1f5f9'},ticks:{font:{size:10},callback:v=>v+'g'}}} }
+    });
+
+    /* Invested vs Current Value horizontal bar */
+    goldChartInst.value = new Chart(document.getElementById('goldValueChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Invested', 'Current Value'],
+        datasets: [{ data:[Math.round(paidInvested), Math.round(totalCurrentValue)], backgroundColor:['#94a3b8','#d97706'], borderRadius:7, borderSkipped:false }]
+      },
+      options: { responsive:true, indexAxis:'y', plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${fmt(ctx.raw)}`}}}, scales:{x:{grid:{color:'#f1f5f9'},ticks:{font:{size:10},callback:v=>'₹'+(v/100000).toFixed(1)+'L'}},y:{grid:{display:false}}} }
+    });
+
+    renderGoldTable();
+  }
+
+  /* ── Gold table render ── */
+  function renderGoldTable() {
+    const q     = (document.getElementById('goldSearchInput')?.value||'').toLowerCase();
+    const typeF = document.getElementById('goldTypeFilter')?.value||'';
+    const giftF = document.getElementById('goldGiftFilter')?.value||'';
+
+    let filtered = goldItems.filter(g => {
+      if (q && !(g.name||'').toLowerCase().includes(q)) return false;
+      if (typeF && g.type !== typeF) return false;
+      if (giftF === 'gifted'   && !g.gifted) return false;
+      if (giftF === 'received' && (g.gifted || (g.paidPerGram||0) > 0)) return false;
+      if (giftF === 'owned'    && (g.gifted || (g.paidPerGram||0) === 0)) return false;
+      return true;
+    });
+
+    /* Sort */
+    if (goldSortCol) {
+      filtered.sort((a, b) => {
+        let va, vb;
+        if (goldSortCol === 'currentValue') { va = goldCurrentValue(a); vb = goldCurrentValue(b); }
+        else if (goldSortCol === 'profit')  { va = goldCurrentValue(a)-(a.totalInvested||0); vb = goldCurrentValue(b)-(b.totalInvested||0); }
+        else { va = a[goldSortCol] ?? ''; vb = b[goldSortCol] ?? ''; }
+        if (typeof va === 'string') va = va.toLowerCase();
+        if (typeof vb === 'string') vb = vb.toLowerCase();
+        if (va < vb) return goldSortDir === 'asc' ? -1 : 1;
+        if (va > vb) return goldSortDir === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    /* Update sort indicators */
+    document.querySelectorAll('[data-gsort]').forEach(th => {
+      th.classList.remove('sort-asc','sort-desc');
+      if (th.dataset.gsort === goldSortCol) th.classList.add(goldSortDir==='asc'?'sort-asc':'sort-desc');
+    });
+
+    document.getElementById('goldTableBody').innerHTML = filtered.map((g, i) => {
+      const cv      = goldCurrentValue(g);
+      const profit  = cv - (g.totalInvested||0);
+      const profCol = profit >= 0 ? '#059669' : '#ef4444';
+      const statusBadge = g.gifted
+        ? `<span class="badge badge-gift">Gifted${g.giftedFor ? ' · '+g.giftedFor : ''}</span>`
+        : (g.paidPerGram||0) === 0
+          ? `<span class="badge" style="background:#f0fdf4;color:#166534">Received Gift</span>`
+          : `<span class="badge badge-active">Owned</span>`;
+      return `<tr>
+        <td style="color:#94a3b8;font-size:11px">${i+1}</td>
+        <td><div class="bond-name">${g.name||'—'}</div></td>
+        <td><span class="badge ${g.type==='24K'?'badge-24k':'badge-22k'}">${g.type||'—'}</span></td>
+        <td class="num">${(g.weight||0).toFixed(2)}g</td>
+        <td class="num">${(g.paidPerGram||0)>0 ? fmt(g.paidPerGram) : '—'}</td>
+        <td class="num">${(g.totalInvested||0)>0 ? fmt(g.totalInvested) : '—'}</td>
+        <td class="num" style="font-weight:700">${cv>0 ? fmt(Math.round(cv)) : '—'}</td>
+        <td class="num" style="font-weight:700;color:${cv>0?profCol:'#94a3b8'}">${cv>0 ? (profit>=0?'+':'')+fmt(Math.round(profit)) : '—'}</td>
+        <td style="white-space:nowrap">${g.date ? fmtDate(g.date) : '—'}</td>
+        <td>${statusBadge}</td>
+        ${!isViewMode ? `<td>
+          <div class="actions">
+            <button class="btn-icon bi-edit" data-gaction="edit" data-gid="${g.id}" title="Edit">
+              <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn-icon bi-del" data-gaction="delete" data-gid="${g.id}" title="Delete">
+              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            </button>
+          </div>
+        </td>` : ''}
+      </tr>`;
+    }).join('');
+
+    document.getElementById('goldTableCount').textContent = `Showing ${filtered.length} of ${goldItems.length} items`;
+  }
+
+  /* ── Gold table sort (click on header) ── */
+  document.querySelector('#tab-gold thead').addEventListener('click', e => {
+    const th = e.target.closest('[data-gsort]');
+    if (!th) return;
+    const col = th.dataset.gsort;
+    if (goldSortCol === col) {
+      goldSortDir = goldSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      goldSortCol = col;
+      goldSortDir = 'asc';
+    }
+    renderGoldTable();
+  });
+
+  /* ── Gold table actions (edit / delete) ── */
+  document.getElementById('goldTableBody').addEventListener('click', async e => {
+    const btn = e.target.closest('[data-gaction]');
+    if (!btn) return;
+    const { gaction, gid } = btn.dataset;
+    if (gaction === 'edit') { openGoldModal(gid); return; }
+    if (gaction === 'delete') {
+      if (!confirm('Delete this gold item? This cannot be undone.')) return;
+      try { await deleteGold(gid); toast('Item deleted', 'info'); }
+      catch (err) { toast('Delete failed: ' + err.message, 'error'); }
+    }
+  });
+
+  /* ── Gold table filters ── */
+  ['goldSearchInput','goldTypeFilter','goldGiftFilter'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', renderGoldTable);
+  });
+
+  /* ── Gold modal ── */
+  function openGoldModal(goldId = null) {
+    editingGoldId = goldId;
+    const g = goldId ? goldItems.find(x => x.id === goldId) : null;
+    document.getElementById('gold-modal-title').textContent = g ? 'Edit Gold Item' : 'Add Gold Item';
+    document.getElementById('gold-save-btn').textContent    = g ? 'Save Changes'   : 'Add Item';
+    document.getElementById('gf-name').value          = g?.name          || '';
+    document.getElementById('gf-type').value          = g?.type          || '';
+    document.getElementById('gf-date').value          = g?.date          || '';
+    document.getElementById('gf-weight').value        = g?.weight        || '';
+    document.getElementById('gf-paidPerGram').value   = g?.paidPerGram   || '';
+    document.getElementById('gf-totalInvested').value = g?.totalInvested || '';
+    document.getElementById('gf-gifted').checked      = g?.gifted        || false;
+    document.getElementById('gf-giftedFor').value     = g?.giftedFor     || '';
+    document.getElementById('gf-gifted-for-field').style.display = (g?.gifted) ? 'block' : 'none';
+    document.getElementById('gold-modal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('gf-name').focus(), 50);
+  }
+
+  function closeGoldModal() {
+    document.getElementById('gold-modal').classList.add('hidden');
+    document.getElementById('gold-form').reset();
+    document.getElementById('gf-gifted-for-field').style.display = 'none';
+    editingGoldId = null;
+  }
+
+  /* auto-calc total invested */
+  ['gf-weight','gf-paidPerGram'].forEach(fid => {
+    document.getElementById(fid).addEventListener('input', () => {
+      const w = parseFloat(document.getElementById('gf-weight').value)     || 0;
+      const p = parseFloat(document.getElementById('gf-paidPerGram').value) || 0;
+      if (w > 0 && p > 0) document.getElementById('gf-totalInvested').value = (w * p).toFixed(2);
+    });
+  });
+
+  /* gifted toggle shows/hides giftedFor field */
+  document.getElementById('gf-gifted').addEventListener('change', e => {
+    document.getElementById('gf-gifted-for-field').style.display = e.target.checked ? 'block' : 'none';
+  });
+
+  /* gold modal close events */
+  document.getElementById('gold-modal-close').addEventListener('click', closeGoldModal);
+  document.getElementById('gold-cancel-btn').addEventListener('click', closeGoldModal);
+  document.getElementById('gold-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeGoldModal(); });
+
+  /* gold form submit */
+  document.getElementById('gold-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('gold-save-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const data = {
+      name:          document.getElementById('gf-name').value.trim(),
+      type:          document.getElementById('gf-type').value,
+      date:          document.getElementById('gf-date').value,
+      weight:        parseFloat(document.getElementById('gf-weight').value)        || 0,
+      paidPerGram:   parseFloat(document.getElementById('gf-paidPerGram').value)   || 0,
+      totalInvested: parseFloat(document.getElementById('gf-totalInvested').value) || 0,
+      gifted:        document.getElementById('gf-gifted').checked,
+      giftedFor:     document.getElementById('gf-giftedFor').value.trim(),
+    };
+    try {
+      if (editingGoldId) { await updateGold(editingGoldId, data); toast('Item updated ✓', 'success'); }
+      else               { await addGold(data);                    toast('Item added ✓', 'success'); }
+      closeGoldModal();
+    } catch (err) {
+      toast('Error: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = editingGoldId ? 'Save Changes' : 'Add Item';
+    }
+  });
+
+  /* ── Add Gold buttons ── */
+  document.getElementById('btn-add-gold').addEventListener('click', () => openGoldModal());
+  document.getElementById('btn-add-first-gold').addEventListener('click', () => openGoldModal());
+
+  /* ── Update gold prices button ── */
+  document.getElementById('btn-update-price').addEventListener('click', async () => {
+    if (isViewMode) { toast('View-only mode — cannot edit prices', 'info'); return; }
+    const btn = document.getElementById('btn-update-price');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      await saveGoldPrices(db, currentUser.uid);
+    } catch (err) {
+      toast('Failed: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Update Prices';
+    }
+  });
+
+} /* end if (isConfigured) */
+</script>
+</body>
+</html>
