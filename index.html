@@ -273,22 +273,16 @@
             <line x1="12" y1="6" x2="12" y2="18"/>
           </svg>
           <!-- View mode (prices already saved) -->
-          <div id="gold-price-view" style="display:none;align-items:center;gap:18px;flex-wrap:wrap;flex:1">
-            <div><label>22K / gram</label><span id="price-22k-display" style="font-weight:700;font-size:15px;color:#fff;margin-left:6px"></span></div>
-            <div><label>24K / gram</label><span id="price-24k-display" style="font-weight:700;font-size:15px;color:#fff;margin-left:6px"></span></div>
+          <div id="gold-price-view" style="display:none">
+            <div><label>22K / gram</label><span id="price-22k-display"></span></div>
+            <div><label>24K / gram</label><span id="price-24k-display"></span></div>
+            <button class="btn-update-price" id="btn-edit-price">Edit Prices</button>
             <span class="gold-price-updated" id="gold-price-updated"></span>
-            <button class="btn-update-price" id="btn-edit-price" style="margin-left:auto">Edit Prices</button>
           </div>
           <!-- Edit mode (no prices saved yet, or editing) -->
-          <div id="gold-price-edit" style="display:none;align-items:center;gap:18px;flex-wrap:wrap;flex:1">
-            <div>
-              <label>22K Price / gram</label>
-              <input type="number" id="price-22k" class="gold-price-input" placeholder="e.g. 13445" step="0.01">
-            </div>
-            <div>
-              <label>24K Price / gram</label>
-              <input type="number" id="price-24k" class="gold-price-input" placeholder="e.g. 14678" step="0.01">
-            </div>
+          <div id="gold-price-edit" style="display:none">
+            <div><label>22K Price / gram</label><input type="number" id="price-22k" class="gold-price-input" placeholder="e.g. 13445" step="0.01"></div>
+            <div><label>24K Price / gram</label><input type="number" id="price-24k" class="gold-price-input" placeholder="e.g. 14678" step="0.01"></div>
             <button class="btn-update-price" id="btn-update-price">Save Prices</button>
             <button class="btn-cancel-price" id="btn-cancel-price" style="display:none">Cancel</button>
           </div>

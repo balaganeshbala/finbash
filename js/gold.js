@@ -76,14 +76,14 @@ function showGoldPriceView() {
   const p24 = state.goldPrices.price24k;
   document.getElementById('price-22k-display').textContent = p22 ? '₹' + p22.toLocaleString('en-IN') : '—';
   document.getElementById('price-24k-display').textContent = p24 ? '₹' + p24.toLocaleString('en-IN') : '—';
-  document.getElementById('gold-price-view').style.display = 'flex';
+  document.getElementById('gold-price-view').style.display = 'grid';
   document.getElementById('gold-price-edit').style.display = 'none';
 }
 
 function showGoldPriceEditMode(showCancel = true) {
   document.getElementById('gold-price-view').style.display = 'none';
-  document.getElementById('gold-price-edit').style.display = 'flex';
-  document.getElementById('btn-cancel-price').style.display = showCancel ? 'inline-flex' : 'none';
+  document.getElementById('gold-price-edit').style.display = 'grid';
+  document.getElementById('btn-cancel-price').style.display = showCancel ? 'block' : 'none';
 }
 
 async function saveGoldPrices(uid) {
