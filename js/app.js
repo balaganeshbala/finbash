@@ -13,7 +13,7 @@ import {
 } from './bonds.js';
 import {
   startListeningGold, loadGoldPrices,
-  initGoldListeners,
+  renderGoldDashboard, initGoldListeners,
 } from './gold.js';
 
 /* ─────────────────────────────────────────────────────────────────
@@ -47,6 +47,11 @@ if (!isConfigured) {
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('tab-' + state.activeTab).classList.add('active');
+      // Re-render gold charts after the tab is visible so Chart.js
+      // measures the correct dimensions and animates from the right origin
+      if (state.activeTab === 'gold' && state.goldItems.length > 0) {
+        requestAnimationFrame(() => renderGoldDashboard());
+      }
     });
   });
 

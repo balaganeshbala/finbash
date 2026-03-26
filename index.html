@@ -272,16 +272,26 @@
             <path d="M16 8h-6a2 2 0 000 4h4a2 2 0 010 4H8"/>
             <line x1="12" y1="6" x2="12" y2="18"/>
           </svg>
-          <div>
-            <label>22K Price / gram</label>
-            <input type="number" id="price-22k" class="gold-price-input" placeholder="e.g. 13445" step="0.01">
+          <!-- View mode (prices already saved) -->
+          <div id="gold-price-view" style="display:none;align-items:center;gap:18px;flex-wrap:wrap;flex:1">
+            <div><label>22K / gram</label><span id="price-22k-display" style="font-weight:700;font-size:15px;color:#fff;margin-left:6px"></span></div>
+            <div><label>24K / gram</label><span id="price-24k-display" style="font-weight:700;font-size:15px;color:#fff;margin-left:6px"></span></div>
+            <span class="gold-price-updated" id="gold-price-updated"></span>
+            <button class="btn-update-price" id="btn-edit-price" style="margin-left:auto">Edit Prices</button>
           </div>
-          <div>
-            <label>24K Price / gram</label>
-            <input type="number" id="price-24k" class="gold-price-input" placeholder="e.g. 14678" step="0.01">
+          <!-- Edit mode (no prices saved yet, or editing) -->
+          <div id="gold-price-edit" style="display:none;align-items:center;gap:18px;flex-wrap:wrap;flex:1">
+            <div>
+              <label>22K Price / gram</label>
+              <input type="number" id="price-22k" class="gold-price-input" placeholder="e.g. 13445" step="0.01">
+            </div>
+            <div>
+              <label>24K Price / gram</label>
+              <input type="number" id="price-24k" class="gold-price-input" placeholder="e.g. 14678" step="0.01">
+            </div>
+            <button class="btn-update-price" id="btn-update-price">Save Prices</button>
+            <button class="btn-cancel-price" id="btn-cancel-price" style="display:none">Cancel</button>
           </div>
-          <button class="btn-update-price" id="btn-update-price">Save Prices</button>
-          <span class="gold-price-updated" id="gold-price-updated"></span>
         </div>
 
         <!-- Gold KPIs -->
@@ -515,7 +525,7 @@
         </div>
         <div class="field">
           <label>Weight (grams) *</label>
-          <input type="number" id="gf-weight" placeholder="e.g. 8" step="0.01" min="0" required>
+          <input type="number" id="gf-weight" placeholder="e.g. 8.1234" step="0.0001" min="0" required>
         </div>
         <div class="field">
           <label>Paid per gram (₹)</label>

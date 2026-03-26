@@ -54,6 +54,7 @@ export async function loadGoldPrices(uid) {
     if (snap.exists()) {
       const d = snap.data();
       state.goldPrices = { price22k: d.price22k || 0, price24k: d.price24k || 0 };
+      // populate edit inputs too (for when user clicks Edit)
       document.getElementById('price-22k').value = state.goldPrices.price22k || '';
       document.getElementById('price-24k').value = state.goldPrices.price24k || '';
       if (d.updatedAt) {
@@ -61,8 +62,28 @@ export async function loadGoldPrices(uid) {
         document.getElementById('gold-price-updated').textContent =
           'Updated ' + dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
       }
+      showGoldPriceView(); // prices exist → show read-only view
+    } else {
+      showGoldPriceEditMode(false); // no prices yet → show input fields, no cancel
     }
-  } catch { /* no prices saved yet */ }
+  } catch {
+    showGoldPriceEditMode(false);
+  }
+}
+
+function showGoldPriceView() {
+  const p22 = state.goldPrices.price22k;
+  const p24 = state.goldPrices.price24k;
+  document.getElementById('price-22k-display').textContent = p22 ? '₹' + p22.toLocaleString('en-IN') : '—';
+  document.getElementById('price-24k-display').textContent = p24 ? '₹' + p24.toLocaleString('en-IN') : '—';
+  document.getElementById('gold-price-view').style.display = 'flex';
+  document.getElementById('gold-price-edit').style.display = 'none';
+}
+
+function showGoldPriceEditMode(showCancel = true) {
+  document.getElementById('gold-price-view').style.display = 'none';
+  document.getElementById('gold-price-edit').style.display = 'flex';
+  document.getElementById('btn-cancel-price').style.display = showCancel ? 'inline-flex' : 'none';
 }
 
 async function saveGoldPrices(uid) {
@@ -73,6 +94,7 @@ async function saveGoldPrices(uid) {
     price22k: p22, price24k: p24, updatedAt: serverTimestamp(),
   });
   document.getElementById('gold-price-updated').textContent = 'Updated just now';
+  showGoldPriceView();
   renderGoldDashboard();
   toast('Gold prices updated ✓', 'success');
 }
@@ -362,7 +384,19 @@ export function initGoldListeners() {
     }
   });
 
-  /* update gold prices */
+  /* Edit Prices button → switch to edit mode */
+  document.getElementById('btn-edit-price').addEventListener('click', () => {
+    if (state.isViewMode) { toast('View-only mode — cannot edit prices', 'info'); return; }
+    showGoldPriceEditMode(true);
+    document.getElementById('price-22k').focus();
+  });
+
+  /* Cancel button → revert to view mode */
+  document.getElementById('btn-cancel-price').addEventListener('click', () => {
+    showGoldPriceView();
+  });
+
+  /* Save / Update gold prices */
   document.getElementById('btn-update-price').addEventListener('click', async () => {
     if (state.isViewMode) { toast('View-only mode — cannot edit prices', 'info'); return; }
     const btn = document.getElementById('btn-update-price');
@@ -372,7 +406,7 @@ export function initGoldListeners() {
     } catch (err) {
       toast('Failed: ' + err.message, 'error');
     } finally {
-      btn.disabled = false; btn.textContent = 'Update Prices';
+      btn.disabled = false; btn.textContent = 'Save Prices';
     }
   });
 }
