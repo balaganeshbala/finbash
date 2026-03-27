@@ -165,9 +165,18 @@ code { background:#f1f5f9; padding:2px 6px; border-radius:4px; font-family:monos
 table { width:100%; border-collapse:collapse; font-size:12.5px; }
 thead th { background:#f8fafc; padding:10px 12px; text-align:left; font-weight:700; font-size:10.5px; color:#475569; text-transform:uppercase; letter-spacing:0.5px; border-bottom:2px solid #e2e8f0; white-space:nowrap; }
 thead th.r { text-align:right; }
-thead th.sortable { cursor:pointer; user-select:none; }
-thead th.sortable:hover { background:#f1f5f9; color:#1e293b; }
-thead th.sortable::after { content:' ⇅'; opacity:0.25; font-size:10px; }
+thead th.sortable,
+thead th[data-fdsort],
+thead th[data-rdsort],
+thead th[data-gsort] { cursor:pointer; user-select:none; }
+thead th.sortable:hover,
+thead th[data-fdsort]:hover,
+thead th[data-rdsort]:hover,
+thead th[data-gsort]:hover { background:#f1f5f9; color:#1e293b; }
+thead th.sortable::after,
+thead th[data-fdsort]::after,
+thead th[data-rdsort]::after,
+thead th[data-gsort]::after { content:' ⇅'; opacity:0.25; font-size:10px; }
 thead th.sort-asc::after  { content:' ↑'; opacity:1; color:#3b82f6; }
 thead th.sort-desc::after { content:' ↓'; opacity:1; color:#3b82f6; }
 tbody tr { border-bottom:1px solid #f1f5f9; transition:background 0.1s; }
@@ -177,7 +186,8 @@ tbody td { padding:9px 12px; color:#334155; vertical-align:middle; }
 .num { text-align:right; font-variant-numeric:tabular-nums; }
 .badge { display:inline-flex; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:700; white-space:nowrap; }
 .badge-active  { background:#dcfce7; color:#15803d; }
-.badge-matured { background:#fee2e2; color:#b91c1c; }
+.badge-matured { background:#f1f5f9; color:#64748b; }
+.badge-soon    { background:#fef3c7; color:#b45309; }
 .badge-sm { background:#dbeafe; color:#1d4ed8; }
 .badge-ai { background:#e0f2fe; color:#0369a1; }
 .badge-gp { background:#d1fae5; color:#065f46; }
@@ -281,15 +291,24 @@ tbody td { padding:9px 12px; color:#334155; vertical-align:middle; }
 
 /* Gold KPI grid: 4 columns by default (overrides the 6-col base) */
 #goldKpiGrid { grid-template-columns:repeat(4,1fr); }
+/* FD KPI grid: 4 columns */
+#fdKpiGrid { grid-template-columns:repeat(4,1fr); }
+
+/* ── FD & RD SECTION ── */
+.section-block { background:#fff; border-radius:16px; padding:20px 24px; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.section-header-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.section-title { font-size:16px; font-weight:700; color:#1e293b; margin:0; }
+.fd-rd-note { font-size:11.5px; color:#94a3b8; margin:-8px 0 14px; }
+
 
 /* ── RESPONSIVE ── */
-@media(max-width:1200px){ .kpi-grid{grid-template-columns:repeat(3,1fr);} #goldKpiGrid{grid-template-columns:repeat(2,1fr);} }
+@media(max-width:1200px){ .kpi-grid{grid-template-columns:repeat(3,1fr);} #goldKpiGrid,#fdKpiGrid{grid-template-columns:repeat(2,1fr);} }
 @media(max-width:900px){
   .row-3{grid-template-columns:1fr 1fr;}
   .row-2{grid-template-columns:1fr;}
   .container,.header{padding:16px 20px;}
   .kpi-grid{grid-template-columns:repeat(2,1fr);}
-  #goldKpiGrid{grid-template-columns:repeat(2,1fr);}
+  #goldKpiGrid,#fdKpiGrid{grid-template-columns:repeat(2,1fr);}
 }
 @media(max-width:768px){
   .header-right { display:none !important; }

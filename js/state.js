@@ -25,6 +25,18 @@ export const state = {
   goldSortDir:    'asc',
   goldPrices:     { price22k: 0, price24k: 0 },
 
+  // FD & RD
+  fds:            [],
+  rds:            [],
+  editingFDId:    null,
+  editingRDId:    null,
+  fdUnsub:        null,
+  rdUnsub:        null,
+  fdSortCol:      null,
+  fdSortDir:      'asc',
+  rdSortCol:      null,
+  rdSortDir:      'asc',
+
   // UI
   activeTab:      'bonds',
 };
