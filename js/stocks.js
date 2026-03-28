@@ -9,53 +9,55 @@ import { fmt }   from './utils.js';
 import { toast } from './ui.js';
 
 /* ─────────────────────────────────────────────────────────────────
-   YAHOO FINANCE  v8 chart API  (per-symbol, parallel fetch)
-   v7 quote requires a crumb/cookie — v8 chart works without it.
-   Three proxy fallbacks so deployed sites work too.
+   YAHOO FINANCE  v8 chart API
+   Strategy: try each proxy for ALL failing symbols before moving
+   to the next proxy — avoids per-proxy rate-limit exhaustion.
    ───────────────────────────────────────────────────────────────── */
 const YF_CHART = sym =>
   `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
 
-// Each entry: { url(target), parse(response) }
 const PROXY_STRATEGIES = [
   {
-    // Direct — works on localhost
+    label: 'direct',
     url:   t => t,
     parse: r => r.json(),
   },
   {
-    // corsproxy.io
+    label: 'corsproxy.io',
     url:   t => `https://corsproxy.io/?${encodeURIComponent(t)}`,
     parse: r => r.json(),
   },
   {
-    // allorigins.win — wraps body in { contents: "..." }
+    label: 'allorigins',
     url:   t => `https://api.allorigins.win/get?url=${encodeURIComponent(t)}`,
     parse: async r => { const w = await r.json(); return JSON.parse(w.contents); },
   },
   {
-    // codetabs proxy
+    label: 'codetabs',
     url:   t => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(t)}`,
     parse: r => r.json(),
   },
 ];
 
-async function fetchQuote(ticker) {
-  const target = YF_CHART(ticker);
-  for (const { url, parse } of PROXY_STRATEGIES) {
+async function tryStrategyForTickers(strategy, tickers) {
+  const results = await Promise.all(tickers.map(async t => {
     try {
-      const res  = await fetch(url(target));
-      if (!res.ok) continue;
-      const json = await parse(res);
+      const res  = await fetch(strategy.url(YF_CHART(t)));
+      if (!res.ok) return { t, data: null };
+      const json = await strategy.parse(res);
       const meta = json?.chart?.result?.[0]?.meta;
       if (meta?.regularMarketPrice != null) return {
-        price:     meta.regularMarketPrice,
-        prevClose: meta.chartPreviousClose ?? meta.previousClose ?? null,
-        name:      meta.shortName || meta.longName || '',
+        t,
+        data: {
+          price:     meta.regularMarketPrice,
+          prevClose: meta.chartPreviousClose ?? meta.previousClose ?? null,
+          name:      meta.shortName || meta.longName || '',
+        },
       };
-    } catch { /* try next strategy */ }
-  }
-  return null;
+    } catch { /* network / parse error */ }
+    return { t, data: null };
+  }));
+  return results;
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -110,22 +112,27 @@ export async function fetchAllPrices() {
   state.stockPriceLoading = true;
   updateRefreshBtn(true);
 
-  // Fetch all unique tickers in parallel
-  const tickers = [...new Set(state.stocks.map(tickerSym))];
-  const settled = await Promise.all(
-    tickers.map(t => fetchQuote(t).then(data => ({ t, data })))
-  );
+  let remaining = [...new Set(state.stocks.map(tickerSym))];
 
-  let anyFailed = false;
-  settled.forEach(({ t, data }) => {
-    if (data) {
-      state.stockPrices[t] = data;
-    } else {
-      anyFailed = true;
-    }
-  });
+  for (const strategy of PROXY_STRATEGIES) {
+    if (!remaining.length) break;
 
-  if (anyFailed) toast('Could not fetch some prices. Check your connection.', 'error');
+    const results = await tryStrategyForTickers(strategy, remaining);
+    remaining = [];
+
+    results.forEach(({ t, data }) => {
+      if (data) {
+        state.stockPrices[t] = data;
+      } else {
+        remaining.push(t); // retry with next proxy
+      }
+    });
+  }
+
+  if (remaining.length) {
+    const syms = remaining.map(t => t.replace(/\.[A-Z]+$/, '')).join(', ');
+    toast(`Could not fetch prices for: ${syms}. Check the NSE symbols.`, 'error');
+  }
 
   state.stockPriceLoading = false;
   updateRefreshBtn(false);
