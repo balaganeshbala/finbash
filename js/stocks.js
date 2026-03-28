@@ -11,23 +11,49 @@ import { toast } from './ui.js';
 /* ─────────────────────────────────────────────────────────────────
    YAHOO FINANCE  v8 chart API  (per-symbol, parallel fetch)
    v7 quote requires a crumb/cookie — v8 chart works without it.
+   Three proxy fallbacks so deployed sites work too.
    ───────────────────────────────────────────────────────────────── */
-const YF_CHART       = sym => `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
-const YF_CHART_PROXY = sym => `https://corsproxy.io/?${encodeURIComponent(YF_CHART(sym))}`;
+const YF_CHART = sym =>
+  `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
+
+// Each entry: { url(target), parse(response) }
+const PROXY_STRATEGIES = [
+  {
+    // Direct — works on localhost
+    url:   t => t,
+    parse: r => r.json(),
+  },
+  {
+    // corsproxy.io
+    url:   t => `https://corsproxy.io/?${encodeURIComponent(t)}`,
+    parse: r => r.json(),
+  },
+  {
+    // allorigins.win — wraps body in { contents: "..." }
+    url:   t => `https://api.allorigins.win/get?url=${encodeURIComponent(t)}`,
+    parse: async r => { const w = await r.json(); return JSON.parse(w.contents); },
+  },
+  {
+    // codetabs proxy
+    url:   t => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(t)}`,
+    parse: r => r.json(),
+  },
+];
 
 async function fetchQuote(ticker) {
-  for (const url of [YF_CHART(ticker), YF_CHART_PROXY(ticker)]) {
+  const target = YF_CHART(ticker);
+  for (const { url, parse } of PROXY_STRATEGIES) {
     try {
-      const res  = await fetch(url);
+      const res  = await fetch(url(target));
       if (!res.ok) continue;
-      const json = await res.json();
+      const json = await parse(res);
       const meta = json?.chart?.result?.[0]?.meta;
       if (meta?.regularMarketPrice != null) return {
         price:     meta.regularMarketPrice,
         prevClose: meta.chartPreviousClose ?? meta.previousClose ?? null,
         name:      meta.shortName || meta.longName || '',
       };
-    } catch { /* try next URL */ }
+    } catch { /* try next strategy */ }
   }
   return null;
 }
