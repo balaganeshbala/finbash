@@ -21,6 +21,9 @@ import {
 import {
   startListeningMF, initMFListeners, fetchAllNavs,
 } from './mf.js';
+import {
+  startListeningStocks, initStockListeners, fetchAllPrices,
+} from './stocks.js';
 
 /* ─────────────────────────────────────────────────────────────────
    BOOT
@@ -41,7 +44,9 @@ if (!isConfigured) {
     if (state.fdUnsub)        { state.fdUnsub();        state.fdUnsub        = null; }
     if (state.rdUnsub)        { state.rdUnsub();        state.rdUnsub        = null; }
     if (state.mfUnsub)        { state.mfUnsub();        state.mfUnsub        = null; }
-    state.bonds = []; state.goldItems = []; state.fds = []; state.rds = []; state.mfs = []; state.mfNavs = {};
+    if (state.stockUnsub)     { state.stockUnsub();     state.stockUnsub     = null; }
+    state.bonds = []; state.goldItems = []; state.fds = []; state.rds = [];
+    state.mfs = []; state.mfNavs = {}; state.stocks = []; state.stockPrices = {};
     state.isViewMode = false; state.viewOwnerUid = null; state.currentViewers = [];
     await signOut(auth);
   };
@@ -64,6 +69,10 @@ if (!isConfigured) {
       // Refresh MF NAVs when switching to MF tab
       if (state.activeTab === 'mf' && state.mfs.length > 0) {
         fetchAllNavs();
+      }
+      // Refresh stock prices when switching to stocks tab
+      if (state.activeTab === 'stocks' && state.stocks.length > 0) {
+        fetchAllPrices();
       }
     });
   });
@@ -94,6 +103,7 @@ if (!isConfigured) {
   initGoldListeners();
   initFDListeners();
   initMFListeners();
+  initStockListeners();
 
   /* ── AUTH STATE ── */
   onAuthStateChanged(auth, async user => {
@@ -143,6 +153,7 @@ if (!isConfigured) {
           startListeningFD(state.viewOwnerUid);
           startListeningRD(state.viewOwnerUid);
           startListeningMF(state.viewOwnerUid);
+          startListeningStocks(state.viewOwnerUid);
         } else {
           state.isViewMode = false; state.viewOwnerUid = null;
           document.getElementById('view-banner').style.display = 'none';
@@ -160,6 +171,7 @@ if (!isConfigured) {
           startListeningFD(user.uid);
           startListeningRD(user.uid);
           startListeningMF(user.uid);
+          startListeningStocks(user.uid);
           loadPartners(user.uid);
         }
       } catch {
@@ -170,6 +182,7 @@ if (!isConfigured) {
         startListeningFD(user.uid);
         startListeningRD(user.uid);
         startListeningMF(user.uid);
+        startListeningStocks(user.uid);
         loadPartners(user.uid);
       }
     } else {
@@ -178,7 +191,9 @@ if (!isConfigured) {
       if (state.fdUnsub)        { state.fdUnsub();        state.fdUnsub        = null; }
       if (state.rdUnsub)        { state.rdUnsub();        state.rdUnsub        = null; }
       if (state.mfUnsub)        { state.mfUnsub();        state.mfUnsub        = null; }
-      state.bonds = []; state.goldItems = []; state.fds = []; state.rds = []; state.mfs = []; state.mfNavs = {};
+      if (state.stockUnsub)     { state.stockUnsub();     state.stockUnsub     = null; }
+      state.bonds = []; state.goldItems = []; state.fds = []; state.rds = [];
+      state.mfs = []; state.mfNavs = {}; state.stocks = []; state.stockPrices = {};
       state.isViewMode = false;
       showSection('login-screen');
     }

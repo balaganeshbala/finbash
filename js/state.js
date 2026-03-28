@@ -46,6 +46,16 @@ export const state = {
   mfSortCol:      null,
   mfSortDir:      'asc',
 
+  // Stocks
+  stocks:            [],
+  editingStockId:    null,
+  stockUnsub:        null,
+  stockPrices:       {},   // tickerSym → { price, prevClose, name }
+  stockPriceLoading: false,
+  stockSortCol:      null,
+  stockSortDir:      'asc',
+  stockViewMode:     'holding',  // 'holding' | 'stock'
+
   // UI
   activeTab:      'bonds',
 };

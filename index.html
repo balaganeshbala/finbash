@@ -141,6 +141,13 @@
       </svg>
       Mutual Funds
     </button>
+    <button class="tab-btn" data-tab="stocks">
+      <svg viewBox="0 0 24 24">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 1 18"/>
+        <polyline points="16 7 22 7 22 13"/>
+      </svg>
+      Stocks
+    </button>
   </div>
 
   <div class="container">
@@ -368,15 +375,13 @@
       <div class="kpi-grid" id="fdKpiGrid" style="margin-bottom:22px"></div>
 
       <!-- FD Section -->
-      <div class="section-block">
-        <div class="section-header-row">
-          <h3 class="section-title">Fixed Deposits</h3>
-          <div style="display:flex;gap:8px;align-items:center">
-            <select id="fdInvestorFilter" class="filter-select">
-              <option value="">All Investors</option>
-            </select>
-            <button class="btn-add" id="btn-add-fd">+ Add FD</button>
-          </div>
+      <div class="card">
+        <div class="card-title">Fixed Deposits</div>
+        <div class="table-controls">
+          <select id="fdInvestorFilter" class="filter-select">
+            <option value="">All Investors</option>
+          </select>
+          <button class="btn-add" id="btn-add-fd" style="margin-left:auto">+ Add FD</button>
         </div>
         <div class="table-wrap">
           <table class="data-table">
@@ -403,15 +408,13 @@
       </div>
 
       <!-- RD Section -->
-      <div class="section-block" style="margin-top:28px">
-        <div class="section-header-row">
-          <h3 class="section-title">Recurring Deposits</h3>
-          <div style="display:flex;gap:8px;align-items:center">
-            <select id="rdInvestorFilter" class="filter-select">
-              <option value="">All Investors</option>
-            </select>
-            <button class="btn-add" id="btn-add-rd">+ Add RD</button>
-          </div>
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">Recurring Deposits</div>
+        <div class="table-controls">
+          <select id="rdInvestorFilter" class="filter-select">
+            <option value="">All Investors</option>
+          </select>
+          <button class="btn-add" id="btn-add-rd" style="margin-left:auto">+ Add RD</button>
         </div>
         <div class="fd-rd-note">
           Installments are auto-counted from the start date · Maturity value uses quarterly compounding
@@ -452,19 +455,17 @@
       <div class="kpi-grid" id="mfKpiGrid" style="margin-bottom:22px"></div>
 
       <!-- MF Section -->
-      <div class="section-block">
-        <div class="section-header-row">
-          <h3 class="section-title">Mutual Funds</h3>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <select id="mfInvestorFilter" class="filter-select">
-              <option value="">All Investors</option>
-            </select>
-            <button class="btn-refresh" id="btn-refresh-mf" title="Refresh NAVs">
-              <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 4v6h6M23 20v-6h-6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
-              Refresh NAVs
-            </button>
-            <button class="btn-add" id="btn-add-mf">+ Add Fund</button>
-          </div>
+      <div class="card">
+        <div class="card-title">Mutual Funds</div>
+        <div class="table-controls">
+          <select id="mfInvestorFilter" class="filter-select">
+            <option value="">All Investors</option>
+          </select>
+          <button class="btn-refresh" id="btn-refresh-mf" title="Refresh NAVs">
+            <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 4v6h6M23 20v-6h-6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+            Refresh NAVs
+          </button>
+          <button class="btn-add" id="btn-add-mf" style="margin-left:auto">+ Add Fund</button>
         </div>
         <div class="table-wrap">
           <table class="data-table">
@@ -490,6 +491,57 @@
       </div>
 
     </div><!-- /tab-mf -->
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- STOCKS TAB                                                 -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div id="tab-stocks" class="tab-panel">
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="stockKpiGrid" style="margin-bottom:22px"></div>
+
+      <!-- Stocks Section -->
+      <div class="card">
+        <div class="card-title">Stocks</div>
+        <div class="table-controls">
+          <div class="view-toggle">
+            <button id="btn-view-holding" class="view-toggle-btn active">By Holding</button>
+            <button id="btn-view-stock"   class="view-toggle-btn">By Stock</button>
+          </div>
+          <select id="stockDematFilter" class="filter-select">
+            <option value="">All Accounts</option>
+          </select>
+          <button class="btn-refresh" id="btn-refresh-stocks" title="Refresh Prices">
+            <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 4v6h6M23 20v-6h-6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+            Refresh Prices
+          </button>
+          <button class="btn-add" id="btn-add-stock" style="margin-left:auto">+ Add Stock</button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead id="stockTableHead">
+              <tr>
+                <th>#</th>
+                <th data-stsort="name">Company</th>
+                <th>Demat Account</th>
+                <th class="num" data-stsort="shares">Shares</th>
+                <th class="num" data-stsort="avgBuyPrice">Avg Buy</th>
+                <th class="num">LTP</th>
+                <th class="num" data-stsort="invested">Invested</th>
+                <th class="num" data-stsort="currentValue">Current Value</th>
+                <th class="num" data-stsort="gain">Gain / Loss</th>
+                <th class="num" data-stsort="returnPct">Return %</th>
+                <th id="stth-actions"></th>
+              </tr>
+            </thead>
+            <tbody id="stockTableBody"></tbody>
+            <tfoot id="stockTableFoot"></tfoot>
+          </table>
+        </div>
+        <div class="table-count" id="stockTableCount"></div>
+      </div>
+
+    </div><!-- /tab-stocks -->
 
   </div><!-- /container -->
 </div><!-- /app-screen -->
@@ -825,6 +877,51 @@
       <div class="modal-footer">
         <button type="button" class="btn-cancel" id="mf-cancel-btn">Cancel</button>
         <button type="submit" class="btn-save" id="mf-save-btn">Add Fund</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ STOCK MODAL ═══ -->
+<div id="st-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="st-modal-title">Add Stock</div>
+      <button class="modal-x" id="st-modal-close">✕</button>
+    </div>
+    <form id="st-form" autocomplete="off">
+      <div class="form-grid">
+
+        <div class="field full">
+          <label>Company Name</label>
+          <input type="text" id="stf-name" placeholder="e.g. Reliance Industries Ltd">
+        </div>
+
+        <div class="field">
+          <label>NSE Symbol *</label>
+          <input type="text" id="stf-symbol" placeholder="e.g. RELIANCE" style="text-transform:uppercase" required>
+          <div class="hint">NSE ticker (e.g. HDFCBANK, TCS, INFY)</div>
+        </div>
+
+        <div class="field">
+          <label>Demat Account</label>
+          <input type="text" id="stf-dematAccount" placeholder="e.g. Zerodha - Bala">
+        </div>
+
+        <div class="field">
+          <label>No. of Shares *</label>
+          <input type="number" id="stf-shares" placeholder="e.g. 10" min="0" step="any" required>
+        </div>
+
+        <div class="field">
+          <label>Avg Buy Price (₹) *</label>
+          <input type="number" id="stf-avgBuyPrice" placeholder="e.g. 2750.00" min="0" step="0.01" required>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" id="st-cancel-btn">Cancel</button>
+        <button type="submit" class="btn-save" id="st-save-btn">Add Stock</button>
       </div>
     </form>
   </div>

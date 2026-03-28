@@ -352,6 +352,41 @@ tbody td { padding:9px 12px; color:#334155; vertical-align:middle; }
 /* ── MF KPI GRID ── */
 #mfKpiGrid { grid-template-columns:repeat(4,1fr); }
 
+/* ── MF TABLE: wider Fund column ── */
+th[data-mfsort="name"] { min-width:260px; }
+
+/* ── STOCK KPI GRID ── */
+#stockKpiGrid { grid-template-columns:repeat(4,1fr); }
+
+/* ── STOCK VIEW TOGGLE ── */
+.view-toggle { display:flex; background:#f1f5f9; border-radius:8px; padding:3px; gap:2px; }
+.view-toggle-btn { background:none; border:none; padding:5px 14px; border-radius:6px; font-size:12px; font-weight:600; color:#64748b; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.view-toggle-btn:hover { color:#1e293b; }
+.view-toggle-btn.active { background:white; color:#1e40af; box-shadow:0 1px 3px rgba(0,0,0,0.12); }
+
+/* ── STOCK GROUP ROWS (By Stock view) ── */
+.stock-group-header { background:#f8fafc; }
+.stock-group-header td { border-top:2px solid #e2e8f0; padding-top:10px; }
+.stock-sub-row td { background:#fafbfc; border-bottom:1px solid #f1f5f9; color:#64748b; }
+.stock-sub-row:last-of-type td { border-bottom:2px solid #e2e8f0; }
+
+/* ── STOCK TOTALS FOOTER ── */
+#stockTableFoot tr td { font-size:13px; }
+#stockTableFoot .num  { font-size:13px; }
+
+/* ── STOCK SECTOR BADGES ── */
+.badge-st-tech       { background:#eff6ff; color:#1d4ed8; }
+.badge-st-fin        { background:#f0fdf4; color:#166534; }
+.badge-st-energy     { background:#fff7ed; color:#9a3412; }
+.badge-st-health     { background:#f0fdfa; color:#0f766e; }
+.badge-st-consumer   { background:#fdf4ff; color:#7e22ce; }
+.badge-st-auto       { background:#fef2f2; color:#991b1b; }
+.badge-st-industrial { background:#f0f9ff; color:#075985; }
+.badge-st-realty     { background:#fefce8; color:#713f12; }
+.badge-st-telecom    { background:#eef2ff; color:#3730a3; }
+.badge-st-metal      { background:#f8fafc; color:#475569; }
+.badge-st-other      { background:#f1f5f9; color:#475569; }
+
 @media(max-width:600px){
   .row-3{grid-template-columns:1fr;}
   .form-grid{grid-template-columns:1fr;}
@@ -359,6 +394,7 @@ tbody td { padding:9px 12px; color:#334155; vertical-align:middle; }
   #goldKpiGrid{grid-template-columns:repeat(2,1fr);}
   #fdKpiGrid{grid-template-columns:repeat(2,1fr);}
   #mfKpiGrid{grid-template-columns:repeat(2,1fr);}
+  #stockKpiGrid{grid-template-columns:repeat(2,1fr);}
   /* Tighter table cells on mobile so horizontal scroll is less aggressive */
   thead th { padding:8px 8px; font-size:10px; }
   tbody td  { padding:7px 8px; font-size:11.5px; }
