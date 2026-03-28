@@ -67,7 +67,11 @@ export async function loadGoldPrices(uid) {
       showGoldPriceEditMode(false); // no prices yet → show input fields, no cancel
     }
   } catch {
-    showGoldPriceEditMode(false);
+    if (state.isViewMode) {
+      showGoldPriceView(); // show "—" prices without edit option
+    } else {
+      showGoldPriceEditMode(false);
+    }
   }
 }
 
@@ -78,6 +82,9 @@ function showGoldPriceView() {
   document.getElementById('price-24k-display').textContent = p24 ? '₹' + p24.toLocaleString('en-IN') : '—';
   document.getElementById('gold-price-view').style.display = 'grid';
   document.getElementById('gold-price-edit').style.display = 'none';
+  // Hide the edit button for viewers — they can read prices but not change them
+  const editBtn = document.getElementById('btn-edit-price');
+  if (editBtn) editBtn.style.display = state.isViewMode ? 'none' : '';
 }
 
 function showGoldPriceEditMode(showCancel = true) {
