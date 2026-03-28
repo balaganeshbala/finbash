@@ -135,6 +135,12 @@
       </svg>
       Deposits
     </button>
+    <button class="tab-btn" data-tab="mf">
+      <svg viewBox="0 0 24 24">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      Mutual Funds
+    </button>
   </div>
 
   <div class="container">
@@ -365,7 +371,12 @@
       <div class="section-block">
         <div class="section-header-row">
           <h3 class="section-title">Fixed Deposits</h3>
-          <button class="btn-add" id="btn-add-fd">+ Add FD</button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="fdInvestorFilter" class="filter-select">
+              <option value="">All Investors</option>
+            </select>
+            <button class="btn-add" id="btn-add-fd">+ Add FD</button>
+          </div>
         </div>
         <div class="table-wrap">
           <table class="data-table">
@@ -395,7 +406,12 @@
       <div class="section-block" style="margin-top:28px">
         <div class="section-header-row">
           <h3 class="section-title">Recurring Deposits</h3>
-          <button class="btn-add" id="btn-add-rd">+ Add RD</button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="rdInvestorFilter" class="filter-select">
+              <option value="">All Investors</option>
+            </select>
+            <button class="btn-add" id="btn-add-rd">+ Add RD</button>
+          </div>
         </div>
         <div class="fd-rd-note">
           Installments are auto-counted from the start date · Maturity value uses quarterly compounding
@@ -426,6 +442,54 @@
       </div>
 
     </div><!-- /tab-fd -->
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- MUTUAL FUNDS TAB                                           -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <div id="tab-mf" class="tab-panel">
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="mfKpiGrid" style="margin-bottom:22px"></div>
+
+      <!-- MF Section -->
+      <div class="section-block">
+        <div class="section-header-row">
+          <h3 class="section-title">Mutual Funds</h3>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <select id="mfInvestorFilter" class="filter-select">
+              <option value="">All Investors</option>
+            </select>
+            <button class="btn-refresh" id="btn-refresh-mf" title="Refresh NAVs">
+              <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 4v6h6M23 20v-6h-6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
+              Refresh NAVs
+            </button>
+            <button class="btn-add" id="btn-add-mf">+ Add Fund</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th data-mfsort="name">Fund</th>
+                <th class="num" data-mfsort="units">Units</th>
+                <th class="num" data-mfsort="avgBuyNav">Avg Buy NAV</th>
+                <th class="num" data-mfsort="currentNav">Current NAV</th>
+                <th class="num" data-mfsort="invested">Invested</th>
+                <th class="num" data-mfsort="currentValue">Current Value</th>
+                <th class="num" data-mfsort="gain">Gain / Loss</th>
+                <th class="num" data-mfsort="returnPct">Return %</th>
+                <th data-mfsort="investedBy">By</th>
+                <th id="mfth-actions"></th>
+              </tr>
+            </thead>
+            <tbody id="mfTableBody"></tbody>
+          </table>
+        </div>
+        <div class="table-count" id="mfTableCount"></div>
+      </div>
+
+    </div><!-- /tab-mf -->
 
   </div><!-- /container -->
 </div><!-- /app-screen -->
@@ -709,6 +773,58 @@
       <div class="modal-footer">
         <button type="button" class="btn-cancel" id="rd-cancel-btn">Cancel</button>
         <button type="submit" class="btn-save" id="rd-save-btn">Add RD</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ MF MODAL ═══ -->
+<div id="mf-modal" class="overlay hidden">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="mf-modal-title">Add Mutual Fund</div>
+      <button class="modal-x" id="mf-modal-close">✕</button>
+    </div>
+    <form id="mf-form" autocomplete="off">
+      <div class="form-grid">
+
+        <!-- Fund search (typeahead) -->
+        <div class="field full">
+          <label>Fund Name *</label>
+          <div id="mf-fund-search-wrap" style="position:relative">
+            <input type="text" id="mf-fund-search" placeholder="Type to search fund (e.g. HDFC Flexi Cap)" autocomplete="off" required>
+          </div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:4px">Type to search · pick from dropdown · or enter scheme code manually below</div>
+        </div>
+
+        <!-- Scheme code — editable so user can enter manually if search misses a fund -->
+        <div class="field">
+          <label>Scheme Code <span id="mff-lookup-hint" style="font-size:10px;color:#3b82f6;font-weight:600;cursor:pointer;margin-left:4px" title="Look up on MFAPI">Lookup ↗</span></label>
+          <input type="text" id="mff-schemeCode" placeholder="Auto-filled or enter manually" style="background:#f8fafc">
+          <div id="mff-scheme-status" style="font-size:11px;margin-top:4px;color:#94a3b8"></div>
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <input type="text" id="mff-category" placeholder="Auto-detected" style="background:#f8fafc;color:#64748b">
+        </div>
+
+        <div class="field">
+          <label>Units Held *</label>
+          <input type="number" id="mff-units" placeholder="e.g. 150.432" min="0" step="0.001" required>
+        </div>
+        <div class="field">
+          <label>Avg Buy NAV (₹) *</label>
+          <input type="number" id="mff-avgBuyNav" placeholder="e.g. 84.500" min="0" step="0.001" required>
+        </div>
+        <div class="field">
+          <label>Invested By</label>
+          <input type="text" id="mff-investedBy" placeholder="e.g. Bala">
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" id="mf-cancel-btn">Cancel</button>
+        <button type="submit" class="btn-save" id="mf-save-btn">Add Fund</button>
       </div>
     </form>
   </div>

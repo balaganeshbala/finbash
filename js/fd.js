@@ -160,9 +160,24 @@ function renderFDRDKpis() {
 /* ─────────────────────────────────────────────────────────────────
    FD TABLE
    ───────────────────────────────────────────────────────────────── */
+function updateInvestorFilter(selectId, items) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  const prev  = sel.value;
+  const names = [...new Set(items.map(x => x.investedBy).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">All Investors</option>' +
+    names.map(n => `<option value="${n}">${n}</option>`).join('');
+  if (names.includes(prev)) sel.value = prev;
+}
+
 export function renderFDSection() {
   renderFDRDKpis();
   const tbody = document.getElementById('fdTableBody');
+
+  // Rebuild investor filter options
+  updateInvestorFilter('fdInvestorFilter', state.fds);
+
+  const inv = document.getElementById('fdInvestorFilter')?.value || '';
 
   if (!state.fds.length) {
     tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No FDs added yet</td></tr>`;
@@ -171,7 +186,7 @@ export function renderFDSection() {
   }
 
   // Sort
-  let sorted = [...state.fds];
+  let sorted = [...state.fds].filter(f => !inv || f.investedBy === inv);
   if (state.fdSortCol) {
     sorted.sort((a, b) => {
       let va, vb;
@@ -234,8 +249,11 @@ export function renderFDSection() {
     </tr>`;
   }).join('');
 
-  document.getElementById('fdTableCount').textContent =
-    `${state.fds.length} FD${state.fds.length !== 1 ? 's' : ''}`;
+  const shown = sorted.length;
+  const total = state.fds.length;
+  document.getElementById('fdTableCount').textContent = inv
+    ? `${shown} of ${total} FD${total !== 1 ? 's' : ''}`
+    : `${total} FD${total !== 1 ? 's' : ''}`;
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -245,6 +263,11 @@ export function renderRDSection() {
   renderFDRDKpis();
   const tbody = document.getElementById('rdTableBody');
 
+  // Rebuild investor filter options
+  updateInvestorFilter('rdInvestorFilter', state.rds);
+
+  const inv = document.getElementById('rdInvestorFilter')?.value || '';
+
   if (!state.rds.length) {
     tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No RDs added yet</td></tr>`;
     document.getElementById('rdTableCount').textContent = '';
@@ -252,7 +275,7 @@ export function renderRDSection() {
   }
 
   // Sort
-  let sorted = [...state.rds];
+  let sorted = [...state.rds].filter(r => !inv || r.investedBy === inv);
   if (state.rdSortCol) {
     sorted.sort((a, b) => {
       let va, vb;
@@ -329,8 +352,11 @@ export function renderRDSection() {
     </tr>`;
   }).join('');
 
-  document.getElementById('rdTableCount').textContent =
-    `${state.rds.length} RD${state.rds.length !== 1 ? 's' : ''}`;
+  const shown = sorted.length;
+  const total = state.rds.length;
+  document.getElementById('rdTableCount').textContent = inv
+    ? `${shown} of ${total} RD${total !== 1 ? 's' : ''}`
+    : `${total} RD${total !== 1 ? 's' : ''}`;
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -385,6 +411,10 @@ function closeRDModal() {
    EVENT LISTENERS
    ───────────────────────────────────────────────────────────────── */
 export function initFDListeners() {
+  /* Investor filters */
+  document.getElementById('fdInvestorFilter').addEventListener('change', renderFDSection);
+  document.getElementById('rdInvestorFilter').addEventListener('change', renderRDSection);
+
   /* FD table header sort */
   document.getElementById('fdTableBody').closest('table').querySelector('thead').addEventListener('click', e => {
     const th = e.target.closest('[data-fdsort]');

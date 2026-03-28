@@ -316,12 +316,45 @@ tbody td { padding:9px 12px; color:#334155; vertical-align:middle; }
   .header-mobile { display:flex; }
   .header { padding:14px 20px; }
 }
+/* ── MUTUAL FUND BADGES ── */
+.badge-mf-equity    { background:#dbeafe; color:#1d4ed8; }
+.badge-mf-debt      { background:#d1fae5; color:#065f46; }
+.badge-mf-hybrid    { background:#ede9fe; color:#5b21b6; }
+.badge-mf-elss      { background:#fef3c7; color:#92400e; }
+.badge-mf-commodity { background:#ffedd5; color:#9a3412; }
+.badge-mf-other     { background:#f1f5f9; color:#475569; }
+
+/* ── INVESTOR FILTER SELECT ── */
+.filter-select { padding:7px 10px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:12px; color:#374151; background:white; cursor:pointer; outline:none; transition:border-color 0.15s; }
+.filter-select:focus { border-color:#3b82f6; }
+
+/* ── REFRESH BUTTON ── */
+.btn-refresh { display:inline-flex; align-items:center; gap:6px; background:white; border:1.5px solid #e2e8f0; color:#374151; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.btn-refresh:hover:not(:disabled) { background:#f8fafc; border-color:#cbd5e1; }
+.btn-refresh:disabled { opacity:0.6; cursor:not-allowed; }
+.btn-refresh svg { width:13px; height:13px; flex-shrink:0; }
+
+/* ── FUND SEARCH DROPDOWN ── */
+.fund-dropdown { position:absolute; top:calc(100% + 4px); left:0; right:0; background:white; border:1.5px solid #e2e8f0; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:9999; max-height:280px; overflow-y:auto; display:none; }
+.fund-dd-item { padding:10px 14px; font-size:12.5px; color:#1e293b; cursor:pointer; border-bottom:1px solid #f8fafc; line-height:1.4; transition:background 0.1s; }
+.fund-dd-item:last-child { border-bottom:none; }
+.fund-dd-item:hover { background:#eff6ff; color:#1d4ed8; }
+.fund-dd-empty { padding:12px 14px; font-size:12.5px; color:#94a3b8; text-align:center; }
+
+/* ── SPIN ANIMATION (NAV refresh) ── */
+@keyframes spin { to { transform:rotate(360deg); } }
+.spin-icon { animation:spin 0.8s linear infinite; display:inline-block; }
+
+/* ── MF KPI GRID ── */
+#mfKpiGrid { grid-template-columns:repeat(4,1fr); }
+
 @media(max-width:600px){
   .row-3{grid-template-columns:1fr;}
   .form-grid{grid-template-columns:1fr;}
   .form-grid .full{grid-column:1;}
   #goldKpiGrid{grid-template-columns:repeat(2,1fr);}
   #fdKpiGrid{grid-template-columns:repeat(2,1fr);}
+  #mfKpiGrid{grid-template-columns:repeat(2,1fr);}
   /* Tighter table cells on mobile so horizontal scroll is less aggressive */
   thead th { padding:8px 8px; font-size:10px; }
   tbody td  { padding:7px 8px; font-size:11.5px; }

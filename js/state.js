@@ -37,6 +37,15 @@ export const state = {
   rdSortCol:      null,
   rdSortDir:      'asc',
 
+  // Mutual Funds
+  mfs:            [],
+  editingMFId:    null,
+  mfUnsub:        null,
+  mfNavs:         {},   // schemeCode → { nav, date, prevNav }
+  mfNavLoading:   false,
+  mfSortCol:      null,
+  mfSortDir:      'asc',
+
   // UI
   activeTab:      'bonds',
 };
