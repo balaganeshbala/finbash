@@ -9,55 +9,23 @@ import { fmt }   from './utils.js';
 import { toast } from './ui.js';
 
 /* ─────────────────────────────────────────────────────────────────
-   YAHOO FINANCE  v8 chart API
-   Strategy: try each proxy for ALL failing symbols before moving
-   to the next proxy — avoids per-proxy rate-limit exhaustion.
+   STOCK PRICE PROXY
    ───────────────────────────────────────────────────────────────── */
-const YF_CHART = sym =>
-  `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`;
+const OWN_PROXY_BASE = 'https://stock-price-proxy.vercel.app';
 
-const PROXY_STRATEGIES = [
-  {
-    label: 'direct',
-    url:   t => t,
-    parse: r => r.json(),
-  },
-  {
-    label: 'corsproxy.io',
-    url:   t => `https://corsproxy.io/?${encodeURIComponent(t)}`,
-    parse: r => r.json(),
-  },
-  {
-    label: 'allorigins',
-    url:   t => `https://api.allorigins.win/get?url=${encodeURIComponent(t)}`,
-    parse: async r => { const w = await r.json(); return JSON.parse(w.contents); },
-  },
-  {
-    label: 'codetabs',
-    url:   t => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(t)}`,
-    parse: r => r.json(),
-  },
-];
-
-async function tryStrategyForTickers(strategy, tickers) {
-  const results = await Promise.all(tickers.map(async t => {
-    try {
-      const res  = await fetch(strategy.url(YF_CHART(t)));
-      if (!res.ok) return { t, data: null };
-      const json = await strategy.parse(res);
-      const meta = json?.chart?.result?.[0]?.meta;
-      if (meta?.regularMarketPrice != null) return {
-        t,
-        data: {
-          price:     meta.regularMarketPrice,
-          prevClose: meta.chartPreviousClose ?? meta.previousClose ?? null,
-          name:      meta.shortName || meta.longName || '',
-        },
-      };
-    } catch { /* network / parse error */ }
-    return { t, data: null };
-  }));
-  return results;
+async function fetchPriceForTicker(sym) {
+  try {
+    const res  = await fetch(`${OWN_PROXY_BASE}/api/stock-price?symbol=${encodeURIComponent(sym)}`);
+    if (!res.ok) return null;
+    const json = await res.json();
+    const meta = json?.chart?.result?.[0]?.meta;
+    if (meta?.regularMarketPrice != null) return {
+      price:     meta.regularMarketPrice,
+      prevClose: meta.chartPreviousClose ?? meta.previousClose ?? null,
+      name:      meta.shortName || meta.longName || '',
+    };
+  } catch { /* network / parse error */ }
+  return null;
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -112,25 +80,20 @@ export async function fetchAllPrices() {
   state.stockPriceLoading = true;
   updateRefreshBtn(true);
 
-  let remaining = [...new Set(state.stocks.map(tickerSym))];
+  const tickers = [...new Set(state.stocks.map(tickerSym))];
+  const results = await Promise.all(tickers.map(async t => ({ t, data: await fetchPriceForTicker(t) })));
 
-  for (const strategy of PROXY_STRATEGIES) {
-    if (!remaining.length) break;
+  const failed = [];
+  results.forEach(({ t, data }) => {
+    if (data) {
+      state.stockPrices[t] = data;
+    } else {
+      failed.push(t);
+    }
+  });
 
-    const results = await tryStrategyForTickers(strategy, remaining);
-    remaining = [];
-
-    results.forEach(({ t, data }) => {
-      if (data) {
-        state.stockPrices[t] = data;
-      } else {
-        remaining.push(t); // retry with next proxy
-      }
-    });
-  }
-
-  if (remaining.length) {
-    const syms = remaining.map(t => t.replace(/\.[A-Z]+$/, '')).join(', ');
+  if (failed.length) {
+    const syms = failed.map(t => t.replace(/\.[A-Z]+$/, '')).join(', ');
     toast(`Could not fetch prices for: ${syms}. Check the NSE symbols.`, 'error');
   }
 
