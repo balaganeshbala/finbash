@@ -1,3 +1,3 @@
 [submodule "stock-price-proxy"]
 	path = stock-price-proxy
-	url = git@github.com:balaganeshbala/stock-price-proxy.git
+	url = https://github.com/balaganeshbala/stock-price-proxy.git
