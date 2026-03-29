@@ -57,5 +57,5 @@ export const state = {
   stockViewMode:     'holding',  // 'holding' | 'stock'
 
   // UI
-  activeTab:      'bonds',
+  activeTab:      'overview',
 };

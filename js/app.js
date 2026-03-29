@@ -24,6 +24,7 @@ import {
 import {
   startListeningStocks, initStockListeners, fetchAllPrices,
 } from './stocks.js';
+import { renderOverview, renderOverviewChart } from './overview.js';
 
 /* ─────────────────────────────────────────────────────────────────
    BOOT
@@ -61,18 +62,30 @@ if (!isConfigured) {
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('tab-' + state.activeTab).classList.add('active');
+      // Re-render overview after the tab is visible so Chart.js measures correct dimensions
+      // (same pattern as Gold — canvas is permanent in the HTML, chart redraws on tab switch)
+      if (state.activeTab === 'overview') {
+        renderOverview();
+        requestAnimationFrame(() => renderOverviewChart());
+      }
       // Re-render gold charts after the tab is visible so Chart.js
       // measures the correct dimensions and animates from the right origin
       if (state.activeTab === 'gold' && state.goldItems.length > 0) {
         requestAnimationFrame(() => renderGoldDashboard());
       }
-      // Refresh MF NAVs when switching to MF tab
+      // Refresh MF NAVs when switching to MF tab (at most once every 5 minutes)
       if (state.activeTab === 'mf' && state.mfs.length > 0) {
-        fetchAllNavs();
+        const FIVE_MINUTES = 5 * 60 * 1000;
+        if (!state.lastMFNavFetch || Date.now() - state.lastMFNavFetch > FIVE_MINUTES) {
+          fetchAllNavs();
+        }
       }
-      // Refresh stock prices when switching to stocks tab
+      // Refresh stock prices when switching to stocks tab (at most once every 5 minutes)
       if (state.activeTab === 'stocks' && state.stocks.length > 0) {
-        fetchAllPrices();
+        const FIVE_MINUTES = 5 * 60 * 1000;
+        if (!state.lastStockPriceFetch || Date.now() - state.lastStockPriceFetch > FIVE_MINUTES) {
+          fetchAllPrices();
+        }
       }
     });
   });

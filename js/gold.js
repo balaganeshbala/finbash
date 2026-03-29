@@ -24,6 +24,7 @@ export function startListeningGold(uid) {
       state.goldItems.length === 0
         ? setGoldState('empty')
         : (setGoldState('data'), renderGoldDashboard());
+      window.__renderOverview?.();
     },
     () => {
       toast('Could not load gold data. Check Firestore rules.', 'error');

@@ -62,8 +62,10 @@ export async function fetchAllNavs() {
     if (nav) state.mfNavs[code] = nav;
   }));
   state.mfNavLoading = false;
+  state.lastMFNavFetch = Date.now();
   updateRefreshBtn(false);
   renderMFSection();
+  window.__renderOverview?.();
 }
 
 function updateRefreshBtn(loading) {

@@ -112,7 +112,14 @@
 
   <!-- Tab Navigation -->
   <div class="tab-bar">
-    <button class="tab-btn active" data-tab="bonds">
+    <button class="tab-btn active" data-tab="overview">
+      <svg viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      Overview
+    </button>
+    <button class="tab-btn" data-tab="bonds">
       <svg viewBox="0 0 24 24">
         <line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/>
         <line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/>
@@ -120,6 +127,7 @@
       </svg>
       Bonds
     </button>
+
     <button class="tab-btn" data-tab="gold">
       <svg viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="10"/>
@@ -152,8 +160,20 @@
 
   <div class="container">
 
+    <!-- ── OVERVIEW TAB ── -->
+    <div id="tab-overview" class="tab-panel active">
+      <div id="overview-kpis"></div>
+      <div class="overview-main-row">
+        <div class="card overview-chart-card">
+          <div class="card-title">Portfolio Allocation</div>
+          <canvas id="overview-pie" height="280"></canvas>
+        </div>
+        <div id="overview-table" class="card overview-table-card"></div>
+      </div>
+    </div>
+
     <!-- ── BONDS TAB ── -->
-    <div id="tab-bonds" class="tab-panel active">
+    <div id="tab-bonds" class="tab-panel">
 
       <!-- Loading -->
       <div id="loading-state" class="loading-state">
@@ -394,8 +414,8 @@
                 <th data-fdsort="startDate">Start</th>
                 <th data-fdsort="maturityDate">Maturity</th>
                 <th data-fdsort="tenure">Tenure</th>
-                <th class="num" data-fdsort="maturityAmt">Maturity Amt</th>
-                <th class="num" data-fdsort="gain">Interest Gain</th>
+                <th class="num" data-fdsort="maturityAmt">Current Value</th>
+                <th class="num" data-fdsort="gain">Accrued Gain</th>
                 <th data-fdsort="investedBy">By</th>
                 <th data-fdsort="status">Status</th>
                 <th id="fdth-actions"></th>
@@ -431,8 +451,8 @@
                 <th data-rdsort="maturityDate">Maturity</th>
                 <th style="text-align:center" data-rdsort="tenure">Installments</th>
                 <th class="num" data-rdsort="invested">Invested</th>
-                <th class="num" data-rdsort="maturityAmt">At Maturity</th>
-                <th class="num" data-rdsort="gain">Interest Gain</th>
+                <th class="num" data-rdsort="maturityAmt">Current Value</th>
+                <th class="num" data-rdsort="gain">Accrued Gain</th>
                 <th data-rdsort="investedBy">By</th>
                 <th data-rdsort="status">Status</th>
                 <th id="rdth-actions"></th>

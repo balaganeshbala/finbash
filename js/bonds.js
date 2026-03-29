@@ -22,6 +22,7 @@ export function startListening(uid) {
       state.bonds.length === 0
         ? setDashboardState('empty')
         : (setDashboardState('data'), renderDashboard());
+      window.__renderOverview?.();
     },
     () => {
       toast('Could not load data. Check your Firestore security rules.', 'error');

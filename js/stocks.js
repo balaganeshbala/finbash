@@ -98,8 +98,10 @@ export async function fetchAllPrices() {
   }
 
   state.stockPriceLoading = false;
+  state.lastStockPriceFetch = Date.now();
   updateRefreshBtn(false);
   renderStocksSection();
+  window.__renderOverview?.();
 }
 
 function updateRefreshBtn(loading) {

@@ -24,6 +24,7 @@ export function startListeningFD(uid) {
   state.fdUnsub = onSnapshot(fdColRef(uid), snap => {
     state.fds = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderFDSection();
+    window.__renderOverview?.();
   }, () => toast('Could not load FD data. Check Firestore rules.', 'error'));
 }
 
@@ -32,6 +33,7 @@ export function startListeningRD(uid) {
   state.rdUnsub = onSnapshot(rdColRef(uid), snap => {
     state.rds = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderRDSection();
+    window.__renderOverview?.();
   }, () => toast('Could not load RD data. Check Firestore rules.', 'error'));
 }
 
@@ -60,6 +62,28 @@ function fdMaturityAmount(principal, rate, startDate, maturityDate) {
   const ms    = new Date(maturityDate) - new Date(startDate);
   const years = ms / (365.25 * 24 * 3600 * 1000);
   return principal * Math.pow(1 + rate / 400, years * 4);
+}
+
+// FD accrued value up to today (capped at maturity date)
+function fdAccruedValue(principal, rate, startDate, maturityDate) {
+  if (!principal || !rate || !startDate || !maturityDate) return principal || 0;
+  const start = new Date(startDate);
+  const end   = new Date(Math.min(new Date(), new Date(maturityDate)));
+  const years = Math.max(0, (end - start) / (365.25 * 24 * 3600 * 1000));
+  return principal * Math.pow(1 + rate / 400, years * 4);
+}
+
+// RD accrued value of instalments paid so far (capped at maturity date)
+function rdAccruedValue(monthlyAmount, rate, startDate, maturityDate) {
+  if (!monthlyAmount || !rate || !startDate || !maturityDate) return 0;
+  const today   = new Date();
+  const mat     = new Date(maturityDate);
+  const endDate = today < mat ? today.toISOString().split('T')[0] : maturityDate;
+  const n = monthDiff(startDate, endDate);
+  if (n <= 0) return 0;
+  const i = Math.pow(1 + rate / 400, 1 / 3) - 1;
+  if (i <= 0) return monthlyAmount * n;
+  return monthlyAmount * (Math.pow(1 + i, n) - 1) * (1 + i) / i;
 }
 
 // RD: how many installments have been deducted so far
@@ -106,16 +130,23 @@ function statusBadge(maturityDate) {
    ───────────────────────────────────────────────────────────────── */
 function renderFDRDKpis() {
   const totalFDPrincipal = state.fds.reduce((s, f) => s + (f.principal || 0), 0);
-  const totalFDMaturity  = state.fds.reduce((s, f) =>
-    s + fdMaturityAmount(f.principal, f.interestRate, f.startDate, f.maturityDate), 0);
+  const totalFDAccrued   = state.fds.reduce((s, f) =>
+    s + fdAccruedValue(f.principal, f.interestRate, f.startDate, f.maturityDate), 0);
+  const fdAvgRate = totalFDPrincipal > 0
+    ? state.fds.reduce((s, f) => s + (f.principal || 0) * (f.interestRate || 0), 0) / totalFDPrincipal
+    : 0;
 
   const totalRDInvested = state.rds.reduce((s, r) => {
     const total = monthDiff(r.startDate, r.maturityDate);
     const paid  = Math.min(rdInstallmentsPaid(r.startDate), total);
     return s + paid * (r.monthlyAmount || 0);
   }, 0);
-  const totalRDMaturity = state.rds.reduce((s, r) =>
-    s + rdMaturityAmount(r.monthlyAmount, r.interestRate, r.startDate, r.maturityDate), 0);
+  const totalRDAccrued  = state.rds.reduce((s, r) =>
+    s + rdAccruedValue(r.monthlyAmount, r.interestRate, r.startDate, r.maturityDate), 0);
+  const totalRDMonthly  = state.rds.reduce((s, r) => s + (r.monthlyAmount || 0), 0);
+  const rdAvgRate = totalRDMonthly > 0
+    ? state.rds.reduce((s, r) => s + (r.monthlyAmount || 0) * (r.interestRate || 0), 0) / totalRDMonthly
+    : 0;
 
   const KSVG = (d, s = '#fff') =>
     `<svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:${s};stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${d}</svg>`;
@@ -129,11 +160,17 @@ function renderFDRDKpis() {
     },
     {
       icon:  KSVG('<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'),
-      label: 'FD at Maturity', cls: 'success',
-      value: fmt(Math.round(totalFDMaturity)),
+      label: 'FD Current Value', cls: 'success',
+      value: fmt(Math.round(totalFDAccrued)),
       sub:   totalFDPrincipal > 0
-        ? `+${fmt(Math.round(totalFDMaturity - totalFDPrincipal))} interest`
+        ? `+${fmt(Math.round(totalFDAccrued - totalFDPrincipal))} accrued`
         : 'Add FDs to see',
+    },
+    {
+      icon:  KSVG('<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>', '#f59e0b'),
+      label: 'FD Avg Rate', cls: '',
+      value: fdAvgRate > 0 ? fdAvgRate.toFixed(2) + '%' : '—',
+      sub:   'Weighted by principal',
     },
     {
       icon:  KSVG('<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>'),
@@ -143,11 +180,17 @@ function renderFDRDKpis() {
     },
     {
       icon:  KSVG('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),
-      label: 'RD at Maturity', cls: '',
-      value: fmt(Math.round(totalRDMaturity)),
+      label: 'RD Current Value', cls: '',
+      value: fmt(Math.round(totalRDAccrued)),
       sub:   totalRDInvested > 0
-        ? `+${fmt(Math.round(totalRDMaturity - totalRDInvested))} interest`
+        ? `+${fmt(Math.round(totalRDAccrued - totalRDInvested))} accrued`
         : 'Add RDs to see',
+    },
+    {
+      icon:  KSVG('<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>', '#f59e0b'),
+      label: 'RD Avg Rate', cls: '',
+      value: rdAvgRate > 0 ? rdAvgRate.toFixed(2) + '%' : '—',
+      sub:   'Weighted by monthly amt',
     },
   ].map(k => `<div class="kpi-card ${k.cls}">
     <div class="kpi-icon">${k.icon}</div>
@@ -222,8 +265,8 @@ export function renderFDSection() {
   });
 
   tbody.innerHTML = sorted.map((f, i) => {
-    const mat  = fdMaturityAmount(f.principal, f.interestRate, f.startDate, f.maturityDate);
-    const gain = mat - (f.principal || 0);
+    const accrued = fdAccruedValue(f.principal, f.interestRate, f.startDate, f.maturityDate);
+    const gain    = accrued - (f.principal || 0);
     return `<tr>
       <td style="color:#94a3b8;font-size:11px">${i + 1}</td>
       <td><div class="bond-name">${f.name || '—'}</div></td>
@@ -232,7 +275,7 @@ export function renderFDSection() {
       <td style="white-space:nowrap">${f.startDate ? fmtDate(f.startDate) : '—'}</td>
       <td style="white-space:nowrap">${f.maturityDate ? fmtDate(f.maturityDate) : '—'}</td>
       <td style="white-space:nowrap">${tenure(f.startDate, f.maturityDate)}</td>
-      <td class="num" style="font-weight:700">${mat > 0 ? fmt(Math.round(mat)) : '—'}</td>
+      <td class="num" style="font-weight:700">${accrued > 0 ? fmt(Math.round(accrued)) : '—'}</td>
       <td class="num" style="color:#059669;font-weight:600">${gain > 0 ? '+' + fmt(Math.round(gain)) : '—'}</td>
       <td>${f.investedBy || '—'}</td>
       <td>${statusBadge(f.maturityDate)}</td>
@@ -321,9 +364,8 @@ export function renderRDSection() {
     const total    = monthDiff(r.startDate, r.maturityDate);
     const paid     = Math.min(rdInstallmentsPaid(r.startDate), total);
     const invested = paid * (r.monthlyAmount || 0);
-    const mat      = rdMaturityAmount(r.monthlyAmount, r.interestRate, r.startDate, r.maturityDate);
-    const totalDeposit = total * (r.monthlyAmount || 0);
-    const gain     = mat - totalDeposit;
+    const accrued  = rdAccruedValue(r.monthlyAmount, r.interestRate, r.startDate, r.maturityDate);
+    const gain     = accrued - invested;
     return `<tr>
       <td style="color:#94a3b8;font-size:11px">${i + 1}</td>
       <td><div class="bond-name">${r.name || '—'}</div></td>
@@ -335,7 +377,7 @@ export function renderRDSection() {
         <span style="font-weight:700">${paid}</span><span style="opacity:.5"> / ${total}</span>
       </td>
       <td class="num">${fmt(Math.round(invested))}</td>
-      <td class="num" style="font-weight:700">${mat > 0 ? fmt(Math.round(mat)) : '—'}</td>
+      <td class="num" style="font-weight:700">${accrued > 0 ? fmt(Math.round(accrued)) : '—'}</td>
       <td class="num" style="color:#059669;font-weight:600">${gain > 0 ? '+' + fmt(Math.round(gain)) : '—'}</td>
       <td>${r.investedBy || '—'}</td>
       <td>${statusBadge(r.maturityDate)}</td>
