@@ -40,8 +40,7 @@ function rdAccruedValue(monthlyAmount, rate, startDate, maturityDate) {
 function rdInstallmentsPaid(startDate) {
   if (!startDate) return 0;
   const s = new Date(startDate), t = new Date();
-  let m = (t.getFullYear() - s.getFullYear()) * 12 + (t.getMonth() - s.getMonth());
-  if (t.getDate() >= s.getDate()) m++;
+  const m = (t.getFullYear() - s.getFullYear()) * 12 + (t.getMonth() - s.getMonth());
   return Math.max(0, m);
 }
 

@@ -87,12 +87,13 @@ function rdAccruedValue(monthlyAmount, rate, startDate, maturityDate) {
 }
 
 // RD: how many installments have been deducted so far
+// Uses complete elapsed months (same basis as monthDiff / rdAccruedValue) so
+// the paid count and accrued-value formula stay in sync.
 function rdInstallmentsPaid(startDate) {
   if (!startDate) return 0;
   const start = new Date(startDate);
   const today = new Date();
-  let months = (today.getFullYear() - start.getFullYear()) * 12 + (today.getMonth() - start.getMonth());
-  if (today.getDate() >= start.getDate()) months++;
+  const months = (today.getFullYear() - start.getFullYear()) * 12 + (today.getMonth() - start.getMonth());
   return Math.max(0, months);
 }
 
