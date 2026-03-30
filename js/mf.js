@@ -276,6 +276,30 @@ export function renderMFSection() {
     </tr>`;
   }).join('');
 
+  // Totals row for visible (filtered) funds
+  const tfoot = document.getElementById('mfTableFoot');
+  if (tfoot) {
+    const totInv = sorted.reduce((s, m) => s + (m.units || 0) * (m.avgBuyNav || 0), 0);
+    const totCV  = sorted.reduce((s, m) => {
+      const nav = state.mfNavs[m.schemeCode];
+      return s + (nav ? (m.units || 0) * nav.nav : (m.units || 0) * (m.avgBuyNav || 0));
+    }, 0);
+    const totGain   = totCV - totInv;
+    const totRetPct = totInv > 0 ? (totGain / totInv) * 100 : 0;
+    const gainCol   = totGain >= 0 ? '#059669' : '#ef4444';
+    const gainSign  = totGain >= 0 ? '+' : '';
+    const colSpan   = state.isViewMode ? 5 : 6; // skip #, name, units, avgNav, currentNav → 5 leading cols; +1 for actions col
+    tfoot.innerHTML = `<tr class="overview-total-row">
+      <td colspan="5"><strong>Total (${sorted.length} fund${sorted.length !== 1 ? 's' : ''})</strong></td>
+      <td class="num"><strong>${fmt(Math.round(totInv))}</strong></td>
+      <td class="num"><strong>${fmt(Math.round(totCV))}</strong></td>
+      <td class="num" style="color:${gainCol}"><strong>${gainSign}${fmt(Math.round(Math.abs(totGain)))}</strong></td>
+      <td class="num" style="color:${gainCol}"><strong>${gainSign}${totRetPct.toFixed(2)}%</strong></td>
+      <td></td>
+      ${!state.isViewMode ? '<td></td>' : ''}
+    </tr>`;
+  }
+
   const shown = sorted.length;
   const total = state.mfs.length;
   document.getElementById('mfTableCount').textContent = inv

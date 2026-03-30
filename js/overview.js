@@ -170,6 +170,14 @@ window.__renderOverview = () => {
 };
 
 export function renderOverview() {
+  // Swap skeleton → real content on first data arrival
+  const loadingEl = document.getElementById('overview-loading');
+  const contentEl = document.getElementById('overview-content');
+  if (loadingEl && loadingEl.style.display !== 'none') {
+    loadingEl.style.display = 'none';
+    contentEl.style.display = '';
+  }
+
   const kpisEl  = document.getElementById('overview-kpis');
   const tableEl = document.getElementById('overview-table');
   if (!kpisEl || !tableEl) return;

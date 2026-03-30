@@ -10,6 +10,22 @@
 <body>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
+<!--  INITIAL LOADER (shown until Firebase resolves auth state)      -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div id="initial-loader">
+  <div class="init-logo">
+    <svg viewBox="0 0 24 24">
+      <line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/>
+      <line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/>
+      <line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7 12 2"/>
+    </svg>
+  </div>
+  <div class="init-title">FinBash Portfolio</div>
+  <div class="init-spinner"></div>
+  <div class="init-sub">Loading your portfolio…</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
 <!--  LOGIN SCREEN                                                   -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <div id="login-screen" style="display:none">
@@ -162,14 +178,35 @@
 
     <!-- ── OVERVIEW TAB ── -->
     <div id="tab-overview" class="tab-panel active">
-      <div id="overview-kpis"></div>
-      <div class="overview-main-row">
-        <div class="card overview-chart-card">
-          <div class="card-title">Portfolio Allocation</div>
-          <canvas id="overview-pie"></canvas>
+
+      <!-- Skeleton shown while Firestore data is loading -->
+      <div id="overview-loading">
+        <div class="skel-kpi-grid">
+          <div class="skeleton skel-kpi"></div>
+          <div class="skeleton skel-kpi"></div>
+          <div class="skeleton skel-kpi"></div>
+          <div class="skeleton skel-kpi"></div>
+          <div class="skeleton skel-kpi"></div>
+          <div class="skeleton skel-kpi"></div>
         </div>
-        <div id="overview-table" class="card overview-table-card"></div>
+        <div class="skel-row">
+          <div class="skeleton skel-chart"></div>
+          <div class="skeleton skel-table"></div>
+        </div>
       </div>
+
+      <!-- Real content (hidden until data arrives) -->
+      <div id="overview-content" style="display:none">
+        <div id="overview-kpis"></div>
+        <div class="overview-main-row">
+          <div class="card overview-chart-card">
+            <div class="card-title">Portfolio Allocation</div>
+            <canvas id="overview-pie"></canvas>
+          </div>
+          <div id="overview-table" class="card overview-table-card"></div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ── BONDS TAB ── -->
@@ -505,6 +542,7 @@
               </tr>
             </thead>
             <tbody id="mfTableBody"></tbody>
+            <tfoot id="mfTableFoot"></tfoot>
           </table>
         </div>
         <div class="table-count" id="mfTableCount"></div>

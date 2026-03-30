@@ -9,7 +9,7 @@ import { state }                       from './state.js';
 import { toast, showSection }          from './ui.js';
 import {
   startListening, loadPartners,
-  initBondListeners,
+  initBondListeners, renderDashboard,
 } from './bonds.js';
 import {
   startListeningGold, loadGoldPrices,
@@ -68,6 +68,11 @@ if (!isConfigured) {
         renderOverview();
         requestAnimationFrame(() => renderOverviewChart());
       }
+      // Re-render bonds charts after the tab is visible so Chart.js
+      // measures the correct dimensions and animates from the right origin
+      if (state.activeTab === 'bonds' && state.bonds.length > 0) {
+        requestAnimationFrame(() => renderDashboard());
+      }
       // Re-render gold charts after the tab is visible so Chart.js
       // measures the correct dimensions and animates from the right origin
       if (state.activeTab === 'gold' && state.goldItems.length > 0) {
@@ -121,6 +126,8 @@ if (!isConfigured) {
   /* ── AUTH STATE ── */
   onAuthStateChanged(auth, async user => {
     state.currentUser = user;
+    // Hide the initial full-page loader once Firebase has resolved auth
+    document.getElementById('initial-loader').classList.add('hidden');
 
     if (user) {
       document.getElementById('app-screen').style.display  = 'block';
