@@ -30,7 +30,7 @@ code { background:#f1f5f9; padding:2px 6px; border-radius:4px; font-family:monos
 /* ── APP HEADER ── */
 .header { background:linear-gradient(135deg,#0f172a,#1a3a6b,#1e40af); color:white; padding:16px 40px; display:flex; justify-content:space-between; align-items:center; }
 .header h1 { font-size:20px; font-weight:800; }
-.header-sub { font-size:12px; opacity:0.6; margin-top:2px; }
+.header-sub { font-size:12px; opacity:0.6; margin-top:6px; }
 .header-right { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .user-avatar { width:30px; height:30px; border-radius:50%; border:2px solid rgba(255,255,255,0.3); }
 .user-name-text { font-size:13px; font-weight:600; }

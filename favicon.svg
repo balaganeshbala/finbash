@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="barTall" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.82)"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded-square background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- Subtle top-highlight layer -->
+  <rect width="512" height="200" rx="112" fill="rgba(255,255,255,0.08)"/>
+
+  <!-- ══ Four bars, bottom-aligned at y=368 ══ -->
+  <!-- bar 1 -->
+  <rect x="68"  y="318" width="72" height="80"  rx="14" fill="rgba(255,255,255,0.25)"/>
+  <!-- bar 2 -->
+  <rect x="164" y="258" width="72" height="140" rx="14" fill="rgba(255,255,255,0.42)"/>
+  <!-- bar 3 -->
+  <rect x="260" y="206" width="72" height="192" rx="14" fill="rgba(255,255,255,0.62)"/>
+  <!-- bar 4 — tallest & brightest -->
+  <rect x="356" y="146" width="72" height="252" rx="14" fill="url(#barTall)"/>
+
+  <!-- ══ Trend line ══ -->
+  <polyline
+    points="104,274  200,214  296,162  392,100"
+    fill="none"
+    stroke="rgba(255,255,255,0.60)"
+    stroke-width="16"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+
+  <!-- Arrow head (up-right) -->
+  <polyline
+    points="354,90  392,100  382,138"
+    fill="none"
+    stroke="rgba(255,255,255,0.60)"
+    stroke-width="16"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+
+  <!-- Baseline rule -->
+  <line x1="52" y1="412" x2="460" y2="412"
+        stroke="rgba(255,255,255,0.18)"
+        stroke-width="7"
+        stroke-linecap="round"/>
+</svg>
