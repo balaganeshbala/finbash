@@ -84,11 +84,20 @@ function computeAssets() {
     return s + (nav ? (m.units || 0) * nav.nav : (m.units || 0) * (m.avgBuyNav || 0));
   }, 0);
 
-  // Stocks
-  const stInvested = state.stocks.reduce((s, s2) => s + (s2.shares || 0) * (s2.avgBuyPrice || 0), 0);
+  // Stocks — US stocks converted to INR using live USD/INR rate
+  const stInvested = state.stocks.reduce((s, s2) => {
+    const isUS = s2.market === 'US';
+    const fx   = isUS ? (state.usdInrRate || 0) : 1;
+    return s + (s2.shares || 0) * (s2.avgBuyPrice || 0) * fx;
+  }, 0);
   const stCurrent  = state.stocks.reduce((s, s2) => {
-    const p = state.stockPrices[`${(s2.symbol || '').toUpperCase()}.NS`];
-    return s + (p?.price ? (s2.shares || 0) * p.price : (s2.shares || 0) * (s2.avgBuyPrice || 0));
+    const isUS   = s2.market === 'US';
+    const fx     = isUS ? (state.usdInrRate || 0) : 1;
+    const sym    = (s2.symbol || '').toUpperCase();
+    const ticker = isUS ? sym : `${sym}.NS`;
+    const p      = state.stockPrices[ticker];
+    const inv    = (s2.shares || 0) * (s2.avgBuyPrice || 0) * fx;
+    return s + (p?.price ? (s2.shares || 0) * p.price * fx : inv);
   }, 0);
 
   return [

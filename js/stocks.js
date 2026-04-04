@@ -61,7 +61,24 @@ export const deleteStock = id => deleteDoc(stDocRef(state.currentUser.uid, id));
    HELPERS
    ───────────────────────────────────────────────────────────────── */
 export function tickerSym(stock) {
-  return `${(stock.symbol || '').toUpperCase()}.NS`;
+  const sym = (stock.symbol || '').toUpperCase();
+  if (stock.market === 'US') {
+    // Yahoo Finance uses hyphens for share-class separators (BRK.B → BRK-B)
+    return sym.replace(/\./g, '-');
+  }
+  return `${sym}.NS`;
+}
+
+// Convert a US-stock value (in USD) to INR using live rate, falling back to 0
+export function usdToInr(usd) {
+  return state.usdInrRate ? usd * state.usdInrRate : 0;
+}
+
+// Market badge HTML
+function marketBadge(market) {
+  return market === 'US'
+    ? `<span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:10px">🇺🇸 US</span>`
+    : `<span class="badge" style="background:#dcfce7;color:#166534;font-size:10px">🇮🇳 NSE</span>`;
 }
 
 function isMarketOpen() {
@@ -81,11 +98,17 @@ export async function fetchAllPrices() {
   updateRefreshBtn(true);
 
   const tickers = [...new Set(state.stocks.map(tickerSym))];
-  const results = await Promise.all(tickers.map(async t => ({ t, data: await fetchPriceForTicker(t) })));
+  const hasUS   = state.stocks.some(s => s.market === 'US');
+
+  // Fetch all stock prices + USD/INR rate if needed
+  const allSymbols = hasUS ? [...tickers, 'USDINR=X'] : tickers;
+  const results    = await Promise.all(allSymbols.map(async t => ({ t, data: await fetchPriceForTicker(t) })));
 
   const failed = [];
   results.forEach(({ t, data }) => {
-    if (data) {
+    if (t === 'USDINR=X') {
+      if (data?.price) state.usdInrRate = data.price;
+    } else if (data) {
       state.stockPrices[t] = data;
     } else {
       failed.push(t);
@@ -93,8 +116,9 @@ export async function fetchAllPrices() {
   });
 
   if (failed.length) {
-    const syms = failed.map(t => t.replace(/\.[A-Z]+$/, '')).join(', ');
-    toast(`Could not fetch prices for: ${syms}. Check the NSE symbols.`, 'error');
+    // Strip only the .NS suffix added for NSE stocks; US tickers (e.g. BRK-B) are shown as-is
+    const syms = failed.map(t => t.endsWith('.NS') ? t.slice(0, -3) : t).join(', ');
+    toast(`Could not fetch prices for: ${syms}. Check the symbols.`, 'error');
   }
 
   state.stockPriceLoading = false;
@@ -119,14 +143,16 @@ function updateRefreshBtn(loading) {
 function renderStocksKpis() {
   let totalInvested = 0, totalCurrent = 0, withPrice = 0, dayGain = 0;
   state.stocks.forEach(s => {
-    const inv = (s.shares || 0) * (s.avgBuyPrice || 0);
+    const isUS = s.market === 'US';
+    const fx   = isUS ? (state.usdInrRate || 0) : 1;
+    const inv  = (s.shares || 0) * (s.avgBuyPrice || 0) * fx;
     totalInvested += inv;
     const p = state.stockPrices[tickerSym(s)];
     if (p?.price) {
-      const cv = (s.shares || 0) * p.price;
+      const cv = (s.shares || 0) * p.price * fx;
       totalCurrent += cv;
       withPrice++;
-      if (p.prevClose) dayGain += (s.shares || 0) * (p.price - p.prevClose);
+      if (p.prevClose) dayGain += (s.shares || 0) * (p.price - p.prevClose) * fx;
     } else {
       totalCurrent += inv;
     }
@@ -144,7 +170,9 @@ function renderStocksKpis() {
       icon:  KSVG('<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>'),
       label: 'Total Invested', cls: 'primary',
       value: fmt(Math.round(totalInvested)),
-      sub:   `${state.stocks.length} holding${state.stocks.length !== 1 ? 's' : ''}`,
+      sub:   state.usdInrRate
+        ? `${state.stocks.length} holding${state.stocks.length !== 1 ? 's' : ''} · $1 = ₹${state.usdInrRate.toFixed(2)}`
+        : `${state.stocks.length} holding${state.stocks.length !== 1 ? 's' : ''}`,
     },
     {
       icon:  KSVG('<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'),
@@ -253,9 +281,12 @@ function renderByHoldingView() {
 
   tbody.innerHTML = rows.map((s, i) => {
     const ticker   = tickerSym(s);
+    const isUS     = s.market === 'US';
+    const fx       = isUS ? (state.usdInrRate || 0) : 1;
+    const cur      = isUS ? '$' : '₹';
     const p        = state.stockPrices[ticker];
-    const invested = (s.shares || 0) * (s.avgBuyPrice || 0);
-    const cv       = p?.price ? (s.shares || 0) * p.price : null;
+    const invested = (s.shares || 0) * (s.avgBuyPrice || 0) * fx;
+    const cv       = p?.price ? (s.shares || 0) * p.price * fx : null;
     const gain     = cv != null ? cv - invested : null;
     const retPct   = invested > 0 && gain != null ? (gain / invested) * 100 : null;
     const gainCol  = gain != null ? (gain >= 0 ? '#059669' : '#ef4444') : '#94a3b8';
@@ -265,26 +296,26 @@ function renderByHoldingView() {
       const diff = p.price - p.prevClose;
       const pct  = (diff / p.prevClose) * 100;
       const col  = diff >= 0 ? '#059669' : '#ef4444';
-      dayChange  = `<div style="font-size:10px;color:${col};margin-top:2px">${diff >= 0 ? '+' : ''}${diff.toFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</div>`;
+      dayChange  = `<div style="font-size:10px;color:${col};margin-top:2px">${diff >= 0 ? '+' : ''}${cur}${Math.abs(diff).toFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</div>`;
     }
 
     return `<tr>
       <td style="color:#94a3b8;font-size:11px">${i + 1}</td>
       <td>
         <div class="bond-name">${s.name || s.symbol || '—'}</div>
-        <div style="font-size:11px;color:#64748b;font-weight:600;margin-top:2px">${ticker}</div>
+        <div style="font-size:11px;color:#64748b;font-weight:600;margin-top:2px">${ticker} ${marketBadge(s.market)}</div>
       </td>
       <td style="font-size:12px;color:#475569">${s.dematAccount || '—'}</td>
       <td class="num">${(s.shares || 0).toLocaleString('en-IN')}</td>
-      <td class="num">₹${(s.avgBuyPrice || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
+      <td class="num">${cur}${(s.avgBuyPrice || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
       <td class="num">
         ${p?.price
-          ? `<span style="font-weight:600">₹${p.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>`
+          ? `<span style="font-weight:600">${cur}${p.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>`
           : `<span style="color:#94a3b8;font-size:11px">—</span>`}
         ${dayChange}
       </td>
       <td class="num">${invested > 0 ? fmt(Math.round(invested)) : '—'}</td>
-      <td class="num" style="font-weight:700">${cv != null ? fmt(Math.round(cv)) : '—'}</td>
+      <td class="num" style="font-weight:700">${cv != null ? fmt(Math.round(cv)) : (isUS && !state.usdInrRate ? '<span style="font-size:10px;color:#94a3b8">No FX rate</span>' : '—')}</td>
       <td class="num" style="font-weight:600;color:${gainCol}">${gain != null ? (gain >= 0 ? '+' : '') + fmt(Math.round(gain)) : '—'}</td>
       <td class="num" style="font-weight:600;color:${gainCol}">${retPct != null ? (retPct >= 0 ? '+' : '') + retPct.toFixed(2) + '%' : '—'}</td>
       ${!state.isViewMode ? `<td>
@@ -324,8 +355,7 @@ function renderByStockView() {
   const groups = {};
   filtered.forEach(s => {
     const key = (s.symbol || '?').toUpperCase();
-    if (!groups[key]) groups[key] = { symbol: key, name: s.name || key, holdings: [] };
-    // Prefer non-empty name
+    if (!groups[key]) groups[key] = { symbol: key, name: s.name || key, market: s.market || 'NSE', holdings: [] };
     if (s.name) groups[key].name = s.name;
     groups[key].holdings.push(s);
   });
@@ -333,14 +363,18 @@ function renderByStockView() {
   syncSortIndicators();
 
   const rows = Object.values(groups).map(g => {
-    const ticker     = `${g.symbol}.NS`;
+    const isUS      = g.market === 'US';
+    const fx        = isUS ? (state.usdInrRate || 0) : 1;
+    const cur       = isUS ? '$' : '₹';
+    const ticker    = tickerSym({ symbol: g.symbol, market: g.market });
     const totalShares   = g.holdings.reduce((sum, h) => sum + (h.shares || 0), 0);
-    const totalInvested = g.holdings.reduce((sum, h) => sum + (h.shares || 0) * (h.avgBuyPrice || 0), 0);
-    const weightedAvg   = totalShares > 0 ? totalInvested / totalShares : 0;
-    const dematList     = [...new Set(g.holdings.map(h => h.dematAccount).filter(Boolean))].join(', ');
+    const totalInvested = g.holdings.reduce((sum, h) => sum + (h.shares || 0) * (h.avgBuyPrice || 0), 0) * fx;
+    const weightedAvgNative = totalShares > 0
+      ? g.holdings.reduce((sum, h) => sum + (h.shares || 0) * (h.avgBuyPrice || 0), 0) / totalShares : 0;
+    const dematList = [...new Set(g.holdings.map(h => h.dematAccount).filter(Boolean))].join(', ');
 
     const p      = state.stockPrices[ticker];
-    const cv     = p?.price ? totalShares * p.price : null;
+    const cv     = p?.price ? totalShares * p.price * fx : null;
     const gain   = cv != null ? cv - totalInvested : null;
     const retPct = totalInvested > 0 && gain != null ? (gain / totalInvested) * 100 : null;
     const gainCol = gain != null ? (gain >= 0 ? '#059669' : '#ef4444') : '#94a3b8';
@@ -350,23 +384,21 @@ function renderByStockView() {
       const diff = p.price - p.prevClose;
       const pct  = (diff / p.prevClose) * 100;
       const col  = diff >= 0 ? '#059669' : '#ef4444';
-      dayChange  = `<div style="font-size:10px;color:${col};margin-top:2px">${diff >= 0 ? '+' : ''}${diff.toFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</div>`;
+      dayChange  = `<div style="font-size:10px;color:${col};margin-top:2px">${diff >= 0 ? '+' : ''}${cur}${Math.abs(diff).toFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</div>`;
     }
 
     // Sub-rows per holding (indented)
     const subRows = g.holdings.map(h => {
-      const hInv    = (h.shares || 0) * (h.avgBuyPrice || 0);
-      const hCv     = p?.price ? (h.shares || 0) * p.price : null;
+      const hInv    = (h.shares || 0) * (h.avgBuyPrice || 0) * fx;
+      const hCv     = p?.price ? (h.shares || 0) * p.price * fx : null;
       const hGain   = hCv != null ? hCv - hInv : null;
       const hRetPct = hInv > 0 && hGain != null ? (hGain / hInv) * 100 : null;
       const hCol    = hGain != null ? (hGain >= 0 ? '#059669' : '#ef4444') : '#94a3b8';
       return `<tr class="stock-sub-row">
         <td></td>
-        <td style="padding-left:24px;font-size:11.5px;color:#64748b">
-          ${h.dematAccount || '—'}
-        </td>
+        <td style="padding-left:24px;font-size:11.5px;color:#64748b">${h.dematAccount || '—'}</td>
         <td class="num" style="font-size:11.5px">${(h.shares || 0).toLocaleString('en-IN')}</td>
-        <td class="num" style="font-size:11.5px">₹${(h.avgBuyPrice || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
+        <td class="num" style="font-size:11.5px">${cur}${(h.avgBuyPrice || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
         <td></td>
         <td class="num" style="font-size:11.5px">${hInv > 0 ? fmt(Math.round(hInv)) : '—'}</td>
         <td class="num" style="font-size:11.5px;font-weight:600">${hCv != null ? fmt(Math.round(hCv)) : '—'}</td>
@@ -381,15 +413,15 @@ function renderByStockView() {
         <td></td>
         <td>
           <div class="bond-name">${g.name}</div>
-          <div style="font-size:11px;color:#64748b;font-weight:600;margin-top:2px">${ticker}${dematList ? ` · ${dematList}` : ''}</div>
+          <div style="font-size:11px;color:#64748b;font-weight:600;margin-top:2px">${ticker} ${marketBadge(g.market)}${dematList ? ` · ${dematList}` : ''}</div>
         </td>
         <td class="num" style="font-weight:700">${totalShares.toLocaleString('en-IN')}</td>
-        <td class="num" style="font-weight:700">₹${weightedAvg.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+        <td class="num" style="font-weight:700">${cur}${weightedAvgNative.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
           <div style="font-size:10px;color:#94a3b8;margin-top:1px">${g.holdings.length} account${g.holdings.length > 1 ? 's' : ''}</div>
         </td>
         <td class="num">
           ${p?.price
-            ? `<span style="font-weight:600">₹${p.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>`
+            ? `<span style="font-weight:600">${cur}${p.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>`
             : `<span style="color:#94a3b8;font-size:11px">—</span>`}
           ${dayChange}
         </td>
@@ -421,10 +453,12 @@ function renderStocksTotals(holdings) {
 
   let totalInvested = 0, totalCurrent = 0;
   holdings.forEach(s => {
-    const inv = (s.shares || 0) * (s.avgBuyPrice || 0);
+    const isUS = s.market === 'US';
+    const fx   = isUS ? (state.usdInrRate || 0) : 1;
+    const inv  = (s.shares || 0) * (s.avgBuyPrice || 0) * fx;
     totalInvested += inv;
     const p = state.stockPrices[tickerSym(s)];
-    totalCurrent += p?.price ? (s.shares || 0) * p.price : inv;
+    totalCurrent += p?.price ? (s.shares || 0) * p.price * fx : inv;
   });
 
   const gain   = totalCurrent - totalInvested;
@@ -458,6 +492,19 @@ function syncSortIndicators() {
 /* ─────────────────────────────────────────────────────────────────
    STOCK MODAL
    ───────────────────────────────────────────────────────────────── */
+
+// Updates symbol hint, placeholder, and price currency label to match chosen market
+function updateModalForMarket(market) {
+  const isUS = market === 'US';
+  document.getElementById('stf-symbol').placeholder     = isUS ? 'e.g. AAPL'      : 'e.g. RELIANCE';
+  document.getElementById('stf-symbol-hint').textContent = isUS
+    ? 'NYSE / NASDAQ ticker (e.g. AAPL, MSFT, TSLA)'
+    : 'NSE ticker (e.g. HDFCBANK, TCS, INFY)';
+  document.getElementById('stf-price-label').textContent = isUS
+    ? 'Avg Buy Price ($) *'
+    : 'Avg Buy Price (₹) *';
+}
+
 export function openStockModal(stockId = null) {
   state.editingStockId = stockId;
   const s = stockId ? state.stocks.find(x => x.id === stockId) : null;
@@ -465,9 +512,11 @@ export function openStockModal(stockId = null) {
   document.getElementById('st-save-btn').textContent    = s ? 'Save Changes' : 'Add Stock';
   document.getElementById('stf-name').value         = s?.name         || '';
   document.getElementById('stf-symbol').value       = s?.symbol       || '';
+  document.getElementById('stf-market').value       = s?.market       || 'NSE';
   document.getElementById('stf-shares').value       = s?.shares       || '';
   document.getElementById('stf-avgBuyPrice').value  = s?.avgBuyPrice  || '';
   document.getElementById('stf-dematAccount').value = s?.dematAccount || '';
+  updateModalForMarket(s?.market || 'NSE');
   document.getElementById('st-modal').classList.remove('hidden');
   setTimeout(() => document.getElementById('stf-name').focus(), 50);
 }
@@ -484,6 +533,11 @@ function closeStockModal() {
 export function initStockListeners() {
   // Demat account filter
   document.getElementById('stockDematFilter').addEventListener('change', renderStocksSection);
+
+  // Market dropdown — update symbol hint and price currency label live
+  document.getElementById('stf-market').addEventListener('change', e => {
+    updateModalForMarket(e.target.value);
+  });
 
   // View toggle: By Holding / By Stock
   document.getElementById('btn-view-holding').addEventListener('click', () => {
@@ -548,12 +602,14 @@ export function initStockListeners() {
     const data = {
       name:         document.getElementById('stf-name').value.trim(),
       symbol:       document.getElementById('stf-symbol').value.trim().toUpperCase(),
+      market:       document.getElementById('stf-market').value || 'NSE',
       shares:       parseFloat(document.getElementById('stf-shares').value)      || 0,
       avgBuyPrice:  parseFloat(document.getElementById('stf-avgBuyPrice').value) || 0,
       dematAccount: document.getElementById('stf-dematAccount').value.trim(),
     };
     if (!data.symbol) {
-      toast('Please enter the NSE symbol (e.g. RELIANCE)', 'error');
+      const symHint = data.market === 'US' ? 'NYSE/NASDAQ symbol (e.g. AAPL)' : 'NSE symbol (e.g. RELIANCE)';
+      toast(`Please enter the ${symHint}`, 'error');
       btn.disabled = false;
       btn.textContent = state.editingStockId ? 'Save Changes' : 'Add Stock';
       return;

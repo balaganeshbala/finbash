@@ -55,6 +55,7 @@ export const state = {
   stockSortCol:      null,
   stockSortDir:      'asc',
   stockViewMode:     'holding',  // 'holding' | 'stock'
+  usdInrRate:        null,       // live USD→INR rate for US stock conversion
 
   // UI
   activeTab:      'overview',

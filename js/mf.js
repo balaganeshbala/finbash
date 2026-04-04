@@ -106,23 +106,31 @@ function catBadge(cat) {
    KPI CARDS
    ───────────────────────────────────────────────────────────────── */
 function renderMFKpis() {
-  let totalInvested = 0, totalCurrent = 0, fundsWithNav = 0;
+  let totalInvested = 0, totalCurrent = 0, totalDayChange = 0, fundsWithNav = 0, fundsWithPrevNav = 0;
   state.mfs.forEach(m => {
     const inv = (m.units || 0) * (m.avgBuyNav || 0);
     totalInvested += inv;
     const nav = state.mfNavs[m.schemeCode];
-    if (nav) { totalCurrent += (m.units || 0) * nav.nav; fundsWithNav++; }
-    else      { totalCurrent += inv; }
+    if (nav) {
+      totalCurrent += (m.units || 0) * nav.nav;
+      fundsWithNav++;
+      if (nav.prevNav) {
+        totalDayChange += (m.units || 0) * (nav.nav - nav.prevNav);
+        fundsWithPrevNav++;
+      }
+    } else {
+      totalCurrent += inv;
+    }
   });
-  const gain   = totalCurrent - totalInvested;
-  const retPct = totalInvested > 0 ? (gain / totalInvested) * 100 : 0;
+  const gain        = totalCurrent - totalInvested;
+  const retPct      = totalInvested > 0 ? (gain / totalInvested) * 100 : 0;
+  const dayCol      = totalDayChange >= 0 ? '#059669' : '#ef4444';
+  const daySign     = totalDayChange >= 0 ? '+' : '';
+  const dayNavPct   = totalCurrent > 0 && fundsWithPrevNav > 0
+    ? (totalDayChange / (totalCurrent - totalDayChange)) * 100 : null;
 
   const KSVG = (d, s = '#fff') =>
     `<svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:${s};stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${d}</svg>`;
-
-  // NAV date
-  const navDates = Object.values(state.mfNavs).map(n => n.date).filter(Boolean);
-  const navDate  = navDates.length ? navDates[0] : '—';
 
   document.getElementById('mfKpiGrid').innerHTML = [
     {
@@ -133,7 +141,7 @@ function renderMFKpis() {
     },
     {
       icon:  KSVG('<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'),
-      label: 'Current Value', cls: 'success',
+      label: 'Current Value', cls: gain >= 0 ? 'success' : '',
       value: fmt(Math.round(totalCurrent)),
       sub:   fundsWithNav < state.mfs.length && state.mfs.length > 0
         ? `NAV for ${fundsWithNav}/${state.mfs.length} funds` : 'Live NAV',
@@ -145,10 +153,15 @@ function renderMFKpis() {
       sub:   totalInvested > 0 ? `${retPct >= 0 ? '+' : ''}${retPct.toFixed(2)}% return` : '—',
     },
     {
-      icon:  KSVG('<circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>'),
-      label: 'NAV as of', cls: '',
-      value: navDate,
-      sub:   state.mfNavLoading ? 'Fetching…' : 'Click Refresh to update',
+      icon:  KSVG(totalDayChange >= 0
+        ? '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'
+        : '<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/>',
+        totalDayChange >= 0 ? '#059669' : '#ef4444'),
+      label: "Last 1 Day Change", cls: '',
+      value: `<span style="color:${dayCol}">${daySign}${fmt(Math.round(totalDayChange))}</span>`,
+      sub:   dayNavPct != null
+        ? `${daySign}${dayNavPct.toFixed(2)}% across ${fundsWithPrevNav} fund${fundsWithPrevNav !== 1 ? 's' : ''}`
+        : fundsWithNav > 0 ? 'No prev NAV available' : '—',
     },
   ].map(k => `<div class="kpi-card ${k.cls}">
     <div class="kpi-icon">${k.icon}</div>
@@ -190,8 +203,9 @@ export function renderMFSection() {
       let va, vb;
       const na = state.mfNavs[a.schemeCode];
       const nb = state.mfNavs[b.schemeCode];
-      if (state.mfSortCol === 'currentNav') {
-        va = na?.nav ?? 0; vb = nb?.nav ?? 0;
+      if (state.mfSortCol === 'dayChange') {
+        va = (na?.prevNav) ? (a.units || 0) * (na.nav - na.prevNav) : 0;
+        vb = (nb?.prevNav) ? (b.units || 0) * (nb.nav - nb.prevNav) : 0;
       } else if (state.mfSortCol === 'invested') {
         va = (a.units || 0) * (a.avgBuyNav || 0);
         vb = (b.units || 0) * (b.avgBuyNav || 0);
@@ -237,13 +251,20 @@ export function renderMFSection() {
     const retPct   = invested > 0 && gain != null ? (gain / invested) * 100 : null;
     const gainCol  = gain != null ? (gain >= 0 ? '#059669' : '#ef4444') : '#94a3b8';
 
-    // Day change badge
-    let dayChange = '';
+    // 1D change in portfolio value (units × NAV move)
+    let dayChangeCell = '<span style="color:#94a3b8;font-size:11px">—</span>';
     if (nav?.prevNav) {
-      const diff = nav.nav - nav.prevNav;
-      const pct  = (diff / nav.prevNav) * 100;
-      const col  = diff >= 0 ? '#059669' : '#ef4444';
-      dayChange  = `<div style="font-size:10px;color:${col};margin-top:2px">${diff >= 0 ? '+' : ''}${diff.toFixed(3)} (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</div>`;
+      const navDiff  = nav.nav - nav.prevNav;
+      const valDiff  = (m.units || 0) * navDiff;
+      const pct      = (navDiff / nav.prevNav) * 100;
+      const col      = valDiff >= 0 ? '#059669' : '#ef4444';
+      const sign     = valDiff >= 0 ? '+' : '';
+      dayChangeCell  = `<span style="font-weight:700;color:${col}">${sign}${fmt(Math.round(valDiff))}</span>
+        <div style="font-size:10px;color:${col};margin-top:2px">${sign}${pct.toFixed(2)}%</div>`;
+    } else if (nav) {
+      dayChangeCell = '<span style="color:#94a3b8;font-size:11px">No prev NAV</span>';
+    } else {
+      dayChangeCell = '<span style="color:#94a3b8;font-size:11px">Loading…</span>';
     }
 
     return `<tr>
@@ -254,10 +275,7 @@ export function renderMFSection() {
       </td>
       <td class="num">${(m.units || 0).toFixed(3)}</td>
       <td class="num">${m.avgBuyNav ? Number(m.avgBuyNav).toFixed(3) : '—'}</td>
-      <td class="num">
-        ${nav ? `<span style="font-weight:600">${Number(nav.nav).toFixed(3)}</span>` : '<span style="color:#94a3b8;font-size:11px">Loading…</span>'}
-        ${dayChange}
-      </td>
+      <td class="num">${dayChangeCell}</td>
       <td class="num">${invested > 0 ? fmt(Math.round(invested)) : '—'}</td>
       <td class="num" style="font-weight:700">${cv != null ? fmt(Math.round(cv)) : '—'}</td>
       <td class="num" style="font-weight:600;color:${gainCol}">${gain != null ? (gain >= 0 ? '+' : '') + fmt(Math.round(gain)) : '—'}</td>
@@ -284,13 +302,19 @@ export function renderMFSection() {
       const nav = state.mfNavs[m.schemeCode];
       return s + (nav ? (m.units || 0) * nav.nav : (m.units || 0) * (m.avgBuyNav || 0));
     }, 0);
-    const totGain   = totCV - totInv;
-    const totRetPct = totInv > 0 ? (totGain / totInv) * 100 : 0;
-    const gainCol   = totGain >= 0 ? '#059669' : '#ef4444';
-    const gainSign  = totGain >= 0 ? '+' : '';
-    const colSpan   = state.isViewMode ? 5 : 6; // skip #, name, units, avgNav, currentNav → 5 leading cols; +1 for actions col
+    const totDay = sorted.reduce((s, m) => {
+      const nav = state.mfNavs[m.schemeCode];
+      return s + (nav?.prevNav ? (m.units || 0) * (nav.nav - nav.prevNav) : 0);
+    }, 0);
+    const totGain    = totCV - totInv;
+    const totRetPct  = totInv > 0 ? (totGain / totInv) * 100 : 0;
+    const gainCol    = totGain >= 0 ? '#059669' : '#ef4444';
+    const gainSign   = totGain >= 0 ? '+' : '';
+    const dayCol     = totDay >= 0 ? '#059669' : '#ef4444';
+    const daySign    = totDay >= 0 ? '+' : '';
     tfoot.innerHTML = `<tr class="overview-total-row">
       <td colspan="5"><strong>Total (${sorted.length} fund${sorted.length !== 1 ? 's' : ''})</strong></td>
+      <td class="num" style="color:${dayCol}"><strong>${daySign}${fmt(Math.round(totDay))}</strong></td>
       <td class="num"><strong>${fmt(Math.round(totInv))}</strong></td>
       <td class="num"><strong>${fmt(Math.round(totCV))}</strong></td>
       <td class="num" style="color:${gainCol}"><strong>${gainSign}${fmt(Math.round(Math.abs(totGain)))}</strong></td>
