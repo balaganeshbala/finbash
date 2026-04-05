@@ -24,6 +24,9 @@ import {
 import {
   startListeningStocks, initStockListeners, fetchAllPrices,
 } from './stocks.js';
+import {
+  startListeningNPS, initNPSListeners,
+} from './nps.js';
 import { renderOverview, renderOverviewChart } from './overview.js';
 
 /* ─────────────────────────────────────────────────────────────────
@@ -46,8 +49,10 @@ if (!isConfigured) {
     if (state.rdUnsub)        { state.rdUnsub();        state.rdUnsub        = null; }
     if (state.mfUnsub)        { state.mfUnsub();        state.mfUnsub        = null; }
     if (state.stockUnsub)     { state.stockUnsub();     state.stockUnsub     = null; }
+    if (state.npsUnsub)       { state.npsUnsub();       state.npsUnsub       = null; }
     state.bonds = []; state.goldItems = []; state.fds = []; state.rds = [];
     state.mfs = []; state.mfNavs = {}; state.stocks = []; state.stockPrices = {};
+    state.nps = [];
     state.isViewMode = false; state.viewOwnerUid = null; state.currentViewers = [];
     await signOut(auth);
   };
@@ -122,6 +127,7 @@ if (!isConfigured) {
   initFDListeners();
   initMFListeners();
   initStockListeners();
+  initNPSListeners();
 
   /* ── AUTH STATE ── */
   onAuthStateChanged(auth, async user => {
@@ -174,6 +180,7 @@ if (!isConfigured) {
           startListeningRD(state.viewOwnerUid);
           startListeningMF(state.viewOwnerUid);
           startListeningStocks(state.viewOwnerUid);
+          startListeningNPS(state.viewOwnerUid);
         } else {
           state.isViewMode = false; state.viewOwnerUid = null;
           document.getElementById('view-banner').style.display = 'none';
@@ -192,6 +199,7 @@ if (!isConfigured) {
           startListeningRD(user.uid);
           startListeningMF(user.uid);
           startListeningStocks(user.uid);
+          startListeningNPS(user.uid);
           loadPartners(user.uid);
         }
       } catch {
@@ -203,6 +211,7 @@ if (!isConfigured) {
         startListeningRD(user.uid);
         startListeningMF(user.uid);
         startListeningStocks(user.uid);
+        startListeningNPS(user.uid);
         loadPartners(user.uid);
       }
     } else {
@@ -212,8 +221,10 @@ if (!isConfigured) {
       if (state.rdUnsub)        { state.rdUnsub();        state.rdUnsub        = null; }
       if (state.mfUnsub)        { state.mfUnsub();        state.mfUnsub        = null; }
       if (state.stockUnsub)     { state.stockUnsub();     state.stockUnsub     = null; }
+      if (state.npsUnsub)       { state.npsUnsub();       state.npsUnsub       = null; }
       state.bonds = []; state.goldItems = []; state.fds = []; state.rds = [];
       state.mfs = []; state.mfNavs = {}; state.stocks = []; state.stockPrices = {};
+      state.nps = [];
       state.isViewMode = false;
       showSection('login-screen');
     }

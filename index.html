@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FinBash</title>
-  <link rel="icon"             type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon-iphone-60x60.png">
   <link rel="apple-touch-icon" sizes="60x60" href="icons/apple-touch-icon-ipad-76x76.png">
   <link rel="apple-touch-icon" sizes="114x114" href="icons/apple-touch-icon-iphone-retina-120x120.png">
@@ -12,984 +13,1208 @@
   <link rel="stylesheet" href="css/main.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
+
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  INITIAL LOADER (shown until Firebase resolves auth state)      -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<div id="initial-loader">
-  <div class="init-logo">
-    <img src="favicon.svg" alt="FinBash" style="width:72px;height:72px;border-radius:16px">
-  </div>
-  <div class="init-title">FinBash</div>
-  <div class="init-spinner"></div>
-  <div class="init-sub">Loading your portfolio…</div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  LOGIN SCREEN                                                   -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<div id="login-screen" style="display:none">
-  <div class="login-screen">
-    <div class="login-card">
-      <div class="login-logo">
-        <img src="favicon.svg" alt="FinBash" style="width:64px;height:64px;border-radius:14px">
-      </div>
-      <h2>FinBash</h2>
-      <p>Sign in to track your investments securely.</p>
-      <button id="btn-google-login" class="btn-google">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-        </svg>
-        Sign in with Google
-      </button>
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  INITIAL LOADER (shown until Firebase resolves auth state)      -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="initial-loader">
+    <div class="init-logo">
+      <img src="favicon.svg" alt="FinBash" style="width:72px;height:72px;border-radius:16px">
     </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  APP SCREEN                                                     -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<div id="app-screen" style="display:none">
-
-  <!-- Header -->
-  <div class="header">
-    <div>
-      <h1>
-        <img src="favicon.svg" alt="FinBash" style="width:40px;height:40px;border-radius:7px;margin-right:10px;vertical-align:middle">FinBash
-      </h1>
-      <div class="header-sub" id="header-sub">Loading…</div>
-    </div>
-    <div class="header-right">
-      <img id="user-avatar" class="user-avatar" src="" alt="" style="display:none">
-      <span id="user-name" class="user-name-text"></span>
-      <button id="btn-partners" class="btn-partners">
-        <svg class="icon" style="width:15px;height:15px;stroke:white" viewBox="0 0 24 24">
-          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
-        </svg> Partners
-      </button>
-      <button id="btn-logout" class="btn-logout">Sign Out</button>
-    </div>
-    <!-- Mobile: avatar + hamburger -->
-    <div class="header-mobile">
-      <img id="user-avatar-mob" class="user-avatar" src="" alt="" style="display:none">
-      <button id="btn-hamburger" class="btn-hamburger" aria-label="Menu">
-        <svg viewBox="0 0 24 24">
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <line x1="3" y1="12" x2="21" y2="12"/>
-          <line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
-    </div>
+    <div class="init-title">FinBash</div>
+    <div class="init-spinner"></div>
+    <div class="init-sub">Loading your portfolio…</div>
   </div>
 
-  <!-- Mobile dropdown menu -->
-  <div id="mobile-menu" class="mobile-menu">
-    <div class="mob-menu-user">
-      <img id="mob-avatar" class="user-avatar" src="" alt="" style="display:none">
-      <div>
-        <div class="mob-menu-name" id="mob-user-name"></div>
-        <div class="mob-menu-email" id="mob-user-email"></div>
-      </div>
-    </div>
-    <button id="mob-btn-partners" class="btn-mob">
-      <svg viewBox="0 0 24 24">
-        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
-      </svg>Partners
-    </button>
-    <button id="mob-btn-logout" class="btn-mob btn-mob-danger">
-      <svg viewBox="0 0 24 24">
-        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-        <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-      </svg>Sign Out
-    </button>
-  </div>
-
-  <!-- View-mode banner -->
-  <div id="view-banner" style="display:none" class="view-banner">
-    <svg class="icon" style="width:16px;height:16px;stroke:white" viewBox="0 0 24 24">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-    </svg>
-    Viewing <span id="view-owner-name">portfolio</span> &nbsp;—&nbsp; Read Only
-  </div>
-
-  <!-- Tab Navigation -->
-  <div class="tab-bar">
-    <button class="tab-btn active" data-tab="overview">
-      <svg viewBox="0 0 24 24">
-        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-      </svg>
-      Overview
-    </button>
-    <button class="tab-btn" data-tab="bonds">
-      <svg viewBox="0 0 24 24">
-        <line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/>
-        <line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/>
-        <line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7 12 2"/>
-      </svg>
-      Bonds
-    </button>
-
-    <button class="tab-btn" data-tab="gold">
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
-        <line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
-      </svg>
-      Gold
-    </button>
-    <button class="tab-btn" data-tab="fd">
-      <svg viewBox="0 0 24 24">
-        <rect x="2" y="7" width="20" height="14" rx="2"/>
-        <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
-      </svg>
-      Deposits
-    </button>
-    <button class="tab-btn" data-tab="mf">
-      <svg viewBox="0 0 24 24">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-      </svg>
-      Mutual Funds
-    </button>
-    <button class="tab-btn" data-tab="stocks">
-      <svg viewBox="0 0 24 24">
-        <polyline points="22 7 13.5 15.5 8.5 10.5 1 18"/>
-        <polyline points="16 7 22 7 22 13"/>
-      </svg>
-      Stocks
-    </button>
-  </div>
-
-  <div class="container">
-
-    <!-- ── OVERVIEW TAB ── -->
-    <div id="tab-overview" class="tab-panel active">
-
-      <!-- Skeleton shown while Firestore data is loading -->
-      <div id="overview-loading">
-        <div class="skel-kpi-grid">
-          <div class="skeleton skel-kpi"></div>
-          <div class="skeleton skel-kpi"></div>
-          <div class="skeleton skel-kpi"></div>
-          <div class="skeleton skel-kpi"></div>
-          <div class="skeleton skel-kpi"></div>
-          <div class="skeleton skel-kpi"></div>
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  LOGIN SCREEN                                                   -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="login-screen" style="display:none">
+    <div class="login-screen">
+      <div class="login-card">
+        <div class="login-logo">
+          <img src="favicon.svg" alt="FinBash" style="width:64px;height:64px;border-radius:14px">
         </div>
-        <div class="skel-row">
-          <div class="skeleton skel-chart"></div>
-          <div class="skeleton skel-table"></div>
-        </div>
-      </div>
-
-      <!-- Real content (hidden until data arrives) -->
-      <div id="overview-content" style="display:none">
-        <div id="overview-kpis"></div>
-        <div class="overview-main-row">
-          <div class="card overview-chart-card">
-            <div class="card-title">Portfolio Allocation</div>
-            <canvas id="overview-pie"></canvas>
-          </div>
-          <div id="overview-table" class="card overview-table-card"></div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ── BONDS TAB ── -->
-    <div id="tab-bonds" class="tab-panel">
-
-      <!-- Loading -->
-      <div id="loading-state" class="loading-state">
-        <div class="spinner"></div>
-        <div class="loading-text">Loading your portfolio…</div>
-      </div>
-
-      <!-- Empty State -->
-      <div id="empty-state" style="display:none" class="empty-state">
-        <div class="empty-icon">
-          <svg style="width:64px;height:64px;fill:none;stroke:#7e868e;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        <h2>FinBash</h2>
+        <p>Sign in to track your investments securely.</p>
+        <button id="btn-google-login" class="btn-google">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#4285F4"
+              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853"
+              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05"
+              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+            <path fill="#EA4335"
+              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
-        </div>
-        <h2>No bonds yet</h2>
-        <p>Add your first bond to get started.</p>
-        <div class="empty-btns">
-          <button id="btn-add-first" class="btn-primary">＋ Add First Bond</button>
+          Sign in with Google
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  APP SCREEN                                                     -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="app-screen" style="display:none">
+
+    <!-- Header -->
+    <div class="header">
+      <div>
+        <h1>
+          <img src="favicon.svg" alt="FinBash"
+            style="width:40px;height:40px;border-radius:7px;margin-right:10px;vertical-align:middle">FinBash
+        </h1>
+        <div class="header-sub" id="header-sub">Loading…</div>
+      </div>
+      <div class="header-right">
+        <img id="user-avatar" class="user-avatar" src="" alt="" style="display:none">
+        <span id="user-name" class="user-name-text"></span>
+        <button id="btn-partners" class="btn-partners">
+          <svg class="icon" style="width:15px;height:15px;stroke:white" viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 00-3-3.87" />
+            <path d="M16 3.13a4 4 0 010 7.75" />
+          </svg> Partners
+        </button>
+        <button id="btn-logout" class="btn-logout">Sign Out</button>
+      </div>
+      <!-- Mobile: avatar + hamburger -->
+      <div class="header-mobile">
+        <img id="user-avatar-mob" class="user-avatar" src="" alt="" style="display:none">
+        <button id="btn-hamburger" class="btn-hamburger" aria-label="Menu">
+          <svg viewBox="0 0 24 24">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile dropdown menu -->
+    <div id="mobile-menu" class="mobile-menu">
+      <div class="mob-menu-user">
+        <img id="mob-avatar" class="user-avatar" src="" alt="" style="display:none">
+        <div>
+          <div class="mob-menu-name" id="mob-user-name"></div>
+          <div class="mob-menu-email" id="mob-user-email"></div>
         </div>
       </div>
+      <button id="mob-btn-partners" class="btn-mob">
+        <svg viewBox="0 0 24 24">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 00-3-3.87" />
+          <path d="M16 3.13a4 4 0 010 7.75" />
+        </svg>Partners
+      </button>
+      <button id="mob-btn-logout" class="btn-mob btn-mob-danger">
+        <svg viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>Sign Out
+      </button>
+    </div>
 
-      <!-- Dashboard -->
-      <div id="dashboard" style="display:none">
+    <!-- View-mode banner -->
+    <div id="view-banner" style="display:none" class="view-banner">
+      <svg class="icon" style="width:16px;height:16px;stroke:white" viewBox="0 0 24 24">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+      Viewing <span id="view-owner-name">portfolio</span> &nbsp;—&nbsp; Read Only
+    </div>
 
-        <!-- KPIs -->
-        <div class="kpi-grid" id="kpiGrid"></div>
+    <!-- Tab Navigation -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="overview">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+        Overview
+      </button>
+      <button class="tab-btn" data-tab="bonds">
+        <svg viewBox="0 0 24 24">
+          <line x1="3" y1="22" x2="21" y2="22" />
+          <line x1="6" y1="18" x2="6" y2="11" />
+          <line x1="10" y1="18" x2="10" y2="11" />
+          <line x1="14" y1="18" x2="14" y2="11" />
+          <line x1="18" y1="18" x2="18" y2="11" />
+          <polygon points="12 2 20 7 4 7 12 2" />
+        </svg>
+        Bonds
+      </button>
 
-        <!-- Charts Row -->
-        <div class="row-3">
-          <div class="card"><div class="card-title">Platform Allocation</div><canvas id="platformChart" height="230"></canvas></div>
-          <div class="card"><div class="card-title">Investor Split</div><canvas id="investorChart" height="230"></canvas></div>
-          <div class="card"><div class="card-title">Demat Account Breakdown</div><canvas id="dematChart" height="230"></canvas></div>
+      <button class="tab-btn" data-tab="gold">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+          <line x1="9" y1="9" x2="9.01" y2="9" />
+          <line x1="15" y1="9" x2="15.01" y2="9" />
+        </svg>
+        Gold
+      </button>
+      <button class="tab-btn" data-tab="fd">
+        <svg viewBox="0 0 24 24">
+          <rect x="2" y="7" width="20" height="14" rx="2" />
+          <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
+        </svg>
+        Deposits
+      </button>
+      <button class="tab-btn" data-tab="mf">
+        <svg viewBox="0 0 24 24">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+        Mutual Funds
+      </button>
+      <button class="tab-btn" data-tab="stocks">
+        <svg viewBox="0 0 24 24">
+          <polyline points="22 7 13.5 15.5 8.5 10.5 1 18" />
+          <polyline points="16 7 22 7 22 13" />
+        </svg>
+        Stocks
+      </button>
+      <button class="tab-btn" data-tab="nps">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+        NPS
+      </button>
+    </div>
+
+    <div class="container">
+
+      <!-- ── OVERVIEW TAB ── -->
+      <div id="tab-overview" class="tab-panel active">
+
+        <!-- Skeleton shown while Firestore data is loading -->
+        <div id="overview-loading">
+          <div class="skel-kpi-grid">
+            <div class="skeleton skel-kpi"></div>
+            <div class="skeleton skel-kpi"></div>
+            <div class="skeleton skel-kpi"></div>
+            <div class="skeleton skel-kpi"></div>
+            <div class="skeleton skel-kpi"></div>
+            <div class="skeleton skel-kpi"></div>
+          </div>
+          <div class="skel-row">
+            <div class="skeleton skel-chart"></div>
+            <div class="skeleton skel-table"></div>
+          </div>
         </div>
 
-        <!-- Bond Table -->
+        <!-- Real content (hidden until data arrives) -->
+        <div id="overview-content" style="display:none">
+          <div id="overview-kpis"></div>
+          <div class="overview-main-row">
+            <div class="card overview-chart-card">
+              <div class="card-title">Portfolio Allocation</div>
+              <canvas id="overview-pie"></canvas>
+            </div>
+            <div id="overview-table" class="card overview-table-card"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── BONDS TAB ── -->
+      <div id="tab-bonds" class="tab-panel">
+
+        <!-- Loading -->
+        <div id="loading-state" class="loading-state">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading your portfolio…</div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" style="display:none" class="empty-state">
+          <div class="empty-icon">
+            <svg
+              style="width:64px;height:64px;fill:none;stroke:#7e868e;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"
+              viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <h2>No bonds yet</h2>
+          <p>Add your first bond to get started.</p>
+          <div class="empty-btns">
+            <button id="btn-add-first" class="btn-primary">＋ Add First Bond</button>
+          </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" style="display:none">
+
+          <!-- KPIs -->
+          <div class="kpi-grid" id="kpiGrid"></div>
+
+          <!-- Charts Row -->
+          <div class="row-3">
+            <div class="card">
+              <div class="card-title">Platform Allocation</div><canvas id="platformChart" height="230"></canvas>
+            </div>
+            <div class="card">
+              <div class="card-title">Investor Split</div><canvas id="investorChart" height="230"></canvas>
+            </div>
+            <div class="card">
+              <div class="card-title">Demat Account Breakdown</div><canvas id="dematChart" height="230"></canvas>
+            </div>
+          </div>
+
+          <!-- Bond Table -->
+          <div class="card">
+            <div class="card-title">All Holdings</div>
+            <div class="table-controls">
+              <input type="text" id="searchInput" class="search-input" placeholder="🔍  Search by bond name…">
+              <select id="platformFilter">
+                <option value="">All Platforms</option>
+                <option>Stable Money</option>
+                <option>Aionion</option>
+                <option>GoldenPi</option>
+                <option>WintWealth</option>
+              </select>
+              <select id="investorFilter">
+                <option value="">All Investors</option>
+              </select>
+              <select id="statusFilter">
+                <option value="">All Status</option>
+                <option value="active" selected>Active</option>
+                <option value="matured">Matured / Withdrawn</option>
+              </select>
+              <button id="btn-add-bond" class="btn-add" style="margin-left:auto">
+                <svg class="icon" style="width:14px;height:14px;stroke:white" viewBox="0 0 24 24">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg> Add Bond
+              </button>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th class="sortable" data-sort="name">Bond Name</th>
+                    <th class="sortable" data-sort="platform">Platform</th>
+                    <th class="r sortable" data-sort="faceValue">Face Value</th>
+                    <th class="r sortable" data-sort="coupon">Coupon</th>
+                    <th class="r sortable" data-sort="ytm">YTM</th>
+                    <th class="sortable" data-sort="investedOn">Invested On</th>
+                    <th class="sortable" data-sort="maturity">Matures On</th>
+                    <th class="r sortable" data-sort="monthly">Monthly Int.</th>
+                    <th class="sortable" data-sort="frequency">Pay Schedule</th>
+                    <th class="sortable" data-sort="by">Investor</th>
+                    <th class="sortable" data-sort="demat">Demat Account</th>
+                    <th class="sortable" data-sort="matured">Status</th>
+                    <th id="th-actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+              </table>
+            </div>
+            <div class="table-count" id="tableCount"></div>
+          </div>
+
+          <!-- Interest Tracker -->
+          <div class="card" style="margin-top:20px">
+            <div class="card-title">Interest Tracker — <span id="tracker-month-label"></span></div>
+            <div class="tracker-summary" id="tracker-summary"></div>
+            <div style="overflow-x:auto">
+              <div id="tracker-body" style="min-width:720px"></div>
+            </div>
+          </div>
+
+          <!-- Maturity Distribution & Upcoming -->
+          <div class="row-2" style="margin-top:28px">
+            <div class="card">
+              <div class="card-title">Maturity Distribution by Year</div><canvas id="maturityChart"
+                height="180"></canvas>
+            </div>
+            <div class="card upcoming-card">
+              <div class="card-title">Upcoming Maturities – Next 12 Months</div>
+              <div class="upcoming-scroll" id="upcomingList"></div>
+            </div>
+          </div>
+
+        </div><!-- /dashboard -->
+      </div><!-- /tab-bonds -->
+
+      <!-- ── GOLD TAB ── -->
+      <div id="tab-gold" class="tab-panel">
+
+        <!-- Gold Loading -->
+        <div id="gold-loading" class="loading-state">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading gold portfolio…</div>
+        </div>
+
+        <!-- Gold Empty -->
+        <div id="gold-empty" style="display:none" class="empty-state">
+          <div class="empty-icon">
+            <svg
+              style="width:64px;height:64px;fill:none;stroke:#7e868e;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"
+              viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <h2>No gold records yet</h2>
+          <p>Add your first gold item to get started.</p>
+          <div class="empty-btns">
+            <button id="btn-add-first-gold" class="btn-primary">＋ Add First Item</button>
+          </div>
+        </div>
+
+        <!-- Gold Dashboard -->
+        <div id="gold-dashboard" style="display:none">
+
+          <!-- Gold Price Bar -->
+          <div class="gold-price-bar">
+            <svg
+              style="width:22px;height:22px;fill:none;stroke:rgba(255,255,255,0.9);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"
+              viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M16 8h-6a2 2 0 000 4h4a2 2 0 010 4H8" />
+              <line x1="12" y1="6" x2="12" y2="18" />
+            </svg>
+            <!-- View mode (prices already saved) -->
+            <div id="gold-price-view" style="display:none">
+              <div><label>22K / gram</label><span id="price-22k-display"></span></div>
+              <div><label>24K / gram</label><span id="price-24k-display"></span></div>
+              <button class="btn-update-price" id="btn-edit-price">Edit Prices</button>
+              <span class="gold-price-updated" id="gold-price-updated"></span>
+            </div>
+            <!-- Edit mode (no prices saved yet, or editing) -->
+            <div id="gold-price-edit" style="display:none">
+              <div><label>22K Price / gram</label><input type="number" id="price-22k" class="gold-price-input"
+                  placeholder="e.g. 13445" step="0.01"></div>
+              <div><label>24K Price / gram</label><input type="number" id="price-24k" class="gold-price-input"
+                  placeholder="e.g. 14678" step="0.01"></div>
+              <button class="btn-update-price" id="btn-update-price">Save Prices</button>
+              <button class="btn-cancel-price" id="btn-cancel-price" style="display:none">Cancel</button>
+            </div>
+          </div>
+
+          <!-- Gold KPIs -->
+          <div class="kpi-grid" id="goldKpiGrid" style="margin-bottom:22px"></div>
+
+          <!-- Gold Charts -->
+          <div class="row-3" style="margin-bottom:20px">
+            <div class="card">
+              <div class="card-title">By Karat (Weight)</div><canvas id="goldTypeChart" height="230"></canvas>
+            </div>
+            <div class="card">
+              <div class="card-title">Year-wise Accumulation</div><canvas id="goldYearChart" height="230"></canvas>
+            </div>
+            <div class="card">
+              <div class="card-title">Invested vs Current Value</div><canvas id="goldValueChart" height="230"></canvas>
+            </div>
+          </div>
+
+          <!-- Gold Table -->
+          <div class="card">
+            <div class="card-title">All Gold Holdings</div>
+            <div class="table-controls">
+              <input type="text" id="goldSearchInput" class="search-input" placeholder="Search by name…">
+              <select id="goldTypeFilter">
+                <option value="">All Karats</option>
+                <option value="22K">22K</option>
+                <option value="24K">24K</option>
+              </select>
+              <select id="goldGiftFilter">
+                <option value="">All</option>
+                <option value="gifted">Gifted Away</option>
+                <option value="received">Received as Gift</option>
+                <option value="owned">Purchased</option>
+              </select>
+              <button id="btn-add-gold" class="btn-add" style="margin-left:auto">
+                <svg class="icon" style="width:14px;height:14px;stroke:white" viewBox="0 0 24 24">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg> Add Gold
+              </button>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th class="sortable" data-gsort="name">Name</th>
+                    <th class="sortable" data-gsort="type">Karat</th>
+                    <th class="r sortable" data-gsort="weight">Weight (g)</th>
+                    <th class="r sortable" data-gsort="paidPerGram">Paid/g</th>
+                    <th class="r sortable" data-gsort="totalInvested">Invested</th>
+                    <th class="r sortable" data-gsort="currentValue">Current Value</th>
+                    <th class="r sortable" data-gsort="profit">Profit</th>
+                    <th class="sortable" data-gsort="date">Date</th>
+                    <th>Status</th>
+                    <th id="gth-actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="goldTableBody"></tbody>
+              </table>
+            </div>
+            <div class="table-count" id="goldTableCount"></div>
+          </div>
+
+        </div><!-- /gold-dashboard -->
+      </div><!-- /tab-gold -->
+
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <!-- FD & RD TAB                                               -->
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <div id="tab-fd" class="tab-panel">
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="fdKpiGrid" style="margin-bottom:22px"></div>
+
+        <!-- FD Section -->
         <div class="card">
-          <div class="card-title">All Holdings</div>
+          <div class="card-title">Fixed Deposits</div>
           <div class="table-controls">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍  Search by bond name…">
-            <select id="platformFilter">
-              <option value="">All Platforms</option>
-              <option>Stable Money</option><option>Aionion</option>
-              <option>GoldenPi</option><option>WintWealth</option>
-            </select>
-            <select id="investorFilter">
+            <select id="fdInvestorFilter" class="filter-select">
               <option value="">All Investors</option>
             </select>
-            <select id="statusFilter">
-              <option value="">All Status</option>
-              <option value="active" selected>Active</option>
-              <option value="matured">Matured / Withdrawn</option>
-            </select>
-            <button id="btn-add-bond" class="btn-add" style="margin-left:auto">
-              <svg class="icon" style="width:14px;height:14px;stroke:white" viewBox="0 0 24 24">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg> Add Bond
-            </button>
+            <button class="btn-add" id="btn-add-fd" style="margin-left:auto">+ Add FD</button>
           </div>
-          <div style="overflow-x:auto">
-            <table>
+          <div class="table-wrap">
+            <table class="data-table">
               <thead>
                 <tr>
                   <th>#</th>
-                  <th class="sortable" data-sort="name">Bond Name</th>
-                  <th class="sortable" data-sort="platform">Platform</th>
-                  <th class="r sortable" data-sort="faceValue">Face Value</th>
-                  <th class="r sortable" data-sort="coupon">Coupon</th>
-                  <th class="r sortable" data-sort="ytm">YTM</th>
-                  <th class="sortable" data-sort="investedOn">Invested On</th>
-                  <th class="sortable" data-sort="maturity">Matures On</th>
-                  <th class="r sortable" data-sort="monthly">Monthly Int.</th>
-                  <th class="sortable" data-sort="frequency">Pay Schedule</th>
-                  <th class="sortable" data-sort="by">Investor</th>
-                  <th class="sortable" data-sort="demat">Demat Account</th>
-                  <th class="sortable" data-sort="matured">Status</th>
-                  <th id="th-actions">Actions</th>
+                  <th data-fdsort="name">Bank / Company</th>
+                  <th class="num" data-fdsort="principal">Principal</th>
+                  <th class="num" data-fdsort="interestRate">Rate</th>
+                  <th data-fdsort="startDate">Start</th>
+                  <th data-fdsort="maturityDate">Maturity</th>
+                  <th data-fdsort="tenure">Tenure</th>
+                  <th class="num" data-fdsort="maturityAmt">Current Value</th>
+                  <th class="num" data-fdsort="gain">Accrued Gain</th>
+                  <th data-fdsort="investedBy">By</th>
+                  <th data-fdsort="status">Status</th>
+                  <th id="fdth-actions"></th>
                 </tr>
               </thead>
-              <tbody id="tableBody"></tbody>
+              <tbody id="fdTableBody"></tbody>
             </table>
           </div>
-          <div class="table-count" id="tableCount"></div>
+          <div class="table-count" id="fdTableCount"></div>
         </div>
 
-        <!-- Interest Tracker -->
+        <!-- RD Section -->
         <div class="card" style="margin-top:20px">
-          <div class="card-title">Interest Tracker — <span id="tracker-month-label"></span></div>
-          <div class="tracker-summary" id="tracker-summary"></div>
-          <div style="overflow-x:auto"><div id="tracker-body" style="min-width:720px"></div></div>
-        </div>
-
-        <!-- Maturity Distribution & Upcoming -->
-        <div class="row-2" style="margin-top:28px">
-          <div class="card"><div class="card-title">Maturity Distribution by Year</div><canvas id="maturityChart" height="180"></canvas></div>
-          <div class="card upcoming-card">
-            <div class="card-title">Upcoming Maturities – Next 12 Months</div>
-            <div class="upcoming-scroll" id="upcomingList"></div>
-          </div>
-        </div>
-
-      </div><!-- /dashboard -->
-    </div><!-- /tab-bonds -->
-
-    <!-- ── GOLD TAB ── -->
-    <div id="tab-gold" class="tab-panel">
-
-      <!-- Gold Loading -->
-      <div id="gold-loading" class="loading-state">
-        <div class="spinner"></div>
-        <div class="loading-text">Loading gold portfolio…</div>
-      </div>
-
-      <!-- Gold Empty -->
-      <div id="gold-empty" style="display:none" class="empty-state">
-        <div class="empty-icon">
-          <svg style="width:64px;height:64px;fill:none;stroke:#7e868e;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-        </div>
-        <h2>No gold records yet</h2>
-        <p>Add your first gold item to get started.</p>
-        <div class="empty-btns">
-          <button id="btn-add-first-gold" class="btn-primary">＋ Add First Item</button>
-        </div>
-      </div>
-
-      <!-- Gold Dashboard -->
-      <div id="gold-dashboard" style="display:none">
-
-        <!-- Gold Price Bar -->
-        <div class="gold-price-bar">
-          <svg style="width:22px;height:22px;fill:none;stroke:rgba(255,255,255,0.9);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M16 8h-6a2 2 0 000 4h4a2 2 0 010 4H8"/>
-            <line x1="12" y1="6" x2="12" y2="18"/>
-          </svg>
-          <!-- View mode (prices already saved) -->
-          <div id="gold-price-view" style="display:none">
-            <div><label>22K / gram</label><span id="price-22k-display"></span></div>
-            <div><label>24K / gram</label><span id="price-24k-display"></span></div>
-            <button class="btn-update-price" id="btn-edit-price">Edit Prices</button>
-            <span class="gold-price-updated" id="gold-price-updated"></span>
-          </div>
-          <!-- Edit mode (no prices saved yet, or editing) -->
-          <div id="gold-price-edit" style="display:none">
-            <div><label>22K Price / gram</label><input type="number" id="price-22k" class="gold-price-input" placeholder="e.g. 13445" step="0.01"></div>
-            <div><label>24K Price / gram</label><input type="number" id="price-24k" class="gold-price-input" placeholder="e.g. 14678" step="0.01"></div>
-            <button class="btn-update-price" id="btn-update-price">Save Prices</button>
-            <button class="btn-cancel-price" id="btn-cancel-price" style="display:none">Cancel</button>
-          </div>
-        </div>
-
-        <!-- Gold KPIs -->
-        <div class="kpi-grid" id="goldKpiGrid" style="margin-bottom:22px"></div>
-
-        <!-- Gold Charts -->
-        <div class="row-3" style="margin-bottom:20px">
-          <div class="card"><div class="card-title">By Karat (Weight)</div><canvas id="goldTypeChart" height="230"></canvas></div>
-          <div class="card"><div class="card-title">Year-wise Accumulation</div><canvas id="goldYearChart" height="230"></canvas></div>
-          <div class="card"><div class="card-title">Invested vs Current Value</div><canvas id="goldValueChart" height="230"></canvas></div>
-        </div>
-
-        <!-- Gold Table -->
-        <div class="card">
-          <div class="card-title">All Gold Holdings</div>
+          <div class="card-title">Recurring Deposits</div>
           <div class="table-controls">
-            <input type="text" id="goldSearchInput" class="search-input" placeholder="Search by name…">
-            <select id="goldTypeFilter">
-              <option value="">All Karats</option>
+            <select id="rdInvestorFilter" class="filter-select">
+              <option value="">All Investors</option>
+            </select>
+            <button class="btn-add" id="btn-add-rd" style="margin-left:auto">+ Add RD</button>
+          </div>
+          <div class="fd-rd-note">
+            Installments are auto-counted from the start date · Maturity value uses quarterly compounding
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th data-rdsort="name">Bank</th>
+                  <th class="num" data-rdsort="monthlyAmount">Monthly</th>
+                  <th class="num" data-rdsort="interestRate">Rate</th>
+                  <th data-rdsort="startDate">Start</th>
+                  <th data-rdsort="maturityDate">Maturity</th>
+                  <th style="text-align:center" data-rdsort="tenure">Installments</th>
+                  <th class="num" data-rdsort="invested">Invested</th>
+                  <th class="num" data-rdsort="maturityAmt">Current Value</th>
+                  <th class="num" data-rdsort="gain">Accrued Gain</th>
+                  <th data-rdsort="investedBy">By</th>
+                  <th data-rdsort="status">Status</th>
+                  <th id="rdth-actions"></th>
+                </tr>
+              </thead>
+              <tbody id="rdTableBody"></tbody>
+            </table>
+          </div>
+          <div class="table-count" id="rdTableCount"></div>
+        </div>
+
+      </div><!-- /tab-fd -->
+
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <!-- MUTUAL FUNDS TAB                                           -->
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <div id="tab-mf" class="tab-panel">
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="mfKpiGrid" style="margin-bottom:22px"></div>
+
+        <!-- MF Section -->
+        <div class="card">
+          <div class="card-title">Mutual Funds</div>
+          <div class="table-controls">
+            <select id="mfInvestorFilter" class="filter-select">
+              <option value="">All Investors</option>
+            </select>
+            <button class="btn-refresh" id="btn-refresh-mf" title="Refresh NAVs">
+              <svg viewBox="0 0 24 24">
+                <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  d="M1 4v6h6M23 20v-6h-6" />
+                <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
+              </svg>
+              Refresh NAVs
+            </button>
+            <button class="btn-add" id="btn-add-mf" style="margin-left:auto">+ Add Fund</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th data-mfsort="name">Fund</th>
+                  <th class="num" data-mfsort="units">Units</th>
+                  <th class="num" data-mfsort="avgBuyNav">Avg Buy NAV</th>
+                  <th class="num" data-mfsort="dayChange">1D Change</th>
+                  <th class="num" data-mfsort="invested">Invested</th>
+                  <th class="num" data-mfsort="currentValue">Current Value</th>
+                  <th class="num" data-mfsort="gain">Gain / Loss</th>
+                  <th class="num" data-mfsort="returnPct">Return %</th>
+                  <th data-mfsort="investedBy">By</th>
+                  <th id="mfth-actions"></th>
+                </tr>
+              </thead>
+              <tbody id="mfTableBody"></tbody>
+              <tfoot id="mfTableFoot"></tfoot>
+            </table>
+          </div>
+          <div class="table-count" id="mfTableCount"></div>
+        </div>
+
+      </div><!-- /tab-mf -->
+
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <!-- STOCKS TAB                                                 -->
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <div id="tab-stocks" class="tab-panel">
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="stockKpiGrid" style="margin-bottom:22px"></div>
+
+        <!-- Stocks Section -->
+        <div class="card">
+          <div class="card-title">Stocks</div>
+          <div class="table-controls">
+            <div class="view-toggle">
+              <button id="btn-view-holding" class="view-toggle-btn active">By Holding</button>
+              <button id="btn-view-stock" class="view-toggle-btn">By Stock</button>
+            </div>
+            <select id="stockDematFilter" class="filter-select">
+              <option value="">All Accounts</option>
+            </select>
+            <button class="btn-refresh" id="btn-refresh-stocks" title="Refresh Prices">
+              <svg viewBox="0 0 24 24">
+                <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  d="M1 4v6h6M23 20v-6h-6" />
+                <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" />
+              </svg>
+              Refresh Prices
+            </button>
+            <button class="btn-add" id="btn-add-stock" style="margin-left:auto">+ Add Stock</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead id="stockTableHead">
+                <tr>
+                  <th>#</th>
+                  <th data-stsort="name">Company</th>
+                  <th>Demat Account</th>
+                  <th class="num" data-stsort="shares">Shares</th>
+                  <th class="num" data-stsort="avgBuyPrice">Avg Buy</th>
+                  <th class="num">LTP</th>
+                  <th class="num" data-stsort="invested">Invested</th>
+                  <th class="num" data-stsort="currentValue">Current Value</th>
+                  <th class="num" data-stsort="gain">Gain / Loss</th>
+                  <th class="num" data-stsort="returnPct">Return %</th>
+                  <th id="stth-actions"></th>
+                </tr>
+              </thead>
+              <tbody id="stockTableBody"></tbody>
+              <tfoot id="stockTableFoot"></tfoot>
+            </table>
+          </div>
+          <div class="table-count" id="stockTableCount"></div>
+        </div>
+
+      </div><!-- /tab-stocks -->
+
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <!-- NPS TAB                                                    -->
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <div id="tab-nps" class="tab-panel">
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid" id="npsKpiGrid" style="margin-bottom:22px"></div>
+
+        <!-- Holdings Table -->
+        <div class="card">
+          <div class="card-title">NPS Holdings</div>
+          <div class="table-controls">
+            <select id="npsPranFilter" class="filter-select">
+              <option value="">All Accounts</option>
+            </select>
+            <input type="file" id="nps-csv-input" accept=".csv" multiple style="display:none">
+            <button class="btn-refresh" id="btn-import-nps" title="Import NSDL annual statement CSV">
+              <svg viewBox="0 0 24 24"
+                style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              Import Statement
+            </button>
+            <button class="btn-add" id="btn-add-nps" style="margin-left:auto">+ Add Scheme</button>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Fund / Scheme</th>
+                  <th class="num">Units</th>
+                  <th class="num">Avg Buy NAV</th>
+                  <th class="num">Current NAV</th>
+                  <th class="num">Invested</th>
+                  <th class="num">Current Value</th>
+                  <th class="num">Gain / Loss</th>
+                  <th id="npsth-actions"></th>
+                </tr>
+              </thead>
+              <tbody id="npsTableBody"></tbody>
+              <tfoot id="npsTableFoot"></tfoot>
+            </table>
+          </div>
+          <div class="hint" style="padding:10px 16px 4px;color:#94a3b8;font-size:12px">
+            NAV is published daily by NPS Trust. Update it from your CRA statement or the NPS app.
+          </div>
+        </div>
+
+        <!-- Year-wise contribution breakdown (rendered by JS) -->
+        <div id="npsYearlyBreakdown"></div>
+
+      </div><!-- /tab-nps -->
+
+    </div><!-- /container -->
+  </div><!-- /app-screen -->
+
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  BOND MODAL  (Add / Edit)                                       -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="bond-modal" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-hdr">
+        <div class="modal-title" id="modal-title">Add New Bond</div>
+        <button class="modal-x" id="modal-close-btn">✕</button>
+      </div>
+      <form id="bond-form" autocomplete="off">
+        <div class="form-grid">
+
+          <div class="field full">
+            <label>Bond / Company Name *</label>
+            <input type="text" id="f-name" placeholder="e.g. NAVI FINSERV LIMITED" required>
+          </div>
+
+          <div class="field">
+            <label>Platform *</label>
+            <input type="text" id="f-platform" placeholder="e.g. Stable Money" required>
+          </div>
+
+          <div class="field">
+            <label>Invested By *</label>
+            <input type="text" id="f-by" placeholder="e.g. Bala" required>
+          </div>
+
+          <div class="field">
+            <label>Face Value (₹) *</label>
+            <input type="number" id="f-faceValue" placeholder="100000" min="1" step="any" required>
+          </div>
+
+          <div class="field">
+            <label>Purchase Price (₹)</label>
+            <input type="number" id="f-purchase" placeholder="Optional" min="0" step="any">
+          </div>
+
+          <div class="field">
+            <label>Coupon Rate (%) *</label>
+            <input type="number" id="f-coupon" placeholder="10.50" step="0.01" min="0" max="100" required>
+          </div>
+
+          <div class="field">
+            <label>YTM (%) *</label>
+            <input type="number" id="f-ytm" placeholder="11.25" step="0.01" min="0" max="100" required>
+          </div>
+
+          <div class="field">
+            <label>Invested On *</label>
+            <input type="date" id="f-investedOn" required>
+          </div>
+
+          <div class="field">
+            <label>Maturity Date *</label>
+            <input type="date" id="f-maturity" required>
+          </div>
+
+          <div class="field">
+            <label>Monthly Interest (₹)</label>
+            <input type="number" id="f-monthly" placeholder="Auto-calculated" step="0.01" min="0">
+            <div class="hint">Auto-fills when you enter Face Value &amp; Coupon Rate</div>
+          </div>
+
+          <div class="field">
+            <label>Pay Schedule</label>
+            <input type="text" id="f-frequency" placeholder="e.g. 15 - Monthly">
+            <div class="hint">Day of month &amp; frequency (e.g. 02 - Monthly)</div>
+          </div>
+
+          <div class="field">
+            <label>Demat Account *</label>
+            <input type="text" id="f-demat" placeholder="e.g. Zerodha - Bala" required>
+          </div>
+
+          <div class="field full">
+            <div class="field-row">
+              <input type="checkbox" id="f-matured">
+              <label for="f-matured">Mark as Matured / Withdrawn</label>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="cancel-btn">Cancel</button>
+          <button type="submit" class="btn-save" id="save-btn">Add Bond</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  CONFIRM DELETE MODAL                                           -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="confirm-modal" class="overlay hidden">
+    <div class="confirm-box">
+      <div class="confirm-title">
+        <svg class="icon" style="width:18px;height:18px;stroke:#ef4444;margin-right:6px" viewBox="0 0 24 24">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+        </svg>Delete Bond?
+      </div>
+      <div class="confirm-text" id="confirm-text">This will permanently delete this bond. This cannot be undone.</div>
+      <div class="confirm-footer">
+        <button class="btn-cancel" id="confirm-cancel">Cancel</button>
+        <button class="btn-danger" id="confirm-delete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  PARTNERS MODAL                                                 -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="partners-modal" class="overlay hidden">
+    <div class="modal" style="max-width:480px">
+      <div class="modal-hdr">
+        <div class="modal-title">
+          <svg class="icon" style="width:18px;height:18px;stroke:#0f172a;margin-right:6px" viewBox="0 0 24 24">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 00-3-3.87" />
+            <path d="M16 3.13a4 4 0 010 7.75" />
+          </svg>Partner Access
+        </div>
+        <button class="modal-x" id="partners-close-btn">✕</button>
+      </div>
+      <p style="font-size:13px;color:#64748b;margin-bottom:20px;line-height:1.6">
+        Partners can <strong>view</strong> your portfolio in read-only mode. They sign in with their own Google account
+        and will see your data automatically.
+      </p>
+      <div class="card-title" style="margin-bottom:12px">Current Partners</div>
+      <div id="partner-list" class="partner-list">
+        <div class="no-partners">No partners added yet</div>
+      </div>
+      <div class="card-title" style="margin-bottom:12px">Add New Partner</div>
+      <div class="add-partner-row">
+        <input type="email" id="partner-email-input" placeholder="partner@gmail.com">
+        <button class="btn-add-partner" id="btn-add-partner-action">Add</button>
+      </div>
+      <p style="font-size:11px;color:#94a3b8;margin-top:8px">They'll have view access the next time they sign in.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  GOLD MODAL  (Add / Edit)                                       -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="gold-modal" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-hdr">
+        <div class="modal-title" id="gold-modal-title">Add Gold Item</div>
+        <button class="modal-x" id="gold-modal-close">✕</button>
+      </div>
+      <form id="gold-form" autocomplete="off">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Name *</label>
+            <input type="text" id="gf-name" placeholder="e.g. Gold Coin - GRT" required>
+          </div>
+          <div class="field">
+            <label>Karat *</label>
+            <select id="gf-type" required>
+              <option value="">Select…</option>
               <option value="22K">22K</option>
               <option value="24K">24K</option>
             </select>
-            <select id="goldGiftFilter">
-              <option value="">All</option>
-              <option value="gifted">Gifted Away</option>
-              <option value="received">Received as Gift</option>
-              <option value="owned">Purchased</option>
+          </div>
+          <div class="field">
+            <label>Date *</label>
+            <input type="date" id="gf-date" required>
+          </div>
+          <div class="field">
+            <label>Weight (grams) *</label>
+            <input type="number" id="gf-weight" placeholder="e.g. 8.1234" step="0.0001" min="0" required>
+          </div>
+          <div class="field">
+            <label>Paid per gram (₹)</label>
+            <input type="number" id="gf-paidPerGram" placeholder="0 if gifted" step="0.01" min="0">
+          </div>
+          <div class="field">
+            <label>Total Invested (₹)</label>
+            <input type="number" id="gf-totalInvested" placeholder="Auto-calculated" step="0.01" min="0">
+            <div class="hint">Auto-fills from weight × paid/gram</div>
+          </div>
+          <div class="field full">
+            <div class="field-row">
+              <input type="checkbox" id="gf-gifted">
+              <label for="gf-gifted">Gifted away</label>
+            </div>
+          </div>
+          <div class="field full" id="gf-gifted-for-field" style="display:none">
+            <label>Gifted For</label>
+            <input type="text" id="gf-giftedFor" placeholder="e.g. Keerthi Marriage">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="gold-cancel-btn">Cancel</button>
+          <button type="submit" class="btn-save" id="gold-save-btn">Add Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ FD MODAL ═══ -->
+  <div id="fd-modal" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-hdr">
+        <div class="modal-title" id="fd-modal-title">Add FD</div>
+        <button class="modal-x" id="fd-modal-close">✕</button>
+      </div>
+      <form id="fd-form" autocomplete="off">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Bank / Company *</label>
+            <input type="text" id="ff-name" placeholder="e.g. Suryoday Small Finance Bank" required>
+          </div>
+          <div class="field">
+            <label>Principal Amount (₹) *</label>
+            <input type="number" id="ff-principal" placeholder="e.g. 100000" min="0" step="0.01" required>
+          </div>
+          <div class="field">
+            <label>Interest Rate (% p.a.) *</label>
+            <input type="number" id="ff-rate" placeholder="e.g. 8.65" min="0" step="0.01" required>
+          </div>
+          <div class="field">
+            <label>Start Date *</label>
+            <input type="date" id="ff-startDate" required>
+          </div>
+          <div class="field">
+            <label>Maturity Date *</label>
+            <input type="date" id="ff-maturityDate" required>
+          </div>
+          <div class="field">
+            <label>Invested By</label>
+            <input type="text" id="ff-investedBy" placeholder="e.g. Bala">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="fd-cancel-btn">Cancel</button>
+          <button type="submit" class="btn-save" id="fd-save-btn">Add FD</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ RD MODAL ═══ -->
+  <div id="rd-modal" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-hdr">
+        <div class="modal-title" id="rd-modal-title">Add RD</div>
+        <button class="modal-x" id="rd-modal-close">✕</button>
+      </div>
+      <form id="rd-form" autocomplete="off">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Bank *</label>
+            <input type="text" id="rf-name" placeholder="e.g. Suryoday Small Finance Bank" required>
+          </div>
+          <div class="field">
+            <label>Monthly Installment (₹) *</label>
+            <input type="number" id="rf-monthly" placeholder="e.g. 5000" min="0" step="0.01" required>
+          </div>
+          <div class="field">
+            <label>Interest Rate (% p.a.) *</label>
+            <input type="number" id="rf-rate" placeholder="e.g. 8.60" min="0" step="0.01" required>
+          </div>
+          <div class="field">
+            <label>Start Date *</label>
+            <input type="date" id="rf-startDate" required>
+          </div>
+          <div class="field">
+            <label>Maturity Date *</label>
+            <input type="date" id="rf-maturityDate" required>
+          </div>
+          <div class="field">
+            <label>Invested By</label>
+            <input type="text" id="rf-investedBy" placeholder="e.g. Bala">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="rd-cancel-btn">Cancel</button>
+          <button type="submit" class="btn-save" id="rd-save-btn">Add RD</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ MF MODAL ═══ -->
+  <div id="mf-modal" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-hdr">
+        <div class="modal-title" id="mf-modal-title">Add Mutual Fund</div>
+        <button class="modal-x" id="mf-modal-close">✕</button>
+      </div>
+      <form id="mf-form" autocomplete="off">
+        <div class="form-grid">
+
+          <!-- Fund search (typeahead) -->
+          <div class="field full">
+            <label>Fund Name *</label>
+            <div id="mf-fund-search-wrap" style="position:relative">
+              <input type="text" id="mf-fund-search" placeholder="Type to search fund (e.g. HDFC Flexi Cap)"
+                autocomplete="off" required>
+            </div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:4px">Type to search · pick from dropdown · or enter
+              scheme code manually below</div>
+          </div>
+
+          <!-- Scheme code — editable so user can enter manually if search misses a fund -->
+          <div class="field">
+            <label>Scheme Code <span id="mff-lookup-hint"
+                style="font-size:10px;color:#3b82f6;font-weight:600;cursor:pointer;margin-left:4px"
+                title="Look up on MFAPI">Lookup ↗</span></label>
+            <input type="text" id="mff-schemeCode" placeholder="Auto-filled or enter manually"
+              style="background:#f8fafc">
+            <div id="mff-scheme-status" style="font-size:11px;margin-top:4px;color:#94a3b8"></div>
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <input type="text" id="mff-category" placeholder="Auto-detected" style="background:#f8fafc;color:#64748b">
+          </div>
+
+          <div class="field">
+            <label>Units Held *</label>
+            <input type="number" id="mff-units" placeholder="e.g. 150.432" min="0" step="0.001" required>
+          </div>
+          <div class="field">
+            <label>Avg Buy NAV (₹) *</label>
+            <input type="number" id="mff-avgBuyNav" placeholder="e.g. 84.500" min="0" step="0.001" required>
+          </div>
+          <div class="field">
+            <label>Invested By</label>
+            <input type="text" id="mff-investedBy" placeholder="e.g. Bala">
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="mf-cancel-btn">Cancel</button>
+          <button type="submit" class="btn-save" id="mf-save-btn">Add Fund</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ STOCK MODAL ═══ -->
+  <div id="st-modal" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-hdr">
+        <div class="modal-title" id="st-modal-title">Add Stock</div>
+        <button class="modal-x" id="st-modal-close">✕</button>
+      </div>
+      <form id="st-form" autocomplete="off">
+        <div class="form-grid">
+
+          <div class="field full">
+            <label>Company Name</label>
+            <input type="text" id="stf-name" placeholder="e.g. Reliance Industries Ltd">
+          </div>
+
+          <div class="field">
+            <label>Market *</label>
+            <select id="stf-market">
+              <option value="NSE">🇮🇳 NSE (India)</option>
+              <option value="US">🇺🇸 US (NYSE / NASDAQ)</option>
             </select>
-            <button id="btn-add-gold" class="btn-add" style="margin-left:auto">
-              <svg class="icon" style="width:14px;height:14px;stroke:white" viewBox="0 0 24 24">
-                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-              </svg> Add Gold
-            </button>
           </div>
-          <div style="overflow-x:auto">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th class="sortable" data-gsort="name">Name</th>
-                  <th class="sortable" data-gsort="type">Karat</th>
-                  <th class="r sortable" data-gsort="weight">Weight (g)</th>
-                  <th class="r sortable" data-gsort="paidPerGram">Paid/g</th>
-                  <th class="r sortable" data-gsort="totalInvested">Invested</th>
-                  <th class="r sortable" data-gsort="currentValue">Current Value</th>
-                  <th class="r sortable" data-gsort="profit">Profit</th>
-                  <th class="sortable" data-gsort="date">Date</th>
-                  <th>Status</th>
-                  <th id="gth-actions">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="goldTableBody"></tbody>
-            </table>
+
+          <div class="field">
+            <label id="stf-symbol-label">Symbol *</label>
+            <input type="text" id="stf-symbol" placeholder="e.g. RELIANCE" style="text-transform:uppercase" required>
+            <div class="hint" id="stf-symbol-hint">NSE ticker (e.g. HDFCBANK, TCS, INFY)</div>
           </div>
-          <div class="table-count" id="goldTableCount"></div>
-        </div>
 
-      </div><!-- /gold-dashboard -->
-    </div><!-- /tab-gold -->
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- FD & RD TAB                                               -->
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <div id="tab-fd" class="tab-panel">
-
-      <!-- KPI Cards -->
-      <div class="kpi-grid" id="fdKpiGrid" style="margin-bottom:22px"></div>
-
-      <!-- FD Section -->
-      <div class="card">
-        <div class="card-title">Fixed Deposits</div>
-        <div class="table-controls">
-          <select id="fdInvestorFilter" class="filter-select">
-            <option value="">All Investors</option>
-          </select>
-          <button class="btn-add" id="btn-add-fd" style="margin-left:auto">+ Add FD</button>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th data-fdsort="name">Bank / Company</th>
-                <th class="num" data-fdsort="principal">Principal</th>
-                <th class="num" data-fdsort="interestRate">Rate</th>
-                <th data-fdsort="startDate">Start</th>
-                <th data-fdsort="maturityDate">Maturity</th>
-                <th data-fdsort="tenure">Tenure</th>
-                <th class="num" data-fdsort="maturityAmt">Current Value</th>
-                <th class="num" data-fdsort="gain">Accrued Gain</th>
-                <th data-fdsort="investedBy">By</th>
-                <th data-fdsort="status">Status</th>
-                <th id="fdth-actions"></th>
-              </tr>
-            </thead>
-            <tbody id="fdTableBody"></tbody>
-          </table>
-        </div>
-        <div class="table-count" id="fdTableCount"></div>
-      </div>
-
-      <!-- RD Section -->
-      <div class="card" style="margin-top:20px">
-        <div class="card-title">Recurring Deposits</div>
-        <div class="table-controls">
-          <select id="rdInvestorFilter" class="filter-select">
-            <option value="">All Investors</option>
-          </select>
-          <button class="btn-add" id="btn-add-rd" style="margin-left:auto">+ Add RD</button>
-        </div>
-        <div class="fd-rd-note">
-          Installments are auto-counted from the start date · Maturity value uses quarterly compounding
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th data-rdsort="name">Bank</th>
-                <th class="num" data-rdsort="monthlyAmount">Monthly</th>
-                <th class="num" data-rdsort="interestRate">Rate</th>
-                <th data-rdsort="startDate">Start</th>
-                <th data-rdsort="maturityDate">Maturity</th>
-                <th style="text-align:center" data-rdsort="tenure">Installments</th>
-                <th class="num" data-rdsort="invested">Invested</th>
-                <th class="num" data-rdsort="maturityAmt">Current Value</th>
-                <th class="num" data-rdsort="gain">Accrued Gain</th>
-                <th data-rdsort="investedBy">By</th>
-                <th data-rdsort="status">Status</th>
-                <th id="rdth-actions"></th>
-              </tr>
-            </thead>
-            <tbody id="rdTableBody"></tbody>
-          </table>
-        </div>
-        <div class="table-count" id="rdTableCount"></div>
-      </div>
-
-    </div><!-- /tab-fd -->
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- MUTUAL FUNDS TAB                                           -->
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <div id="tab-mf" class="tab-panel">
-
-      <!-- KPI Cards -->
-      <div class="kpi-grid" id="mfKpiGrid" style="margin-bottom:22px"></div>
-
-      <!-- MF Section -->
-      <div class="card">
-        <div class="card-title">Mutual Funds</div>
-        <div class="table-controls">
-          <select id="mfInvestorFilter" class="filter-select">
-            <option value="">All Investors</option>
-          </select>
-          <button class="btn-refresh" id="btn-refresh-mf" title="Refresh NAVs">
-            <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 4v6h6M23 20v-6h-6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
-            Refresh NAVs
-          </button>
-          <button class="btn-add" id="btn-add-mf" style="margin-left:auto">+ Add Fund</button>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th data-mfsort="name">Fund</th>
-                <th class="num" data-mfsort="units">Units</th>
-                <th class="num" data-mfsort="avgBuyNav">Avg Buy NAV</th>
-                <th class="num" data-mfsort="dayChange">1D Change</th>
-                <th class="num" data-mfsort="invested">Invested</th>
-                <th class="num" data-mfsort="currentValue">Current Value</th>
-                <th class="num" data-mfsort="gain">Gain / Loss</th>
-                <th class="num" data-mfsort="returnPct">Return %</th>
-                <th data-mfsort="investedBy">By</th>
-                <th id="mfth-actions"></th>
-              </tr>
-            </thead>
-            <tbody id="mfTableBody"></tbody>
-            <tfoot id="mfTableFoot"></tfoot>
-          </table>
-        </div>
-        <div class="table-count" id="mfTableCount"></div>
-      </div>
-
-    </div><!-- /tab-mf -->
-
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <!-- STOCKS TAB                                                 -->
-    <!-- ══════════════════════════════════════════════════════════ -->
-    <div id="tab-stocks" class="tab-panel">
-
-      <!-- KPI Cards -->
-      <div class="kpi-grid" id="stockKpiGrid" style="margin-bottom:22px"></div>
-
-      <!-- Stocks Section -->
-      <div class="card">
-        <div class="card-title">Stocks</div>
-        <div class="table-controls">
-          <div class="view-toggle">
-            <button id="btn-view-holding" class="view-toggle-btn active">By Holding</button>
-            <button id="btn-view-stock"   class="view-toggle-btn">By Stock</button>
+          <div class="field">
+            <label>Demat Account</label>
+            <input type="text" id="stf-dematAccount" placeholder="e.g. Zerodha - Bala">
           </div>
-          <select id="stockDematFilter" class="filter-select">
-            <option value="">All Accounts</option>
-          </select>
-          <button class="btn-refresh" id="btn-refresh-stocks" title="Refresh Prices">
-            <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M1 4v6h6M23 20v-6h-6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>
-            Refresh Prices
-          </button>
-          <button class="btn-add" id="btn-add-stock" style="margin-left:auto">+ Add Stock</button>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead id="stockTableHead">
-              <tr>
-                <th>#</th>
-                <th data-stsort="name">Company</th>
-                <th>Demat Account</th>
-                <th class="num" data-stsort="shares">Shares</th>
-                <th class="num" data-stsort="avgBuyPrice">Avg Buy</th>
-                <th class="num">LTP</th>
-                <th class="num" data-stsort="invested">Invested</th>
-                <th class="num" data-stsort="currentValue">Current Value</th>
-                <th class="num" data-stsort="gain">Gain / Loss</th>
-                <th class="num" data-stsort="returnPct">Return %</th>
-                <th id="stth-actions"></th>
-              </tr>
-            </thead>
-            <tbody id="stockTableBody"></tbody>
-            <tfoot id="stockTableFoot"></tfoot>
-          </table>
-        </div>
-        <div class="table-count" id="stockTableCount"></div>
-      </div>
 
-    </div><!-- /tab-stocks -->
-
-  </div><!-- /container -->
-</div><!-- /app-screen -->
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  BOND MODAL  (Add / Edit)                                       -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<div id="bond-modal" class="overlay hidden">
-  <div class="modal">
-    <div class="modal-hdr">
-      <div class="modal-title" id="modal-title">Add New Bond</div>
-      <button class="modal-x" id="modal-close-btn">✕</button>
-    </div>
-    <form id="bond-form" autocomplete="off">
-      <div class="form-grid">
-
-        <div class="field full">
-          <label>Bond / Company Name *</label>
-          <input type="text" id="f-name" placeholder="e.g. NAVI FINSERV LIMITED" required>
-        </div>
-
-        <div class="field">
-          <label>Platform *</label>
-          <input type="text" id="f-platform" placeholder="e.g. Stable Money" required>
-        </div>
-
-        <div class="field">
-          <label>Invested By *</label>
-          <input type="text" id="f-by" placeholder="e.g. Bala" required>
-        </div>
-
-        <div class="field">
-          <label>Face Value (₹) *</label>
-          <input type="number" id="f-faceValue" placeholder="100000" min="1" step="any" required>
-        </div>
-
-        <div class="field">
-          <label>Purchase Price (₹)</label>
-          <input type="number" id="f-purchase" placeholder="Optional" min="0" step="any">
-        </div>
-
-        <div class="field">
-          <label>Coupon Rate (%) *</label>
-          <input type="number" id="f-coupon" placeholder="10.50" step="0.01" min="0" max="100" required>
-        </div>
-
-        <div class="field">
-          <label>YTM (%) *</label>
-          <input type="number" id="f-ytm" placeholder="11.25" step="0.01" min="0" max="100" required>
-        </div>
-
-        <div class="field">
-          <label>Invested On *</label>
-          <input type="date" id="f-investedOn" required>
-        </div>
-
-        <div class="field">
-          <label>Maturity Date *</label>
-          <input type="date" id="f-maturity" required>
-        </div>
-
-        <div class="field">
-          <label>Monthly Interest (₹)</label>
-          <input type="number" id="f-monthly" placeholder="Auto-calculated" step="0.01" min="0">
-          <div class="hint">Auto-fills when you enter Face Value &amp; Coupon Rate</div>
-        </div>
-
-        <div class="field">
-          <label>Pay Schedule</label>
-          <input type="text" id="f-frequency" placeholder="e.g. 15 - Monthly">
-          <div class="hint">Day of month &amp; frequency (e.g. 02 - Monthly)</div>
-        </div>
-
-        <div class="field">
-          <label>Demat Account *</label>
-          <input type="text" id="f-demat" placeholder="e.g. Zerodha - Bala" required>
-        </div>
-
-        <div class="field full">
-          <div class="field-row">
-            <input type="checkbox" id="f-matured">
-            <label for="f-matured">Mark as Matured / Withdrawn</label>
+          <div class="field">
+            <label>No. of Shares *</label>
+            <input type="number" id="stf-shares" placeholder="e.g. 10" min="0" step="any" required>
           </div>
-        </div>
 
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-cancel" id="cancel-btn">Cancel</button>
-        <button type="submit" class="btn-save" id="save-btn">Add Bond</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  CONFIRM DELETE MODAL                                           -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<div id="confirm-modal" class="overlay hidden">
-  <div class="confirm-box">
-    <div class="confirm-title">
-      <svg class="icon" style="width:18px;height:18px;stroke:#ef4444;margin-right:6px" viewBox="0 0 24 24">
-        <polyline points="3 6 5 6 21 6"/>
-        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-      </svg>Delete Bond?
-    </div>
-    <div class="confirm-text" id="confirm-text">This will permanently delete this bond. This cannot be undone.</div>
-    <div class="confirm-footer">
-      <button class="btn-cancel" id="confirm-cancel">Cancel</button>
-      <button class="btn-danger" id="confirm-delete">Delete</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  PARTNERS MODAL                                                 -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<div id="partners-modal" class="overlay hidden">
-  <div class="modal" style="max-width:480px">
-    <div class="modal-hdr">
-      <div class="modal-title">
-        <svg class="icon" style="width:18px;height:18px;stroke:#0f172a;margin-right:6px" viewBox="0 0 24 24">
-          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
-        </svg>Partner Access
-      </div>
-      <button class="modal-x" id="partners-close-btn">✕</button>
-    </div>
-    <p style="font-size:13px;color:#64748b;margin-bottom:20px;line-height:1.6">
-      Partners can <strong>view</strong> your portfolio in read-only mode. They sign in with their own Google account and will see your data automatically.
-    </p>
-    <div class="card-title" style="margin-bottom:12px">Current Partners</div>
-    <div id="partner-list" class="partner-list">
-      <div class="no-partners">No partners added yet</div>
-    </div>
-    <div class="card-title" style="margin-bottom:12px">Add New Partner</div>
-    <div class="add-partner-row">
-      <input type="email" id="partner-email-input" placeholder="partner@gmail.com">
-      <button class="btn-add-partner" id="btn-add-partner-action">Add</button>
-    </div>
-    <p style="font-size:11px;color:#94a3b8;margin-top:8px">They'll have view access the next time they sign in.</p>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<!--  GOLD MODAL  (Add / Edit)                                       -->
-<!-- ═══════════════════════════════════════════════════════════════ -->
-<div id="gold-modal" class="overlay hidden">
-  <div class="modal">
-    <div class="modal-hdr">
-      <div class="modal-title" id="gold-modal-title">Add Gold Item</div>
-      <button class="modal-x" id="gold-modal-close">✕</button>
-    </div>
-    <form id="gold-form" autocomplete="off">
-      <div class="form-grid">
-        <div class="field full">
-          <label>Name *</label>
-          <input type="text" id="gf-name" placeholder="e.g. Gold Coin - GRT" required>
-        </div>
-        <div class="field">
-          <label>Karat *</label>
-          <select id="gf-type" required>
-            <option value="">Select…</option>
-            <option value="22K">22K</option>
-            <option value="24K">24K</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Date *</label>
-          <input type="date" id="gf-date" required>
-        </div>
-        <div class="field">
-          <label>Weight (grams) *</label>
-          <input type="number" id="gf-weight" placeholder="e.g. 8.1234" step="0.0001" min="0" required>
-        </div>
-        <div class="field">
-          <label>Paid per gram (₹)</label>
-          <input type="number" id="gf-paidPerGram" placeholder="0 if gifted" step="0.01" min="0">
-        </div>
-        <div class="field">
-          <label>Total Invested (₹)</label>
-          <input type="number" id="gf-totalInvested" placeholder="Auto-calculated" step="0.01" min="0">
-          <div class="hint">Auto-fills from weight × paid/gram</div>
-        </div>
-        <div class="field full">
-          <div class="field-row">
-            <input type="checkbox" id="gf-gifted">
-            <label for="gf-gifted">Gifted away</label>
+          <div class="field">
+            <label id="stf-price-label">Avg Buy Price (₹) *</label>
+            <input type="number" id="stf-avgBuyPrice" placeholder="e.g. 2750.00" min="0" step="0.01" required>
           </div>
-        </div>
-        <div class="field full" id="gf-gifted-for-field" style="display:none">
-          <label>Gifted For</label>
-          <input type="text" id="gf-giftedFor" placeholder="e.g. Keerthi Marriage">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-cancel" id="gold-cancel-btn">Cancel</button>
-        <button type="submit" class="btn-save" id="gold-save-btn">Add Item</button>
-      </div>
-    </form>
-  </div>
-</div>
 
-<!-- ═══ FD MODAL ═══ -->
-<div id="fd-modal" class="overlay hidden">
-  <div class="modal">
-    <div class="modal-hdr">
-      <div class="modal-title" id="fd-modal-title">Add FD</div>
-      <button class="modal-x" id="fd-modal-close">✕</button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="st-cancel-btn">Cancel</button>
+          <button type="submit" class="btn-save" id="st-save-btn">Add Stock</button>
+        </div>
+      </form>
     </div>
-    <form id="fd-form" autocomplete="off">
-      <div class="form-grid">
-        <div class="field full">
-          <label>Bank / Company *</label>
-          <input type="text" id="ff-name" placeholder="e.g. Suryoday Small Finance Bank" required>
-        </div>
-        <div class="field">
-          <label>Principal Amount (₹) *</label>
-          <input type="number" id="ff-principal" placeholder="e.g. 100000" min="0" step="0.01" required>
-        </div>
-        <div class="field">
-          <label>Interest Rate (% p.a.) *</label>
-          <input type="number" id="ff-rate" placeholder="e.g. 8.65" min="0" step="0.01" required>
-        </div>
-        <div class="field">
-          <label>Start Date *</label>
-          <input type="date" id="ff-startDate" required>
-        </div>
-        <div class="field">
-          <label>Maturity Date *</label>
-          <input type="date" id="ff-maturityDate" required>
-        </div>
-        <div class="field">
-          <label>Invested By</label>
-          <input type="text" id="ff-investedBy" placeholder="e.g. Bala">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-cancel" id="fd-cancel-btn">Cancel</button>
-        <button type="submit" class="btn-save" id="fd-save-btn">Add FD</button>
-      </div>
-    </form>
   </div>
-</div>
 
-<!-- ═══ RD MODAL ═══ -->
-<div id="rd-modal" class="overlay hidden">
-  <div class="modal">
-    <div class="modal-hdr">
-      <div class="modal-title" id="rd-modal-title">Add RD</div>
-      <button class="modal-x" id="rd-modal-close">✕</button>
-    </div>
-    <form id="rd-form" autocomplete="off">
-      <div class="form-grid">
-        <div class="field full">
-          <label>Bank *</label>
-          <input type="text" id="rf-name" placeholder="e.g. Suryoday Small Finance Bank" required>
-        </div>
-        <div class="field">
-          <label>Monthly Installment (₹) *</label>
-          <input type="number" id="rf-monthly" placeholder="e.g. 5000" min="0" step="0.01" required>
-        </div>
-        <div class="field">
-          <label>Interest Rate (% p.a.) *</label>
-          <input type="number" id="rf-rate" placeholder="e.g. 8.60" min="0" step="0.01" required>
-        </div>
-        <div class="field">
-          <label>Start Date *</label>
-          <input type="date" id="rf-startDate" required>
-        </div>
-        <div class="field">
-          <label>Maturity Date *</label>
-          <input type="date" id="rf-maturityDate" required>
-        </div>
-        <div class="field">
-          <label>Invested By</label>
-          <input type="text" id="rf-investedBy" placeholder="e.g. Bala">
-        </div>
+  <!-- ═══ NPS MODAL ═══ -->
+  <div id="nps-modal" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-hdr">
+        <div class="modal-title" id="nps-modal-title">Add NPS Scheme</div>
+        <button class="modal-x" id="nps-modal-close">✕</button>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-cancel" id="rd-cancel-btn">Cancel</button>
-        <button type="submit" class="btn-save" id="rd-save-btn">Add RD</button>
-      </div>
-    </form>
-  </div>
-</div>
+      <form id="nps-form" autocomplete="off">
+        <div class="form-grid">
 
-<!-- ═══ MF MODAL ═══ -->
-<div id="mf-modal" class="overlay hidden">
-  <div class="modal">
-    <div class="modal-hdr">
-      <div class="modal-title" id="mf-modal-title">Add Mutual Fund</div>
-      <button class="modal-x" id="mf-modal-close">✕</button>
-    </div>
-    <form id="mf-form" autocomplete="off">
-      <div class="form-grid">
-
-        <!-- Fund search (typeahead) -->
-        <div class="field full">
-          <label>Fund Name *</label>
-          <div id="mf-fund-search-wrap" style="position:relative">
-            <input type="text" id="mf-fund-search" placeholder="Type to search fund (e.g. HDFC Flexi Cap)" autocomplete="off" required>
+          <div class="field full">
+            <label>PRAN / Account ID</label>
+            <input type="text" id="npsf-pran" placeholder="e.g. 110126905015" required>
           </div>
-          <div style="font-size:11px;color:#94a3b8;margin-top:4px">Type to search · pick from dropdown · or enter scheme code manually below</div>
-        </div>
 
-        <!-- Scheme code — editable so user can enter manually if search misses a fund -->
-        <div class="field">
-          <label>Scheme Code <span id="mff-lookup-hint" style="font-size:10px;color:#3b82f6;font-weight:600;cursor:pointer;margin-left:4px" title="Look up on MFAPI">Lookup ↗</span></label>
-          <input type="text" id="mff-schemeCode" placeholder="Auto-filled or enter manually" style="background:#f8fafc">
-          <div id="mff-scheme-status" style="font-size:11px;margin-top:4px;color:#94a3b8"></div>
-        </div>
-        <div class="field">
-          <label>Category</label>
-          <input type="text" id="mff-category" placeholder="Auto-detected" style="background:#f8fafc;color:#64748b">
-        </div>
+          <div class="field full">
+            <label>Fund Manager *</label>
+            <select id="npsf-fundManager">
+              <option value="SBI Pension Funds">SBI Pension Funds</option>
+              <option value="LIC Pension Fund">LIC Pension Fund</option>
+              <option value="HDFC Pension Management">HDFC Pension Management</option>
+              <option value="Kotak Pension Fund">Kotak Pension Fund</option>
+              <option value="UTI Retirement Solutions">UTI Retirement Solutions</option>
+              <option value="Aditya Birla Sun Life Pension">Aditya Birla Sun Life Pension</option>
+              <option value="Max Life Pension Fund">Max Life Pension Fund</option>
+              <option value="Tata Pension Management">Tata Pension Management</option>
+              <option value="Axis Pension Fund">Axis Pension Fund</option>
+            </select>
+          </div>
 
-        <div class="field">
-          <label>Units Held *</label>
-          <input type="number" id="mff-units" placeholder="e.g. 150.432" min="0" step="0.001" required>
-        </div>
-        <div class="field">
-          <label>Avg Buy NAV (₹) *</label>
-          <input type="number" id="mff-avgBuyNav" placeholder="e.g. 84.500" min="0" step="0.001" required>
-        </div>
-        <div class="field">
-          <label>Invested By</label>
-          <input type="text" id="mff-investedBy" placeholder="e.g. Bala">
-        </div>
+          <div class="field">
+            <label>Tier *</label>
+            <select id="npsf-tier">
+              <option value="I">Tier I (Primary)</option>
+              <option value="II">Tier II (Voluntary)</option>
+            </select>
+          </div>
 
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-cancel" id="mf-cancel-btn">Cancel</button>
-        <button type="submit" class="btn-save" id="mf-save-btn">Add Fund</button>
-      </div>
-    </form>
-  </div>
-</div>
+          <div class="field">
+            <label>Asset Class *</label>
+            <select id="npsf-assetClass">
+              <option value="E">E — Equity</option>
+              <option value="C">C — Corporate Bonds</option>
+              <option value="G">G — Govt Securities</option>
+              <option value="A">A — Alternate Assets</option>
+            </select>
+          </div>
 
-<!-- ═══ STOCK MODAL ═══ -->
-<div id="st-modal" class="overlay hidden">
-  <div class="modal">
-    <div class="modal-hdr">
-      <div class="modal-title" id="st-modal-title">Add Stock</div>
-      <button class="modal-x" id="st-modal-close">✕</button>
+          <div class="field">
+            <label>Units *</label>
+            <input type="number" id="npsf-units" placeholder="e.g. 1234.5678" min="0" step="0.0001" required>
+          </div>
+
+          <div class="field">
+            <label>Avg Buy NAV (₹) *</label>
+            <input type="number" id="npsf-avgBuyNav" placeholder="e.g. 45.2310" min="0" step="0.0001" required>
+          </div>
+
+          <div class="field">
+            <label>Current NAV (₹)</label>
+            <input type="number" id="npsf-currentNav" placeholder="e.g. 58.7640" min="0" step="0.0001">
+            <div class="hint">From your CRA statement or NPS app</div>
+            </br>
+          </div>
+
+          <div class="field">
+            <label>NAV Date</label>
+            <input type="date" id="npsf-navDate">
+          </div>
+
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="nps-cancel-btn">Cancel</button>
+          <button type="submit" class="btn-primary" id="nps-save-btn">Add Scheme</button>
+        </div>
+      </form>
     </div>
-    <form id="st-form" autocomplete="off">
-      <div class="form-grid">
-
-        <div class="field full">
-          <label>Company Name</label>
-          <input type="text" id="stf-name" placeholder="e.g. Reliance Industries Ltd">
-        </div>
-
-        <div class="field">
-          <label>Market *</label>
-          <select id="stf-market">
-            <option value="NSE">🇮🇳 NSE (India)</option>
-            <option value="US">🇺🇸 US (NYSE / NASDAQ)</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label id="stf-symbol-label">Symbol *</label>
-          <input type="text" id="stf-symbol" placeholder="e.g. RELIANCE" style="text-transform:uppercase" required>
-          <div class="hint" id="stf-symbol-hint">NSE ticker (e.g. HDFCBANK, TCS, INFY)</div>
-        </div>
-
-        <div class="field">
-          <label>Demat Account</label>
-          <input type="text" id="stf-dematAccount" placeholder="e.g. Zerodha - Bala">
-        </div>
-
-        <div class="field">
-          <label>No. of Shares *</label>
-          <input type="number" id="stf-shares" placeholder="e.g. 10" min="0" step="any" required>
-        </div>
-
-        <div class="field">
-          <label id="stf-price-label">Avg Buy Price (₹) *</label>
-          <input type="number" id="stf-avgBuyPrice" placeholder="e.g. 2750.00" min="0" step="0.01" required>
-        </div>
-
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-cancel" id="st-cancel-btn">Cancel</button>
-        <button type="submit" class="btn-save" id="st-save-btn">Add Stock</button>
-      </div>
-    </form>
   </div>
-</div>
 
-<!-- Toast -->
-<div id="toast" class="toast"></div>
+  <!-- ═══ NPS IMPORT PREVIEW MODAL ═══ -->
+  <div id="nps-import-modal" class="overlay hidden">
+    <div class="modal" style="max-width:700px;width:95%">
+      <div class="modal-hdr">
+        <div class="modal-title">Import NPS Statement</div>
+        <button class="modal-x" id="nps-import-close">✕</button>
+      </div>
+      <div id="nps-import-preview" style="max-height:60vh;overflow-y:auto;padding:4px 0"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="nps-import-cancel">Cancel</button>
+        <button type="button" class="btn-primary" id="nps-import-confirm">Import &amp; Save</button>
+      </div>
+    </div>
+  </div>
 
-<!-- App entry point -->
-<script type="module" src="js/app.js"></script>
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- App entry point -->
+  <script type="module" src="js/app.js"></script>
 
 </body>
+
 </html>

@@ -57,6 +57,11 @@ export const state = {
   stockViewMode:     'holding',  // 'holding' | 'stock'
   usdInrRate:        null,       // live USD→INR rate for US stock conversion
 
+  // NPS
+  nps:            [],
+  editingNPSId:   null,
+  npsUnsub:       null,
+
   // UI
   activeTab:      'overview',
 };

@@ -100,12 +100,20 @@ function computeAssets() {
     return s + (p?.price ? (s2.shares || 0) * p.price * fx : inv);
   }, 0);
 
+  // NPS — invested = units × avgBuyNav, current = units × currentNav (fallback to invested)
+  const npsInvested = state.nps.reduce((s, n) => s + (n.units || 0) * (n.avgBuyNav || 0), 0);
+  const npsCurrent  = state.nps.reduce((s, n) => {
+    const inv = (n.units || 0) * (n.avgBuyNav || 0);
+    return s + (n.currentNav ? (n.units || 0) * n.currentNav : inv);
+  }, 0);
+
   return [
-    { label: 'Bonds',         invested: bondsInvested, current: bondsInvested, color: '#3b82f6' },
-    { label: 'Gold',          invested: goldInvested,  current: goldCurrent,   color: '#f59e0b' },
-    { label: 'Deposits',      invested: fdInvested + rdInvested, current: fdCurrent + rdCurrent, color: '#8b5cf6' },
-    { label: 'Mutual Funds',  invested: mfInvested,    current: mfCurrent,     color: '#10b981' },
-    { label: 'Stocks',        invested: stInvested,    current: stCurrent,     color: '#ef4444' },
+    { label: 'Bonds',         invested: bondsInvested,             current: bondsInvested,           color: '#3b82f6' },
+    { label: 'Gold',          invested: goldInvested,              current: goldCurrent,              color: '#f59e0b' },
+    { label: 'Deposits',      invested: fdInvested + rdInvested,   current: fdCurrent + rdCurrent,   color: '#8b5cf6' },
+    { label: 'Mutual Funds',  invested: mfInvested,                current: mfCurrent,               color: '#10b981' },
+    { label: 'Stocks',        invested: stInvested,                current: stCurrent,               color: '#ef4444' },
+    { label: 'NPS',           invested: npsInvested,               current: npsCurrent,              color: '#6366f1' },
   ];
 }
 
