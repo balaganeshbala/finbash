@@ -62,6 +62,11 @@ export const state = {
   editingNPSId:   null,
   npsUnsub:       null,
 
+  // EPF
+  epf:            [],
+  editingEPFId:   null,
+  epfUnsub:       null,
+
   // UI
   activeTab:      'overview',
 };

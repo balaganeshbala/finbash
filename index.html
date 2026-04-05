@@ -189,6 +189,13 @@
         </svg>
         NPS
       </button>
+      <button class="tab-btn" data-tab="epf">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+          <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+        </svg>
+        EPF
+      </button>
     </div>
 
     <div class="container">
@@ -715,6 +722,22 @@
 
       </div><!-- /tab-nps -->
 
+      <!-- ── EPF TAB ── -->
+      <div id="tab-epf" class="tab-panel">
+
+        <!-- KPI cards -->
+        <div class="kpi-grid" id="epfKpiGrid"></div>
+
+        <!-- Account cards (rendered by JS) -->
+        <div id="epfAccountList"></div>
+
+        <!-- Toolbar -->
+        <div style="display:flex;align-items:center;padding:8px 16px 16px;gap:8px" id="epf-toolbar">
+          <button class="btn-add" id="btn-add-epf" style="margin-left:auto">+ Add Account</button>
+        </div>
+
+      </div><!-- /tab-epf -->
+
     </div><!-- /container -->
   </div><!-- /app-screen -->
 
@@ -1206,6 +1229,71 @@
         <button type="button" class="btn-secondary" id="nps-import-cancel">Cancel</button>
         <button type="button" class="btn-primary" id="nps-import-confirm">Import &amp; Save</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!--  EPF MODAL  (Add / Edit Account)                               -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="epf-modal" class="overlay hidden">
+    <div class="modal" style="max-width:680px;width:95%">
+      <div class="modal-hdr">
+        <div class="modal-title" id="epf-modal-title">Add EPF Account</div>
+        <button class="modal-x" id="epf-modal-close">✕</button>
+      </div>
+      <form id="epf-form" autocomplete="off">
+        <div class="form-grid">
+          <div class="field">
+            <label>Account Holder Name *</label>
+            <input id="epff-holderName" placeholder="e.g. Balaganesh" required />
+          </div>
+          <div class="field">
+            <label>UAN / Account Number</label>
+            <input id="epff-accountNumber" placeholder="e.g. 100123456789" />
+          </div>
+          <div class="field">
+            <label>Employer / Company Name *</label>
+            <input id="epff-employerName" placeholder="e.g. Acme Pvt Ltd" required />
+          </div>
+          <div class="field">
+            <label>Status</label>
+            <select id="epff-status">
+              <option value="active">Active (current employer)</option>
+              <option value="inactive">Inactive (past employer)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Opening Balance (₹)</label>
+            <input id="epff-openingBalance" type="number" min="0" step="0.01" placeholder="0 if starting from scratch" />
+          </div>
+        </div>
+
+        <!-- Year-wise data table -->
+        <div style="margin-top:20px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <span style="font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.6px">Year-wise Contributions &amp; Interest</span>
+            <button type="button" class="btn-secondary" id="epf-add-year-row" style="padding:5px 14px;font-size:12px">+ Add Year</button>
+          </div>
+          <div class="table-wrap" style="max-height:260px;overflow-y:auto;border:1.5px solid #e2e8f0;border-radius:9px">
+            <table class="data-table" style="font-size:12px">
+              <thead><tr>
+                <th>Financial Year</th>
+                <th class="num">Employee (₹)</th>
+                <th class="num">Employer (₹)</th>
+                <th class="num">Interest (₹)</th>
+                <th style="width:36px"></th>
+              </tr></thead>
+              <tbody id="epf-year-rows"></tbody>
+            </table>
+          </div>
+          <p style="font-size:11px;color:#94a3b8;margin-top:6px">Enter data per financial year from your EPFO passbook. Years are sorted automatically.</p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="epf-cancel-btn">Cancel</button>
+          <button type="submit" class="btn-primary" id="epf-save-btn">Add Account</button>
+        </div>
+      </form>
     </div>
   </div>
 

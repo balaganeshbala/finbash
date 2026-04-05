@@ -101,10 +101,24 @@ function computeAssets() {
   }, 0);
 
   // NPS — invested = units × avgBuyNav, current = units × currentNav (fallback to invested)
-  const npsInvested = state.nps.reduce((s, n) => s + (n.units || 0) * (n.avgBuyNav || 0), 0);
+  const npsInvested = state.nps.reduce((s, n) => s + (n.totalContributed != null ? n.totalContributed : (n.units || 0) * (n.avgBuyNav || 0)), 0);
   const npsCurrent  = state.nps.reduce((s, n) => {
-    const inv = (n.units || 0) * (n.avgBuyNav || 0);
+    const inv = n.totalContributed != null ? n.totalContributed : (n.units || 0) * (n.avgBuyNav || 0);
     return s + (n.currentNav ? (n.units || 0) * n.currentNav : inv);
+  }, 0);
+
+  // EPF — balance = opening + Σ(employee + employer + interest); invested = balance − interest
+  const epfBalance  = state.epf.reduce((s, acc) => {
+    const opening = acc.openingBalance || 0;
+    const rows    = acc.yearlyData || [];
+    return s + opening + rows.reduce((rs, r) =>
+      rs + (r.employeeContribution || 0) + (r.employerContribution || 0) + (r.interest || 0), 0);
+  }, 0);
+  const epfInvested = state.epf.reduce((s, acc) => {
+    const opening = acc.openingBalance || 0;
+    const rows    = acc.yearlyData || [];
+    return s + opening + rows.reduce((rs, r) =>
+      rs + (r.employeeContribution || 0) + (r.employerContribution || 0), 0);
   }, 0);
 
   return [
@@ -114,6 +128,7 @@ function computeAssets() {
     { label: 'Mutual Funds',  invested: mfInvested,                current: mfCurrent,               color: '#10b981' },
     { label: 'Stocks',        invested: stInvested,                current: stCurrent,               color: '#ef4444' },
     { label: 'NPS',           invested: npsInvested,               current: npsCurrent,              color: '#6366f1' },
+    { label: 'EPF',           invested: epfInvested,               current: epfBalance,              color: '#0ea5e9' },
   ];
 }
 
