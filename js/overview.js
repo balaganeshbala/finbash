@@ -100,7 +100,7 @@ function computeAssets() {
     return s + (p?.price ? (s2.shares || 0) * p.price * fx : inv);
   }, 0);
 
-  // NPS — invested = units × avgBuyNav, current = units × currentNav (fallback to invested)
+  // NPS — invested = totalContributed (explicit field), current = units × currentNav (fallback to invested)
   const npsInvested = state.nps.reduce((s, n) => s + (n.totalContributed != null ? n.totalContributed : (n.units || 0) * (n.avgBuyNav || 0)), 0);
   const npsCurrent  = state.nps.reduce((s, n) => {
     const inv = n.totalContributed != null ? n.totalContributed : (n.units || 0) * (n.avgBuyNav || 0);
@@ -130,6 +130,46 @@ function computeAssets() {
     { label: 'NPS',           invested: npsInvested,               current: npsCurrent,              color: '#6366f1' },
     { label: 'EPF',           invested: epfInvested,               current: epfBalance,              color: '#0ea5e9' },
   ];
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   FILTER STATE
+   ───────────────────────────────────────────────────────────────── */
+// Empty set = "All" (no filter active). Non-empty = only show these labels.
+let _activeFilters = new Set();
+
+function renderFilterBar(allAssets) {
+  const el = document.getElementById('overview-filter-bar');
+  if (!el) return;
+
+  const allSelected = _activeFilters.size === 0;
+
+  el.innerHTML = `
+    <button class="overview-chip${allSelected ? ' active' : ''}" data-filter="__all__">All</button>
+    ${allAssets.map(a => {
+      const on = _activeFilters.has(a.label);
+      return `<button class="overview-chip${on ? ' active' : ''}" data-filter="${a.label}">
+        <span class="overview-chip-dot" style="background:${a.color}"></span>${a.label}
+      </button>`;
+    }).join('')}`;
+
+  el.querySelectorAll('.overview-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const f = btn.dataset.filter;
+      if (f === '__all__') {
+        _activeFilters.clear();
+      } else {
+        if (_activeFilters.has(f)) {
+          _activeFilters.delete(f);
+        } else {
+          _activeFilters.add(f);
+        }
+      }
+      // Re-render (filter bar + KPIs + table + chart)
+      renderOverview();
+      requestAnimationFrame(() => renderPieChart(_lastAssets));
+    });
+  });
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -184,7 +224,7 @@ function renderPieChart(assets) {
 /* ─────────────────────────────────────────────────────────────────
    RENDER
    ───────────────────────────────────────────────────────────────── */
-// Last computed assets — stored so renderOverviewChart() can redraw without recomputing
+// Last computed (filtered) assets — stored so renderOverviewChart() can redraw without recomputing
 let _lastAssets = [];
 
 // Exported: redraws only the chart on the permanent canvas (call via requestAnimationFrame)
@@ -213,7 +253,17 @@ export function renderOverview() {
   const tableEl = document.getElementById('overview-table');
   if (!kpisEl || !tableEl) return;
 
-  const assets = _lastAssets = computeAssets();
+  // All assets (unfiltered) — used for filter bar chips
+  const allAssets = computeAssets();
+
+  // Filtered view for KPIs / table / chart
+  const assets = _lastAssets = _activeFilters.size === 0
+    ? allAssets
+    : allAssets.filter(a => _activeFilters.has(a.label));
+
+  // Render filter chips (always based on full asset list)
+  renderFilterBar(allAssets);
+
   const totalInvested = assets.reduce((s, a) => s + a.invested, 0);
   const totalCurrent  = assets.reduce((s, a) => s + a.current,  0);
   const totalGain     = totalCurrent - totalInvested;
@@ -222,13 +272,17 @@ export function renderOverview() {
   const gainColor = totalGain >= 0 ? '#059669' : '#dc2626';
   const gainSign  = totalGain >= 0 ? '+' : '';
 
+  const kpiSubLabel = _activeFilters.size === 0
+    ? 'Across all assets'
+    : `${_activeFilters.size} instrument${_activeFilters.size > 1 ? 's' : ''} selected`;
+
   // Update KPI cards
   kpisEl.innerHTML = `
     <div class="overview-kpi-grid">
       <div class="kpi-card primary">
         <div class="kpi-label">Total Invested</div>
         <div class="kpi-value">${fmt(Math.round(totalInvested))}</div>
-        <div class="kpi-sub">Across all assets</div>
+        <div class="kpi-sub">${kpiSubLabel}</div>
       </div>
       <div class="kpi-card ${totalGain >= 0 ? 'success' : 'danger'}">
         <div class="kpi-label">Current Value</div>
@@ -288,5 +342,4 @@ export function renderOverview() {
         </tfoot>
       </table>
     </div>`;
-
 }
