@@ -175,21 +175,20 @@ function renderEPFAccounts() {
         <td class="num" style="padding:10px 12px">${fmt(Math.round(t.balance))}</td>
       </tr></tfoot>` : '';
 
-    // Card title line: employer name + meta + balance summary on right + actions
-    const titleMeta = [
-      statusBadge,
-      account.holderName    ? `<span style="font-size:12px;font-weight:400;color:#64748b">${account.holderName}</span>` : '',
+    // Card title: employer name on line 1, holder name + UAN on line 2
+    const holderLine = [
+      account.holderName    ? `<span style="font-size:12px;font-weight:500;color:#64748b">${account.holderName}</span>` : '',
       account.accountNumber ? `<span style="font-size:11px;font-weight:400;color:#94a3b8">· UAN ${account.accountNumber}</span>` : '',
     ].filter(Boolean).join(' ');
 
     return `
       <div class="card" style="margin:0 16px 16px">
-        <div class="card-title" style="justify-content:space-between;margin-bottom:14px">
-          <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            ${account.employerName || '—'}
-            ${titleMeta}
+        <div class="card-title epf-card-title" style="margin-bottom:14px">
+          <span style="display:flex;flex-direction:column;gap:3px">
+            <span style="display:flex;align-items:center;gap:8px">${account.employerName || '—'}${statusBadge}</span>
+            ${holderLine ? `<span style="display:flex;align-items:center;gap:6px">${holderLine}</span>` : ''}
           </span>
-          <span style="display:flex;align-items:center;gap:16px;margin-left:auto;padding-left:16px">
+          <span class="epf-card-meta">
             <span style="font-size:13px;font-weight:400;color:#64748b">
               Balance <strong style="color:#1e293b;font-size:15px">${fmt(Math.round(t.balance))}</strong>
             </span>

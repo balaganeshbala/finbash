@@ -324,12 +324,16 @@ function renderNPSYearlyBreakdown() {
       ? `<span style="color:${neg ? '#ef4444' : 'inherit'}">${neg ? '−' : ''}${fmt(Math.round(v))}</span>`
       : `<span style="color:#94a3b8">—</span>`;
 
-    const titlePrefix = targetPran !== 'Unknown' ? `Year-wise Contribution Breakdown — PRAN: ${targetPran}` : 'Year-wise Contribution Breakdown';
-    const subTitle = targetPran !== 'Unknown' && subName !== 'Unknown' ? ` &nbsp;<span style="font-size:12px;color:#94a3b8;font-weight:400">·&nbsp; ${subName}</span>` : '';
+    const titlePrefix = targetPran !== 'Unknown'
+      ? `Year-wise Contribution Breakdown — PRAN: ${targetPran}`
+      : 'Year-wise Contribution Breakdown';
+    const subTitle = targetPran !== 'Unknown' && subName !== 'Unknown'
+      ? `<span style="font-size:12px;font-weight:500;color:#64748b;margin-top:2px">${subName}</span>`
+      : '';
 
     html += `
       <div class="card" style="margin-top:20px">
-        <div class="card-title">${titlePrefix}${subTitle}</div>
+        <div class="card-title"><span style="display:flex;flex-direction:column;gap:2px">${titlePrefix}${subTitle}</span></div>
         <div class="table-wrap">
           <table class="data-table">
             <thead><tr>
