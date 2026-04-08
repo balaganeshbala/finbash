@@ -688,6 +688,13 @@
               <option value="">All Accounts</option>
             </select>
             <input type="file" id="nps-csv-input" accept=".csv" multiple style="display:none">
+            <button class="btn-refresh" id="btn-refresh-nps-nav" title="Fetch latest NAV from npsnav.in">
+              <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">
+                <path d="M1 4v6h6M23 20v-6h-6"/>
+                <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
+              </svg>
+              Refresh NAV
+            </button>
             <button class="btn-refresh" id="btn-import-nps" title="Import NSDL annual statement CSV">
               <svg viewBox="0 0 24 24"
                 style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">
@@ -1192,6 +1199,12 @@
             </select>
           </div>
 
+          <div class="field full">
+            <label>Scheme Code</label>
+            <input type="text" id="npsf-schemeCode" placeholder="e.g. SM008001" style="font-family:monospace">
+            <div class="hint">Auto-filled from fund manager + tier + asset class. You can override if needed.</div>
+          </div>
+
           <div class="field">
             <label>Units *</label>
             <input type="number" id="npsf-units" placeholder="e.g. 1234.5678" min="0" step="0.0001" required>
@@ -1206,7 +1219,6 @@
             <label>Current NAV (₹)</label>
             <input type="number" id="npsf-currentNav" placeholder="e.g. 58.7640" min="0" step="0.0001">
             <div class="hint">From your CRA statement or NPS app</div>
-            </br>
           </div>
 
           <div class="field">

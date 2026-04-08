@@ -101,11 +101,13 @@ function computeAssets() {
     return s + (p?.price ? (s2.shares || 0) * p.price * fx : inv);
   }, 0);
 
-  // NPS — invested = totalContributed (explicit field), current = units × currentNav (fallback to invested)
+  // NPS — invested = totalContributed; current = live NAV (from API) → manual currentNav → fallback to invested
   const npsInvested = state.nps.reduce((s, n) => s + (n.totalContributed != null ? n.totalContributed : (n.units || 0) * (n.avgBuyNav || 0)), 0);
   const npsCurrent  = state.nps.reduce((s, n) => {
-    const inv = n.totalContributed != null ? n.totalContributed : (n.units || 0) * (n.avgBuyNav || 0);
-    return s + (n.currentNav ? (n.units || 0) * n.currentNav : inv);
+    const inv     = n.totalContributed != null ? n.totalContributed : (n.units || 0) * (n.avgBuyNav || 0);
+    const liveNav = state.npsNavs?.[`${n.fundManager}|${n.tier}|${n.assetClass}`]?.nav;
+    const nav     = liveNav || n.currentNav || null;
+    return s + (nav ? (n.units || 0) * nav : inv);
   }, 0);
 
   // EPF — balance = opening + Σ(employee + employer + interest); invested = balance − interest

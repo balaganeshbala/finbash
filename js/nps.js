@@ -63,9 +63,185 @@ export function startListeningNPS(uid) {
     snap => {
       state.nps = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       renderNPSSection();
+      fetchAllNPSNavs();
     },
     () => toast('Could not load NPS data. Check Firestore rules.', 'error'),
   );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   LIVE NAV FETCH  (via Vercel proxy → npsnav.in / Protean NSDL)
+   The proxy lives in stock-price-proxy/api/nps-nav.ts and avoids
+   browser CORS restrictions when calling npsnav.in directly.
+   ───────────────────────────────────────────────────────────────── */
+const NPS_PROXY = 'https://stock-price-proxy.vercel.app/api/nps-nav';
+
+// ── Scheme-code lookup table ─────────────────────────────────────────────────
+// Key: "fundManager|tier|assetClass"  →  npsnav.in scheme code (SM________)
+// Confirmed codes are marked; inferred ones follow the sequential numbering
+// pattern observed on npsnav.in. Users can always override in the modal.
+export const NPS_SCHEME_CODES = {
+  // SBI Pension Funds (SM001 — has Central/State Govt at 001/002)
+  'SBI Pension Funds|I|E':              'SM001003',
+  'SBI Pension Funds|I|C':             'SM001004',
+  'SBI Pension Funds|I|G':             'SM001005',
+  'SBI Pension Funds|I|A':             'SM001012',
+  'SBI Pension Funds|II|E':            'SM001006',
+  'SBI Pension Funds|II|C':            'SM001007',
+  'SBI Pension Funds|II|G':            'SM001008',
+
+  // UTI Retirement Solutions (SM002 — has Central/State Govt at 001/002)
+  'UTI Retirement Solutions|I|E':      'SM002003',
+  'UTI Retirement Solutions|I|C':      'SM002004',
+  'UTI Retirement Solutions|I|G':      'SM002005',
+  'UTI Retirement Solutions|I|A':      'SM002012',
+  'UTI Retirement Solutions|II|E':     'SM002006',
+  'UTI Retirement Solutions|II|C':     'SM002007',
+  'UTI Retirement Solutions|II|G':     'SM002008',
+
+  // LIC Pension Fund (SM003 — has Central/State Govt at 001/002)
+  'LIC Pension Fund|I|E':              'SM003005',
+  'LIC Pension Fund|I|C':             'SM003006',
+  'LIC Pension Fund|I|G':             'SM003007',
+  'LIC Pension Fund|I|A':             'SM003012',
+  'LIC Pension Fund|II|E':            'SM003008',
+  'LIC Pension Fund|II|C':            'SM003009',
+  'LIC Pension Fund|II|G':            'SM003010',
+
+  // Kotak Pension Fund (SM005 — no govt schemes, starts at 001)
+  'Kotak Pension Fund|I|E':            'SM005001',
+  'Kotak Pension Fund|I|C':           'SM005002',
+  'Kotak Pension Fund|I|G':           'SM005003',
+  'Kotak Pension Fund|I|A':           'SM005007',
+  'Kotak Pension Fund|II|E':          'SM005004',
+  'Kotak Pension Fund|II|C':          'SM005005',
+  'Kotak Pension Fund|II|G':          'SM005006',
+
+  // HDFC Pension Management (SM008 — no govt schemes)
+  'HDFC Pension Management|I|E':       'SM008001',
+  'HDFC Pension Management|I|C':      'SM008002',
+  'HDFC Pension Management|I|G':      'SM008003',
+  'HDFC Pension Management|I|A':      'SM008008',
+  'HDFC Pension Management|II|E':     'SM008004',
+  'HDFC Pension Management|II|C':     'SM008005',
+  'HDFC Pension Management|II|G':     'SM008006',
+  'HDFC Pension Management|II|A':     'SM008007',
+
+  // Aditya Birla Sun Life Pension (SM010)
+  'Aditya Birla Sun Life Pension|I|E':  'SM010001',
+  'Aditya Birla Sun Life Pension|I|C': 'SM010002',
+  'Aditya Birla Sun Life Pension|I|G': 'SM010003',
+  'Aditya Birla Sun Life Pension|I|A': 'SM010004',
+  'Aditya Birla Sun Life Pension|II|E':'SM010005',
+  'Aditya Birla Sun Life Pension|II|C':'SM010006',
+  'Aditya Birla Sun Life Pension|II|G':'SM010007',
+
+  // Tata Pension Management (SM011)
+  'Tata Pension Management|I|E':       'SM011001',
+  'Tata Pension Management|I|C':      'SM011002',
+  'Tata Pension Management|I|G':      'SM011003',
+  'Tata Pension Management|I|A':      'SM011004',
+  'Tata Pension Management|II|E':     'SM011005',
+  'Tata Pension Management|II|C':     'SM011006',
+  'Tata Pension Management|II|G':     'SM011007',
+
+  // Max Life Pension Fund (SM012)
+  'Max Life Pension Fund|I|E':         'SM012001',
+  'Max Life Pension Fund|I|C':        'SM012002',
+  'Max Life Pension Fund|I|G':        'SM012003',
+  'Max Life Pension Fund|I|A':        'SM012004',
+  'Max Life Pension Fund|II|E':       'SM012005',
+  'Max Life Pension Fund|II|C':       'SM012006',
+  'Max Life Pension Fund|II|G':       'SM012007',
+
+  // Axis Pension Fund (SM013)
+  'Axis Pension Fund|I|E':             'SM013001',
+  'Axis Pension Fund|I|C':            'SM013002',
+  'Axis Pension Fund|I|G':            'SM013003',
+  'Axis Pension Fund|I|A':            'SM013004',
+  'Axis Pension Fund|II|E':           'SM013005',
+  'Axis Pension Fund|II|C':           'SM013006',
+  'Axis Pension Fund|II|G':           'SM013007',
+};
+
+export function schemeCodeFor(fundManager, tier, assetClass) {
+  return NPS_SCHEME_CODES[`${fundManager}|${tier}|${assetClass}`] || '';
+}
+
+function updateNPSRefreshBtn(loading) {
+  const btn = document.getElementById('btn-refresh-nps-nav');
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? `<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;animation:spin 1s linear infinite"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg> Fetching…`
+    : `<svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg> Refresh NAV`;
+}
+
+export async function fetchAllNPSNavs() {
+  if (!state.nps.length) return;
+  state.npsNavLoading = true;
+  updateNPSRefreshBtn(true);
+
+  // Collect unique scheme codes across all NPS records
+  // Use the stored schemeCode field first; fall back to the lookup table
+  const toFetch = new Map(); // schemeCode → { fundManager, tier, assetClass }
+  state.nps.forEach(n => {
+    const code = n.schemeCode || schemeCodeFor(n.fundManager, n.tier, n.assetClass);
+    if (code) toFetch.set(code, { fundManager: n.fundManager, tier: n.tier, assetClass: n.assetClass });
+  });
+
+  if (!toFetch.size) {
+    toast('No scheme codes found — add a scheme code to your NPS entries to enable live NAV.', 'warn');
+    state.npsNavLoading = false;
+    updateNPSRefreshBtn(false);
+    return;
+  }
+
+  try {
+    // Fetch each scheme individually via the proxy (?scheme=SM008001)
+    // Run all requests in parallel
+    const results = await Promise.allSettled(
+      [...toFetch.entries()].map(async ([code]) => {
+        const res = await fetch(`${NPS_PROXY}?scheme=${encodeURIComponent(code)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        return { code, nav: json.nav };
+      })
+    );
+
+    state.npsNavs = {};
+    let fetched = 0;
+    let failed  = 0;
+
+    results.forEach((result, i) => {
+      const code = [...toFetch.keys()][i];
+      const { fundManager, tier, assetClass } = toFetch.get(code);
+      const key = `${fundManager}|${tier}|${assetClass}`;
+
+      if (result.status === 'fulfilled' && result.value.nav > 0) {
+        state.npsNavs[key] = { nav: result.value.nav, date: new Date().toLocaleDateString('en-IN') };
+        fetched++;
+      } else {
+        console.warn(`NPS NAV fetch failed for ${code}:`, result.reason);
+        failed++;
+      }
+    });
+
+    renderNPSSection();
+    window.__renderOverview?.();
+
+    if (failed > 0 && fetched === 0) {
+      toast('Could not fetch NPS NAV. Check your connection.', 'error');
+    } else if (failed > 0) {
+      toast(`NAV updated for ${fetched} scheme(s). ${failed} could not be fetched.`, 'warn');
+    }
+  } catch (e) {
+    console.warn('NPS NAV fetch failed:', e);
+    toast('Could not fetch NPS NAV. Check your connection.', 'error');
+  } finally {
+    state.npsNavLoading = false;
+    updateNPSRefreshBtn(false);
+  }
 }
 
 export const addNPS    = data => addDoc(npsColRef(state.currentUser.uid), { ...data, createdAt: serverTimestamp() });
@@ -107,14 +283,25 @@ function updateNPSFilterOptions() {
 /* ─────────────────────────────────────────────────────────────────
    KPI CARDS
    ───────────────────────────────────────────────────────────────── */
+function liveNav(n) {
+  const key = `${n.fundManager}|${n.tier}|${n.assetClass}`;
+  return state.npsNavs[key]?.nav || n.currentNav || null;
+}
+
+function liveNavDate(n) {
+  const key = `${n.fundManager}|${n.tier}|${n.assetClass}`;
+  return state.npsNavs[key]?.date || n.navDate || null;
+}
+
 function renderNPSKpis() {
   let totalInvested = 0, totalCurrent = 0, withNav = 0;
   const npsList = getFilteredNPS();
   npsList.forEach(n => {
     const inv = n.totalContributed != null ? n.totalContributed : (n.units || 0) * (n.avgBuyNav || 0);
     totalInvested += inv;
-    if (n.currentNav) {
-      totalCurrent += (n.units || 0) * n.currentNav;
+    const nav = liveNav(n);
+    if (nav) {
+      totalCurrent += (n.units || 0) * nav;
       withNav++;
     } else {
       totalCurrent += inv;
@@ -187,7 +374,8 @@ function renderNPSTable() {
 
   tbody.innerHTML = rows.map((n, i) => {
     const inv     = n.totalContributed != null ? n.totalContributed : (n.units || 0) * (n.avgBuyNav || 0);
-    const cv      = n.currentNav ? (n.units || 0) * n.currentNav : null;
+    const nav     = liveNav(n);
+    const cv      = nav ? (n.units || 0) * nav : null;
     const gain    = cv != null ? cv - inv : null;
     const retPct  = inv > 0 && gain != null ? (gain / inv) * 100 : null;
     const gainCol = gain != null ? (gain >= 0 ? '#059669' : '#ef4444') : '#94a3b8';
@@ -195,8 +383,10 @@ function renderNPSTable() {
     totInvested += inv;
     totCurrent  += cv != null ? cv : inv;
 
-    const navDateStr = n.navDate
-      ? new Date(n.navDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' })
+    const navDate    = liveNavDate(n);
+    const isLive     = !!state.npsNavs[`${n.fundManager}|${n.tier}|${n.assetClass}`];
+    const navDateStr = navDate
+      ? (isLive ? navDate : new Date(navDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }))
       : null;
 
     return `<tr>
@@ -212,9 +402,9 @@ function renderNPSTable() {
       <td class="num">${(n.units || 0).toLocaleString('en-IN', { maximumFractionDigits: 4 })}</td>
       <td class="num">₹${(n.avgBuyNav || 0).toFixed(4)}</td>
       <td class="num">
-        ${n.currentNav
-          ? `<span style="font-weight:600">₹${n.currentNav.toFixed(4)}</span>
-             ${navDateStr ? `<div style="font-size:10px;color:#94a3b8;margin-top:2px">as of ${navDateStr}</div>` : ''}`
+        ${nav
+          ? `<span style="font-weight:600">₹${nav.toFixed(4)}</span>
+             ${isLive ? `<div style="font-size:10px;color:#059669;margin-top:2px">● live${navDateStr ? ` · ${navDateStr}` : ''}</div>` : navDateStr ? `<div style="font-size:10px;color:#94a3b8;margin-top:2px">as of ${navDateStr}</div>` : ''}`
           : `<span style="font-size:11px;color:#94a3b8">—</span>`}
       </td>
       <td class="num">${inv > 0 ? fmt(Math.round(inv)) : '—'}</td>
@@ -384,6 +574,50 @@ export function renderNPSSection() {
 /* ─────────────────────────────────────────────────────────────────
    MODAL
    ───────────────────────────────────────────────────────────────── */
+// Fetch NAV for a given scheme code and fill the modal's Current NAV + NAV Date fields
+async function fetchAndFillModalNAV(schemeCode) {
+  if (!schemeCode) return;
+  const navInput  = document.getElementById('npsf-currentNav');
+  const dateInput = document.getElementById('npsf-navDate');
+  if (!navInput || !dateInput) return;
+
+  // Show a subtle loading indicator in the NAV field
+  navInput.placeholder = 'Fetching…';
+
+  try {
+    const res  = await fetch(`${NPS_PROXY}?scheme=${encodeURIComponent(schemeCode)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    if (json.nav && json.nav > 0) {
+      navInput.value  = json.nav;
+      // Use today's date in YYYY-MM-DD format (local time)
+      const today = new Date();
+      const yy  = today.getFullYear();
+      const mm  = String(today.getMonth() + 1).padStart(2, '0');
+      const dd  = String(today.getDate()).padStart(2, '0');
+      dateInput.value = `${yy}-${mm}-${dd}`;
+    }
+  } catch (e) {
+    console.warn('Modal NAV fetch failed for', schemeCode, e);
+  } finally {
+    navInput.placeholder = 'e.g. 58.7640';
+  }
+}
+
+function autoFillSchemeCode() {
+  const fm    = document.getElementById('npsf-fundManager')?.value || '';
+  const tier  = document.getElementById('npsf-tier')?.value || '';
+  const asset = document.getElementById('npsf-assetClass')?.value || '';
+  const field = document.getElementById('npsf-schemeCode');
+  if (!field) return;
+  // Only auto-fill if the user hasn't manually typed something different
+  if (field.dataset.userEdited !== 'true') {
+    field.value = schemeCodeFor(fm, tier, asset);
+  }
+  // Fetch live NAV for whatever code is now in the field
+  if (field.value) fetchAndFillModalNAV(field.value);
+}
+
 export function openNPSModal(id = null) {
   state.editingNPSId = id;
   const n = id ? state.nps.find(x => x.id === id) : null;
@@ -397,6 +631,17 @@ export function openNPSModal(id = null) {
   document.getElementById('npsf-avgBuyNav').value    = n?.avgBuyNav    || '';
   document.getElementById('npsf-currentNav').value   = n?.currentNav   || '';
   document.getElementById('npsf-navDate').value      = n?.navDate      || '';
+
+  // Scheme code — use stored value if editing, otherwise derive from lookup
+  const codeField = document.getElementById('npsf-schemeCode');
+  if (codeField) {
+    codeField.dataset.userEdited = 'false';
+    codeField.value = n?.schemeCode
+      || schemeCodeFor(n?.fundManager || FUND_MANAGERS[0], n?.tier || 'I', n?.assetClass || 'E');
+    // Auto-fetch live NAV and fill the fields
+    if (codeField.value) fetchAndFillModalNAV(codeField.value);
+  }
+
   document.getElementById('nps-modal').classList.remove('hidden');
   setTimeout(() => document.getElementById('npsf-units').focus(), 50);
 }
@@ -700,6 +945,7 @@ async function confirmImport() {
         totalContributed:    parseFloat(totalContributed.toFixed(2)),
         avgBuyNav:           parseFloat((s.units > 0 ? totalContributed / s.units : 0).toFixed(4)),
         annualContributions: mergedContribs,
+        schemeCode:          existing?.schemeCode || schemeCodeFor(s.fundManager, s.tier, s.assetClass),
         ...(s.nav > 0 && { currentNav: parseFloat(s.nav.toFixed(4)) }),
         ...(s.navDate  && { navDate: s.navDate }),
       };
@@ -753,6 +999,7 @@ export function initNPSListeners() {
 
   // CSV Import
   const csvInput = document.getElementById('nps-csv-input');
+  document.getElementById('btn-refresh-nps-nav').addEventListener('click', fetchAllNPSNavs);
   document.getElementById('btn-import-nps').addEventListener('click', () => csvInput.click());
   csvInput.addEventListener('change', async e => {
     const files = [...e.target.files];
@@ -782,6 +1029,29 @@ export function initNPSListeners() {
   });
   document.getElementById('nps-import-confirm').addEventListener('click', confirmImport);
 
+  // Scheme code auto-fill: re-derive when fund manager / tier / asset class changes
+  const autoFillTriggers = ['npsf-fundManager', 'npsf-tier', 'npsf-assetClass'];
+  autoFillTriggers.forEach(id => {
+    document.getElementById(id)?.addEventListener('change', () => {
+      const field = document.getElementById('npsf-schemeCode');
+      if (field) field.dataset.userEdited = 'false'; // dropdown changed → re-derive
+      autoFillSchemeCode();
+    });
+  });
+  // If the user types in the scheme code field manually, stop overwriting it
+  // and fetch the NAV for the entered code (debounced)
+  let _navFetchTimer = null;
+  document.getElementById('npsf-schemeCode')?.addEventListener('input', () => {
+    const field = document.getElementById('npsf-schemeCode');
+    if (!field) return;
+    field.dataset.userEdited = 'true';
+    clearTimeout(_navFetchTimer);
+    const code = field.value.trim().toUpperCase();
+    if (code.length >= 7) { // SM + 6 chars minimum
+      _navFetchTimer = setTimeout(() => fetchAndFillModalNAV(code), 600);
+    }
+  });
+
   // Modal close
   document.getElementById('nps-modal-close').addEventListener('click', closeNPSModal);
   document.getElementById('nps-cancel-btn').addEventListener('click', closeNPSModal);
@@ -801,6 +1071,8 @@ export function initNPSListeners() {
     const units     = parseFloat(document.getElementById('npsf-units').value)     || 0;
     const avgBuyNav = parseFloat(document.getElementById('npsf-avgBuyNav').value) || 0;
 
+    const schemeCode = (document.getElementById('npsf-schemeCode')?.value || '').trim().toUpperCase();
+
     const data = {
       pran:             document.getElementById('npsf-pran').value,
       fundManager:      document.getElementById('npsf-fundManager').value,
@@ -809,6 +1081,7 @@ export function initNPSListeners() {
       units,
       avgBuyNav,
       totalContributed: parseFloat((units * avgBuyNav).toFixed(2)),
+      ...(schemeCode    && { schemeCode }),
       ...(currentNavRaw > 0 && { currentNav: currentNavRaw }),
       ...(navDateRaw    && { navDate: navDateRaw }),
     };

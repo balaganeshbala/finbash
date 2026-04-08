@@ -61,6 +61,8 @@ export const state = {
   nps:            [],
   editingNPSId:   null,
   npsUnsub:       null,
+  npsNavs:        {},   // "${fundManager}|${tier}|${assetClass}" → { nav, date }
+  npsNavLoading:  false,
 
   // EPF
   epf:            [],
