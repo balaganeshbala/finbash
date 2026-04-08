@@ -248,7 +248,7 @@ function renderByHoldingView() {
 
   let rows = [...state.stocks].filter(s =>
     (!demat  || s.dematAccount === demat) &&
-    (!market || s.market === market)
+    (!market || (s.market || 'NSE') === market)
   );
 
   if (state.stockSortCol) {
@@ -350,7 +350,7 @@ function renderByStockView() {
   const market   = document.getElementById('stockMarketFilter')?.value || '';
   const filtered = state.stocks.filter(s =>
     (!demat  || s.dematAccount === demat) &&
-    (!market || s.market === market)
+    (!market || (s.market || 'NSE') === market)
   );
 
   if (!filtered.length) {
