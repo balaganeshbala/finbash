@@ -53,8 +53,9 @@ function goldCurrentValue(g) {
    COMPUTE TOTALS PER ASSET CLASS
    ───────────────────────────────────────────────────────────────── */
 function computeAssets() {
-  // Bonds — face value is both invested and current (no live price)
-  const bondsInvested = state.bonds.reduce((s, b) => s + (b.faceValue || 0), 0);
+  // Bonds — active bonds only (excludes matured/withdrawn), matching the Bonds tab
+  const activeBonds   = state.bonds.filter(b => !b.matured);
+  const bondsInvested = activeBonds.reduce((s, b) => s + (b.faceValue || 0), 0);
 
   // Gold — exclude gifted items, matching what the Gold tab shows
   const ownedGold    = state.goldItems.filter(g => !g.gifted);
