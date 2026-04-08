@@ -238,6 +238,7 @@ export function renderStocksSection() {
 function renderByHoldingView() {
   const tbody  = document.getElementById('stockTableBody');
   const demat  = document.getElementById('stockDematFilter')?.value || '';
+  const market = document.getElementById('stockMarketFilter')?.value || '';
 
   if (!state.stocks.length) {
     tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No stocks added yet. Click "+ Add Stock" to get started.</td></tr>`;
@@ -245,7 +246,10 @@ function renderByHoldingView() {
     return;
   }
 
-  let rows = [...state.stocks].filter(s => !demat || s.dematAccount === demat);
+  let rows = [...state.stocks].filter(s =>
+    (!demat  || s.dematAccount === demat) &&
+    (!market || s.market === market)
+  );
 
   if (state.stockSortCol) {
     rows.sort((a, b) => {
@@ -343,7 +347,11 @@ function renderByHoldingView() {
 function renderByStockView() {
   const tbody    = document.getElementById('stockTableBody');
   const demat    = document.getElementById('stockDematFilter')?.value || '';
-  const filtered = demat ? state.stocks.filter(s => s.dematAccount === demat) : state.stocks;
+  const market   = document.getElementById('stockMarketFilter')?.value || '';
+  const filtered = state.stocks.filter(s =>
+    (!demat  || s.dematAccount === demat) &&
+    (!market || s.market === market)
+  );
 
   if (!filtered.length) {
     tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No stocks found.</td></tr>`;
@@ -531,6 +539,8 @@ function closeStockModal() {
    EVENT LISTENERS
    ───────────────────────────────────────────────────────────────── */
 export function initStockListeners() {
+  // Market filter
+  document.getElementById('stockMarketFilter').addEventListener('change', renderStocksSection);
   // Demat account filter
   document.getElementById('stockDematFilter').addEventListener('change', renderStocksSection);
 

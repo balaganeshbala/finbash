@@ -40,7 +40,9 @@ export const deleteMF = id => deleteDoc(mfDocRef(state.currentUser.uid, id));
    ───────────────────────────────────────────────────────────────── */
 async function fetchNav(schemeCode) {
   try {
-    const res  = await fetch(`${MFAPI}/${schemeCode}/latest`);
+    // Use the full scheme endpoint (not /latest) — it returns history newest-first,
+    // so data[0] = today's NAV and data[1] = previous trading day's NAV.
+    const res  = await fetch(`${MFAPI}/${schemeCode}`);
     const json = await res.json();
     const data = json.data;
     if (!data?.length) return null;
