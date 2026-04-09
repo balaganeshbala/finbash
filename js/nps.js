@@ -198,42 +198,46 @@ export async function fetchAllNPSNavs() {
   }
 
   try {
-    // Fetch each scheme individually via the proxy (?scheme=SM008001)
-    // Run all requests in parallel
-    const results = await Promise.allSettled(
-      [...toFetch.entries()].map(async ([code]) => {
-        const res = await fetch(`${NPS_PROXY}?scheme=${encodeURIComponent(code)}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-        return { code, nav: json.nav };
-      })
-    );
+    // Single call — proxy fetches npsnav.in/api/latest-min and returns:
+    // { lastUpdated: "07-04-2026", navs: { "SM008001": 51.2367, ... } }
+    const res = await fetch(NPS_PROXY);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    const { lastUpdated, navs } = await res.json();
+
+    // lastUpdated is "DD-MM-YYYY" — parse manually to avoid JS treating it as MM-DD
+    let date = null;
+    if (lastUpdated) {
+      const [dd, mm, yyyy] = lastUpdated.split('-');
+      const d = new Date(+yyyy, +mm - 1, +dd);
+      if (!isNaN(d.getTime())) {
+        date = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' });
+      }
+    }
 
     state.npsNavs = {};
-    let fetched = 0;
-    let failed  = 0;
+    let fetched = 0, missing = 0;
 
-    results.forEach((result, i) => {
-      const code = [...toFetch.keys()][i];
-      const { fundManager, tier, assetClass } = toFetch.get(code);
-      const key = `${fundManager}|${tier}|${assetClass}`;
-
-      if (result.status === 'fulfilled' && result.value.nav > 0) {
-        state.npsNavs[key] = { nav: result.value.nav, date: new Date().toLocaleDateString('en-IN') };
+    for (const [code, { fundManager, tier, assetClass }] of toFetch) {
+      const nav = navs[code];
+      if (nav != null && nav > 0) {
+        state.npsNavs[`${fundManager}|${tier}|${assetClass}`] = { nav, date };
         fetched++;
       } else {
-        console.warn(`NPS NAV fetch failed for ${code}:`, result.reason);
-        failed++;
+        console.warn(`No NAV in API response for scheme code: ${code}`);
+        missing++;
       }
-    });
+    }
 
     renderNPSSection();
     window.__renderOverview?.();
 
-    if (failed > 0 && fetched === 0) {
-      toast('Could not fetch NPS NAV. Check your connection.', 'error');
-    } else if (failed > 0) {
-      toast(`NAV updated for ${fetched} scheme(s). ${failed} could not be fetched.`, 'warn');
+    if (fetched === 0) {
+      toast('Could not match any NPS schemes. Check scheme codes.', 'error');
+    } else if (missing > 0) {
+      toast(`NAV updated for ${fetched} scheme(s). ${missing} scheme code(s) not found in API.`, 'warn');
     }
   } catch (e) {
     console.warn('NPS NAV fetch failed:', e);
@@ -385,9 +389,14 @@ function renderNPSTable() {
 
     const navDate    = liveNavDate(n);
     const isLive     = !!state.npsNavs[`${n.fundManager}|${n.tier}|${n.assetClass}`];
-    const navDateStr = navDate
-      ? (isLive ? navDate : new Date(navDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' }))
-      : null;
+    // Parse date robustly — API may return "07-Apr-2026", "2026-04-07", or a locale string
+    let navDateStr = null;
+    if (navDate) {
+      const d = new Date(navDate);
+      navDateStr = isNaN(d.getTime())
+        ? navDate   // unrecognised format — display as-is
+        : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' });
+    }
 
     return `<tr>
       <td style="color:#94a3b8;font-size:11px">${i + 1}</td>
@@ -404,7 +413,7 @@ function renderNPSTable() {
       <td class="num">
         ${nav
           ? `<span style="font-weight:600">₹${nav.toFixed(4)}</span>
-             ${isLive ? `<div style="font-size:10px;color:#059669;margin-top:2px">● live${navDateStr ? ` · ${navDateStr}` : ''}</div>` : navDateStr ? `<div style="font-size:10px;color:#94a3b8;margin-top:2px">as of ${navDateStr}</div>` : ''}`
+             ${navDateStr ? `<div style="font-size:10px;color:#94a3b8;margin-top:2px">as on ${navDateStr}</div>` : ''}`
           : `<span style="font-size:11px;color:#94a3b8">—</span>`}
       </td>
       <td class="num">${inv > 0 ? fmt(Math.round(inv)) : '—'}</td>
@@ -581,21 +590,22 @@ async function fetchAndFillModalNAV(schemeCode) {
   const dateInput = document.getElementById('npsf-navDate');
   if (!navInput || !dateInput) return;
 
-  // Show a subtle loading indicator in the NAV field
   navInput.placeholder = 'Fetching…';
 
   try {
-    const res  = await fetch(`${NPS_PROXY}?scheme=${encodeURIComponent(schemeCode)}`);
+    // Reuse the same single-call endpoint — look up the scheme in the navs map
+    const res = await fetch(NPS_PROXY);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
-    if (json.nav && json.nav > 0) {
-      navInput.value  = json.nav;
-      // Use today's date in YYYY-MM-DD format (local time)
-      const today = new Date();
-      const yy  = today.getFullYear();
-      const mm  = String(today.getMonth() + 1).padStart(2, '0');
-      const dd  = String(today.getDate()).padStart(2, '0');
-      dateInput.value = `${yy}-${mm}-${dd}`;
+    const { lastUpdated, navs } = await res.json();
+
+    const nav = navs?.[schemeCode.toUpperCase()];
+    if (nav && nav > 0) {
+      navInput.value = nav;
+      // Parse "DD-MM-YYYY" → YYYY-MM-DD for the date input
+      if (lastUpdated) {
+        const [dd, mm, yyyy] = lastUpdated.split('-');
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+      }
     }
   } catch (e) {
     console.warn('Modal NAV fetch failed for', schemeCode, e);

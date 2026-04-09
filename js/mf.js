@@ -193,7 +193,7 @@ export function renderMFSection() {
   const inv = sel?.value || '';
 
   if (!state.mfs.length) {
-    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No mutual funds added yet</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No mutual funds added yet</td></tr>`;
     document.getElementById('mfTableCount').textContent = '';
     return;
   }
@@ -205,7 +205,10 @@ export function renderMFSection() {
       let va, vb;
       const na = state.mfNavs[a.schemeCode];
       const nb = state.mfNavs[b.schemeCode];
-      if (state.mfSortCol === 'dayChange') {
+      if (state.mfSortCol === 'lastNav') {
+        va = na?.nav ?? 0;
+        vb = nb?.nav ?? 0;
+      } else if (state.mfSortCol === 'dayChange') {
         va = (na?.prevNav) ? (a.units || 0) * (na.nav - na.prevNav) : 0;
         vb = (nb?.prevNav) ? (b.units || 0) * (nb.nav - nb.prevNav) : 0;
       } else if (state.mfSortCol === 'invested') {
@@ -277,6 +280,7 @@ export function renderMFSection() {
       </td>
       <td class="num">${(m.units || 0).toFixed(3)}</td>
       <td class="num">${m.avgBuyNav ? Number(m.avgBuyNav).toFixed(3) : '—'}</td>
+      <td class="num">${nav ? Number(nav.nav).toFixed(3) : '<span style="color:#94a3b8;font-size:11px">—</span>'}</td>
       <td class="num">${dayChangeCell}</td>
       <td class="num">${invested > 0 ? fmt(Math.round(invested)) : '—'}</td>
       <td class="num" style="font-weight:700">${cv != null ? fmt(Math.round(cv)) : '—'}</td>
