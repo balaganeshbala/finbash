@@ -470,11 +470,13 @@ function renderNPSYearlyBreakdown() {
     const subset = npsList.filter(n => (n.pran || 'Unknown') === targetPran);
     const subName = subset[0]?.subscriberName || 'Unknown';
 
-    // Aggregate annualContributions across all schemes in this subset
+    // Aggregate annualContributions across all schemes in this subset.
+    // Normalise keys: legacy ISO-date keys ("2023-09-30") → FY key ("2023-24").
     const yearMap = {};
     subset.forEach(n => {
       if (!n.annualContributions) return;
-      Object.entries(n.annualContributions).forEach(([year, data]) => {
+      Object.entries(n.annualContributions).forEach(([rawYear, data]) => {
+        const year = /^\d{4}-\d{2}$/.test(rawYear) ? rawYear : (dateToFY(rawYear) || rawYear);
         if (!yearMap[year]) yearMap[year] = { voluntary: 0, employer: 0, switchIn: 0, switchOut: 0, charges: 0, net: 0 };
         if (typeof data === 'object') {
           yearMap[year].voluntary += data.voluntary || 0;
@@ -511,10 +513,16 @@ function renderNPSYearlyBreakdown() {
       totNet       += yearMap[y].net;
     });
 
-    // "2022-03-31" → "FY 2021–22"
-    function fyLabel(iso) {
-      const yr = parseInt(iso.slice(0, 4), 10);
-      const mo = parseInt(iso.slice(5, 7), 10);
+    // Accepts new FY key "2023-24" or legacy ISO date "2022-03-31" → "FY 2021–22"
+    function fyLabel(key) {
+      // New format: "YYYY-YY" e.g. "2023-24"
+      if (/^\d{4}-\d{2}$/.test(key)) {
+        const [startYr, endYY] = key.split('-');
+        return `FY ${startYr}–${endYY}`;
+      }
+      // Legacy: ISO date string "YYYY-MM-DD"
+      const yr = parseInt(key.slice(0, 4), 10);
+      const mo = parseInt(key.slice(5, 7), 10);
       const endYY = mo <= 3 ? yr : yr + 1;
       return `FY ${endYY - 1}–${String(endYY).slice(2)}`;
     }
@@ -812,9 +820,23 @@ function parseNPSCsv(text) {
   return result;
 }
 
+// Convert an ISO date "2023-09-30" → Indian financial year key "2023-24"
+// April (mo 4) – March (mo 3): months 4-12 belong to the FY that starts that calendar year.
+function dateToFY(isoDate) {
+  if (!isoDate) return null;
+  const d = new Date(isoDate);
+  if (isNaN(d.getTime())) return null;
+  const yr = d.getFullYear();
+  const mo = d.getMonth() + 1; // 1-12
+  return mo >= 4
+    ? `${yr}-${String(yr + 1).slice(-2)}`
+    : `${yr - 1}-${String(yr).slice(-2)}`;
+}
+
 // Merge results from multiple years into one record per scheme.
 // Units + NAV come from the most recent statement.
-// Contributions are stored per statement date so re-imports never double-count.
+// Contributions are keyed by financial year ("2023-24") so a partial statement
+// and a full-year statement for the same FY overwrite the same entry.
 function mergeYears(parsedFiles) {
   // Sort oldest → newest so the last write wins for units/NAV
   parsedFiles.sort((a, b) => (a.navDate || '') < (b.navDate || '') ? -1 : 1);
@@ -831,14 +853,15 @@ function mergeYears(parsedFiles) {
       map[key].units   = data.units;
       map[key].nav     = data.nav;
       map[key].navDate = file.navDate;
-      // Store per-year breakdown — re-importing same year just overwrites its own key
-      if (file.navDate) {
+      // Key by financial year so partial re-imports for the same FY overwrite the same entry
+      const fyKey = dateToFY(file.navDate);
+      if (fyKey) {
         const voluntary  = data.voluntary  || 0;
         const employer   = data.employer   || 0;
         const switchIn   = data.switchIn   || 0;
         const switchOut  = data.switchOut  || 0;
         const charges    = data.charges    || 0;
-        map[key].annualContributions[file.navDate] = {
+        map[key].annualContributions[fyKey] = {
           voluntary, employer, switchIn, switchOut, charges,
           net: voluntary + employer + switchIn - switchOut,
         };
@@ -868,7 +891,25 @@ function showImportPreview(schemes) {
     const existing       = state.nps.find(n =>
       (n.pran || 'Unknown') === s.pran && n.fundManager === s.fundManager && n.tier === s.tier && n.assetClass === s.assetClass
     );
-    const mergedContribs  = { ...(existing?.annualContributions || {}), ...s.annualContributions };
+    // Normalise any legacy ISO-date keys in existing Firestore data → FY keys before merging
+    const rawExistingP = existing?.annualContributions || {};
+    const normExistingP = {};
+    for (const [k, v] of Object.entries(rawExistingP)) {
+      const nk = /^\d{4}-\d{2}$/.test(k) ? k : (dateToFY(k) || k);
+      if (normExistingP[nk] && typeof normExistingP[nk] === 'object' && typeof v === 'object') {
+        normExistingP[nk] = {
+          voluntary: (normExistingP[nk].voluntary || 0) + (v.voluntary || 0),
+          employer:  (normExistingP[nk].employer  || 0) + (v.employer  || 0),
+          switchIn:  (normExistingP[nk].switchIn  || 0) + (v.switchIn  || 0),
+          switchOut: (normExistingP[nk].switchOut || 0) + (v.switchOut || 0),
+          charges:   (normExistingP[nk].charges   || 0) + (v.charges   || 0),
+          net:       (normExistingP[nk].net       || 0) + (v.net       || 0),
+        };
+      } else {
+        normExistingP[nk] = v;
+      }
+    }
+    const mergedContribs  = { ...normExistingP, ...s.annualContributions };
     const mergedTotal     = Object.values(mergedContribs).reduce((sum, yr) => {
       if (typeof yr === 'object') return sum + (yr.net !== undefined ? yr.net : (yr.voluntary || 0));
       return sum + yr;
@@ -936,9 +977,27 @@ async function confirmImport() {
       );
 
       // Merge this import's per-year contributions with whatever is already stored.
-      // Existing years are preserved; the newly imported years overwrite their own keys
-      // (so re-importing the same statement never double-counts).
-      const existingContribs  = existing?.annualContributions || {};
+      // Migrate any legacy ISO-date keys (e.g. "2023-09-30") in existing Firestore data
+      // to FY keys ("2023-24") so they merge correctly with the new import's FY-keyed data.
+      const rawExisting = existing?.annualContributions || {};
+      const existingContribs = {};
+      for (const [k, v] of Object.entries(rawExisting)) {
+        const normalised = /^\d{4}-\d{2}$/.test(k) ? k : (dateToFY(k) || k);
+        // If two legacy keys map to the same FY, accumulate rather than overwrite
+        if (existingContribs[normalised] && typeof existingContribs[normalised] === 'object' && typeof v === 'object') {
+          existingContribs[normalised] = {
+            voluntary: (existingContribs[normalised].voluntary || 0) + (v.voluntary || 0),
+            employer:  (existingContribs[normalised].employer  || 0) + (v.employer  || 0),
+            switchIn:  (existingContribs[normalised].switchIn  || 0) + (v.switchIn  || 0),
+            switchOut: (existingContribs[normalised].switchOut || 0) + (v.switchOut || 0),
+            charges:   (existingContribs[normalised].charges   || 0) + (v.charges   || 0),
+            net:       (existingContribs[normalised].net       || 0) + (v.net       || 0),
+          };
+        } else {
+          existingContribs[normalised] = v;
+        }
+      }
+      // New import keys are already FY-keyed (from mergeYears); overwrite existing FY entry
       const mergedContribs    = { ...existingContribs, ...s.annualContributions };
       const totalContributed  = Object.values(mergedContribs).reduce((sum, yr) => {
         if (typeof yr === 'object') return sum + (yr.net !== undefined ? yr.net : (yr.voluntary || 0));
