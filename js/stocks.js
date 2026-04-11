@@ -21,7 +21,7 @@ async function fetchPriceForTicker(sym) {
     const meta = json?.chart?.result?.[0]?.meta;
     if (meta?.regularMarketPrice != null) return {
       price:     meta.regularMarketPrice,
-      prevClose: meta.chartPreviousClose ?? meta.previousClose ?? null,
+      prevClose: meta.previousClose ?? meta.chartPreviousClose ?? null,
       name:      meta.shortName || meta.longName || '',
     };
   } catch { /* network / parse error */ }
@@ -241,7 +241,7 @@ function renderByHoldingView() {
   const market = document.getElementById('stockMarketFilter')?.value || '';
 
   if (!state.stocks.length) {
-    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No stocks added yet. Click "+ Add Stock" to get started.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No stocks added yet. Click "+ Add Stock" to get started.</td></tr>`;
     document.getElementById('stockTableCount').textContent = '';
     return;
   }
@@ -272,6 +272,10 @@ function renderByHoldingView() {
         const cB = pb?.price ? (b.shares||0)*pb.price : iB;
         va = iA > 0 ? (cA-iA)/iA : 0; vb = iB > 0 ? (cB-iB)/iB : 0;
       }
+      else if (state.stockSortCol === 'dayChange') {
+        va = pa?.price && pa.prevClose ? (pa.price - pa.prevClose) / pa.prevClose : -Infinity;
+        vb = pb?.price && pb.prevClose ? (pb.price - pb.prevClose) / pb.prevClose : -Infinity;
+      }
       else { va = a[state.stockSortCol] ?? ''; vb = b[state.stockSortCol] ?? ''; }
       if (typeof va === 'string') va = va.toLowerCase();
       if (typeof vb === 'string') vb = vb.toLowerCase();
@@ -295,12 +299,18 @@ function renderByHoldingView() {
     const retPct   = invested > 0 && gain != null ? (gain / invested) * 100 : null;
     const gainCol  = gain != null ? (gain >= 0 ? '#059669' : '#ef4444') : '#94a3b8';
 
-    let dayChange = '';
+    let dayChangeTd = `<td class="num"><span style="color:#94a3b8;font-size:11px">—</span></td>`;
     if (p?.price && p.prevClose) {
-      const diff = p.price - p.prevClose;
-      const pct  = (diff / p.prevClose) * 100;
-      const col  = diff >= 0 ? '#059669' : '#ef4444';
-      dayChange  = `<div style="font-size:10px;color:${col};margin-top:2px">${diff >= 0 ? '+' : ''}${cur}${Math.abs(diff).toFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</div>`;
+      const diff      = p.price - p.prevClose;              // native currency ($ or ₹)
+      const pct       = (diff / p.prevClose) * 100;
+      const totalDiff = (s.shares || 0) * diff;             // native currency total (no FX)
+      const col       = diff >= 0 ? '#059669' : '#ef4444';
+      const diffStr   = isUS
+        ? `${totalDiff >= 0 ? '+' : ''}${cur}${Math.abs(totalDiff).toFixed(2)}`
+        : `${totalDiff >= 0 ? '+' : ''}${fmt(Math.round(totalDiff))}`;
+      dayChangeTd = `<td class="num" style="color:${col};font-weight:600">${diffStr}
+        <div style="font-size:10px">${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%</div>
+      </td>`;
     }
 
     return `<tr>
@@ -316,8 +326,8 @@ function renderByHoldingView() {
         ${p?.price
           ? `<span style="font-weight:600">${cur}${p.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>`
           : `<span style="color:#94a3b8;font-size:11px">—</span>`}
-        ${dayChange}
       </td>
+      ${dayChangeTd}
       <td class="num">${invested > 0 ? fmt(Math.round(invested)) : '—'}</td>
       <td class="num" style="font-weight:700">${cv != null ? fmt(Math.round(cv)) : (isUS && !state.usdInrRate ? '<span style="font-size:10px;color:#94a3b8">No FX rate</span>' : '—')}</td>
       <td class="num" style="font-weight:600;color:${gainCol}">${gain != null ? (gain >= 0 ? '+' : '') + fmt(Math.round(gain)) : '—'}</td>
@@ -354,7 +364,7 @@ function renderByStockView() {
   );
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No stocks found.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No stocks found.</td></tr>`;
     document.getElementById('stockTableCount').textContent = '';
     return;
   }
@@ -387,12 +397,18 @@ function renderByStockView() {
     const retPct = totalInvested > 0 && gain != null ? (gain / totalInvested) * 100 : null;
     const gainCol = gain != null ? (gain >= 0 ? '#059669' : '#ef4444') : '#94a3b8';
 
-    let dayChange = '';
+    let dayChangeTd = `<td class="num"><span style="color:#94a3b8;font-size:11px">—</span></td>`;
     if (p?.price && p.prevClose) {
-      const diff = p.price - p.prevClose;
-      const pct  = (diff / p.prevClose) * 100;
-      const col  = diff >= 0 ? '#059669' : '#ef4444';
-      dayChange  = `<div style="font-size:10px;color:${col};margin-top:2px">${diff >= 0 ? '+' : ''}${cur}${Math.abs(diff).toFixed(2)} (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)</div>`;
+      const diff      = p.price - p.prevClose;              // native currency ($ or ₹)
+      const pct       = (diff / p.prevClose) * 100;
+      const totalDiff = totalShares * diff;                  // native currency total (no FX)
+      const col       = diff >= 0 ? '#059669' : '#ef4444';
+      const diffStr   = isUS
+        ? `${totalDiff >= 0 ? '+' : ''}${cur}${Math.abs(totalDiff).toFixed(2)}`
+        : `${totalDiff >= 0 ? '+' : ''}${fmt(Math.round(totalDiff))}`;
+      dayChangeTd = `<td class="num" style="color:${col};font-weight:600">${diffStr}
+        <div style="font-size:10px">${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%</div>
+      </td>`;
     }
 
     // Sub-rows per holding (indented)
@@ -407,6 +423,7 @@ function renderByStockView() {
         <td style="padding-left:24px;font-size:11.5px;color:#64748b">${h.dematAccount || '—'}</td>
         <td class="num" style="font-size:11.5px">${(h.shares || 0).toLocaleString('en-IN')}</td>
         <td class="num" style="font-size:11.5px">${cur}${(h.avgBuyPrice || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
+        <td></td>
         <td></td>
         <td class="num" style="font-size:11.5px">${hInv > 0 ? fmt(Math.round(hInv)) : '—'}</td>
         <td class="num" style="font-size:11.5px;font-weight:600">${hCv != null ? fmt(Math.round(hCv)) : '—'}</td>
@@ -431,8 +448,8 @@ function renderByStockView() {
           ${p?.price
             ? `<span style="font-weight:600">${cur}${p.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>`
             : `<span style="color:#94a3b8;font-size:11px">—</span>`}
-          ${dayChange}
         </td>
+        ${dayChangeTd}
         <td class="num">${totalInvested > 0 ? fmt(Math.round(totalInvested)) : '—'}</td>
         <td class="num" style="font-weight:700">${cv != null ? fmt(Math.round(cv)) : '—'}</td>
         <td class="num" style="font-weight:600;color:${gainCol}">
@@ -459,7 +476,7 @@ function renderStocksTotals(holdings) {
 
   if (!holdings.length) { tfoot.innerHTML = ''; return; }
 
-  let totalInvested = 0, totalCurrent = 0;
+  let totalInvested = 0, totalCurrent = 0, totalDayPL = 0, hasDayPL = false;
   holdings.forEach(s => {
     const isUS = s.market === 'US';
     const fx   = isUS ? (state.usdInrRate || 0) : 1;
@@ -467,24 +484,34 @@ function renderStocksTotals(holdings) {
     totalInvested += inv;
     const p = state.stockPrices[tickerSym(s)];
     totalCurrent += p?.price ? (s.shares || 0) * p.price * fx : inv;
+    if (p?.price && p.prevClose) {
+      totalDayPL += (s.shares || 0) * (p.price - p.prevClose) * fx;
+      hasDayPL = true;
+    }
   });
 
   const gain   = totalCurrent - totalInvested;
   const retPct = totalInvested > 0 ? (gain / totalInvested) * 100 : 0;
   const col    = gain >= 0 ? '#059669' : '#ef4444';
+  const dayCol = totalDayPL >= 0 ? '#059669' : '#ef4444';
   const isVM   = state.isViewMode;
   const viewMode = state.stockViewMode || 'holding';
 
-  // colspan before "Invested" differs by view
-  const leadCols = viewMode === 'stock' ? 5 : 6;
+  // leadCols covers everything up to (but not including) Today's P&L
+  const leadCols  = viewMode === 'stock' ? 5 : 6;
   const trailCols = viewMode === 'stock' ? 0 : (isVM ? 0 : 1);
+
+  const dayPLCell = hasDayPL
+    ? `<td class="num" style="padding:10px 12px;color:${dayCol}">${totalDayPL >= 0 ? '+' : ''}${fmt(Math.round(totalDayPL))}</td>`
+    : `<td class="num" style="padding:10px 12px;color:#94a3b8">—</td>`;
 
   tfoot.innerHTML = `<tr style="font-weight:700;border-top:1px solid #909090;">
     <td colspan="${leadCols}" style="padding:10px 12px;font-size:12px;color:#94a3b8;text-align:right">Total</td>
+    ${dayPLCell}
     <td class="num" style="padding:10px 12px">${fmt(Math.round(totalInvested))}</td>
     <td class="num" style="padding:10px 12px">${fmt(Math.round(totalCurrent))}</td>
     <td class="num" style="padding:10px 12px;color:${col}">${gain >= 0 ? '+' : ''}${fmt(Math.round(gain))}</td>
-    ${viewMode === 'holding' ? `<td class="num" style="padding:10px 12px;color:${col}">${retPct >= 0 ? '+' : ''}${retPct.toFixed(2)}%</td>` : `<td class="num" style="padding:10px 12px;color:${col}">${retPct >= 0 ? '+' : ''}${retPct.toFixed(2)}%</td>`}
+    <td class="num" style="padding:10px 12px;color:${col}">${retPct >= 0 ? '+' : ''}${retPct.toFixed(2)}%</td>
     ${trailCols > 0 ? `<td></td>` : ''}
   </tr>`;
 }
@@ -660,6 +687,7 @@ function updateViewHeaders() {
       <th class="num" data-stsort="shares">Total Shares</th>
       <th class="num">Wtd Avg Price</th>
       <th class="num">LTP</th>
+      <th class="num" data-stsort="dayChange">Today's P&amp;L</th>
       <th class="num" data-stsort="invested">Invested</th>
       <th class="num" data-stsort="currentValue">Current Value</th>
       <th class="num" data-stsort="gain">Gain / Loss</th>
@@ -672,6 +700,7 @@ function updateViewHeaders() {
       <th class="num" data-stsort="shares">Shares</th>
       <th class="num" data-stsort="avgBuyPrice">Avg Buy</th>
       <th class="num">LTP</th>
+      <th class="num" data-stsort="dayChange">Today's P&amp;L</th>
       <th class="num" data-stsort="invested">Invested</th>
       <th class="num" data-stsort="currentValue">Current Value</th>
       <th class="num" data-stsort="gain">Gain / Loss</th>
