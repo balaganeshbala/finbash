@@ -2019,6 +2019,16 @@ th[data-mfsort="name"] {
   grid-template-columns: repeat(4, 1fr);
 }
 
+/* ── NPS KPI GRID ── */
+#npsKpiGrid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ── EPF KPI GRID ── */
+#epfKpiGrid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 /* ── STOCK VIEW TOGGLE ── */
 .view-toggle {
   display: flex;
@@ -2327,6 +2337,65 @@ th[data-mfsort="name"] {
 .overview-total-row td.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+/* ── PORTFOLIO HISTORY CHART ── */
+.portfolio-history-card {
+  margin-top: 16px;
+}
+
+.portfolio-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.period-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.period-btn {
+  padding: 5px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  background: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1.4;
+}
+
+.period-btn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.period-btn.active {
+  background: #1e40af;
+  border-color: #1e40af;
+  color: white;
+}
+
+#portfolio-history-chart {
+  max-height: 300px;
+}
+
+@media(max-width: 600px) {
+  .portfolio-history-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .period-btn {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
 }
 
 .overview-dot {

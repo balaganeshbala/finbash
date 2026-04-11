@@ -1,5 +1,6 @@
-import { state } from './state.js';
-import { fmt }   from './utils.js';
+import { state }                                      from './state.js';
+import { fmt }                                         from './utils.js';
+import { saveSnapshotIfNeeded, fetchSnapshots }        from './snapshots.js';
 
 /* ─────────────────────────────────────────────────────────────────
    HELPERS — inline the same formulas used per-tab so we don't need
@@ -137,15 +138,21 @@ function computeAssets() {
 
 /* ─────────────────────────────────────────────────────────────────
    FILTER STATE
+   Full set = "All" selected. Removing a label excludes it.
    ───────────────────────────────────────────────────────────────── */
-// Empty set = "All" (no filter active). Non-empty = only show these labels.
-let _activeFilters = new Set();
+// null = not yet initialised (will be filled with all labels on first render)
+let _activeFilters = null;
 
 function renderFilterBar(allAssets) {
   const el = document.getElementById('overview-filter-bar');
   if (!el) return;
 
-  const allSelected = _activeFilters.size === 0;
+  // Lazy-init: start with everything selected
+  if (_activeFilters === null) {
+    _activeFilters = new Set(allAssets.map(a => a.label));
+  }
+
+  const allSelected = _activeFilters.size === allAssets.length;
 
   el.innerHTML = `
     <button class="overview-chip${allSelected ? ' active' : ''}" data-filter="__all__">All</button>
@@ -160,10 +167,17 @@ function renderFilterBar(allAssets) {
     btn.addEventListener('click', () => {
       const f = btn.dataset.filter;
       if (f === '__all__') {
-        _activeFilters.clear();
+        // Select all chips
+        _activeFilters = new Set(allAssets.map(a => a.label));
       } else {
         if (_activeFilters.has(f)) {
+          // Deselect this chip (and implicitly deselects "All")
           _activeFilters.delete(f);
+          // Keep at least one chip selected
+          if (_activeFilters.size === 0) {
+            _activeFilters.add(f);
+            return; // nothing to change
+          }
         } else {
           _activeFilters.add(f);
         }
@@ -176,7 +190,128 @@ function renderFilterBar(allAssets) {
 }
 
 /* ─────────────────────────────────────────────────────────────────
-   CHART
+   PORTFOLIO HISTORY LINE CHART
+   ───────────────────────────────────────────────────────────────── */
+let _historyChart    = null;
+let _historyPeriod   = '6M';
+let _chartInitialised = false;
+
+function periodToSinceDate(period) {
+  if (period === 'ALL') return null;
+  const d = new Date();
+  const n = parseInt(period);
+  if (period.endsWith('M')) d.setMonth(d.getMonth() - n);
+  else if (period.endsWith('Y')) d.setFullYear(d.getFullYear() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+function fmtSnapshotLabel(iso, period) {
+  const [y, m, d] = iso.split('-');
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m - 1];
+  return period === '1M' ? `${+d} ${mo}` : `${mo} '${y.slice(2)}`;
+}
+
+async function renderPortfolioHistoryChart(period) {
+  _historyPeriod = period || _historyPeriod;
+  const uid = state.currentUser?.uid;
+  const canvas  = document.getElementById('portfolio-history-chart');
+  const emptyEl = document.getElementById('history-chart-empty');
+  const wrapEl  = document.getElementById('history-chart-wrap');
+  if (!canvas || !uid) return;
+
+  // Update active period button
+  document.querySelectorAll('#historyPeriodBtns .period-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.period === _historyPeriod));
+
+  const snapshots = await fetchSnapshots(uid, periodToSinceDate(_historyPeriod));
+
+  if (!snapshots.length) {
+    wrapEl.style.display = 'none';
+    emptyEl.style.display = '';
+    return;
+  }
+  wrapEl.style.display = '';
+  emptyEl.style.display = 'none';
+
+  const labels   = snapshots.map(s => fmtSnapshotLabel(s.date, _historyPeriod));
+  const values   = snapshots.map(s => s.totalValue   ?? 0);
+  const invested = snapshots.map(s => s.totalInvested ?? 0);
+
+  const latest    = values[values.length - 1];
+  const latestInv = invested[invested.length - 1];
+  const isGain    = latest >= latestInv;
+  const lineCol   = isGain ? '#059669' : '#ef4444';
+  const fillCol   = isGain ? 'rgba(5,150,105,0.08)' : 'rgba(239,68,68,0.08)';
+  const showDots  = snapshots.length <= 60;
+
+  if (_historyChart) { _historyChart.destroy(); _historyChart = null; }
+
+  _historyChart = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Portfolio Value',
+          data: values,
+          borderColor: lineCol,
+          backgroundColor: fillCol,
+          borderWidth: 2.5,
+          pointRadius: showDots ? 3 : 0,
+          pointHoverRadius: 5,
+          fill: 'origin',
+          tension: 0.35,
+        },
+        {
+          label: 'Invested',
+          data: invested,
+          borderColor: '#94a3b8',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [5, 4],
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          tension: 0.35,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top', align: 'end',
+          labels: { font: { size: 11, weight: '600' }, usePointStyle: true, pointStyleWidth: 8, padding: 16, boxHeight: 8 },
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`,
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11 }, color: '#94a3b8', maxTicksLimit: 8 },
+        },
+        y: {
+          grid: { color: '#f1f5f9' },
+          ticks: {
+            font: { size: 11 }, color: '#94a3b8',
+            callback: v => v >= 1e7 ? '₹' + (v / 1e7).toFixed(1) + 'Cr'
+                        : v >= 1e5 ? '₹' + (v / 1e5).toFixed(1) + 'L'
+                        : v >= 1e3 ? '₹' + (v / 1e3).toFixed(0) + 'K'
+                        : '₹' + v,
+          },
+        },
+      },
+    },
+  });
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   PIE / DOUGHNUT CHART
    ───────────────────────────────────────────────────────────────── */
 let overviewChart = null;
 
@@ -256,13 +391,32 @@ export function renderOverview() {
   const tableEl = document.getElementById('overview-table');
   if (!kpisEl || !tableEl) return;
 
-  // All assets (unfiltered) — used for filter bar chips
+  // All assets (unfiltered) — used for filter bar chips + snapshotting
   const allAssets = computeAssets();
 
-  // Filtered view for KPIs / table / chart
-  const assets = _lastAssets = _activeFilters.size === 0
+  // Save today's snapshot (best-effort, skips if already done today)
+  const snapTotal    = allAssets.reduce((s, a) => s + a.current,  0);
+  const snapInvested = allAssets.reduce((s, a) => s + a.invested, 0);
+  if (snapTotal > 0 && state.currentUser?.uid) {
+    const breakdown = {};
+    allAssets.forEach(a => { breakdown[a.label] = Math.round(a.current); });
+    saveSnapshotIfNeeded(state.currentUser.uid, snapTotal, snapInvested, breakdown);
+  }
+
+  // Filtered view for KPIs / table / pie chart
+  // null check: _activeFilters may not be initialised yet (renderFilterBar does that)
+  const assets = _lastAssets = (!_activeFilters || _activeFilters.size === allAssets.length)
     ? allAssets
     : allAssets.filter(a => _activeFilters.has(a.label));
+
+  // Initialise the history line chart once (async, non-blocking)
+  if (!_chartInitialised && state.currentUser?.uid) {
+    _chartInitialised = true;
+    // Attach period button listeners
+    document.getElementById('historyPeriodBtns')?.querySelectorAll('.period-btn')
+      .forEach(btn => btn.addEventListener('click', () => renderPortfolioHistoryChart(btn.dataset.period)));
+    renderPortfolioHistoryChart(_historyPeriod);
+  }
 
   // Render filter chips (always based on full asset list)
   renderFilterBar(allAssets);
@@ -275,9 +429,10 @@ export function renderOverview() {
   const gainColor = totalGain >= 0 ? '#059669' : '#dc2626';
   const gainSign  = totalGain >= 0 ? '+' : '';
 
-  const kpiSubLabel = _activeFilters.size === 0
+  const allSelected = !_activeFilters || _activeFilters.size === allAssets.length;
+  const kpiSubLabel = allSelected
     ? 'Across all assets'
-    : `${_activeFilters.size} instrument${_activeFilters.size > 1 ? 's' : ''} selected`;
+    : `${_activeFilters.size} of ${allAssets.length} categories selected`;
 
   // Update KPI cards
   kpisEl.innerHTML = `
