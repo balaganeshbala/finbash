@@ -130,9 +130,11 @@ function statusBadge(maturityDate) {
    KPI CARDS
    ───────────────────────────────────────────────────────────────── */
 function renderFDRDKpis() {
-  const totalFDPrincipal = state.fds.reduce((s, f) => s + (f.principal || 0), 0);
-  const totalFDAccrued   = state.fds.reduce((s, f) =>
+  const totalFDPrincipal  = state.fds.reduce((s, f) => s + (f.principal || 0), 0);
+  const totalFDAccrued    = state.fds.reduce((s, f) =>
     s + fdAccruedValue(f.principal, f.interestRate, f.startDate, f.maturityDate), 0);
+  const totalFDMaturity   = state.fds.reduce((s, f) =>
+    s + fdMaturityAmount(f.principal, f.interestRate, f.startDate, f.maturityDate), 0);
   const fdAvgRate = totalFDPrincipal > 0
     ? state.fds.reduce((s, f) => s + (f.principal || 0) * (f.interestRate || 0), 0) / totalFDPrincipal
     : 0;
@@ -149,6 +151,21 @@ function renderFDRDKpis() {
     ? state.rds.reduce((s, r) => s + (r.monthlyAmount || 0) * (r.interestRate || 0), 0) / totalRDMonthly
     : 0;
 
+  // Maturing Soon — FDs + RDs maturing within 90 days
+  const today  = new Date(); today.setHours(0, 0, 0, 0);
+  const soon90 = new Date(today); soon90.setDate(soon90.getDate() + 90);
+  const maturingSoon = [
+    ...state.fds.map(f => ({ date: f.maturityDate,
+      value: fdMaturityAmount(f.principal, f.interestRate, f.startDate, f.maturityDate) })),
+    ...state.rds.map(r => ({ date: r.maturityDate,
+      value: rdMaturityAmount(r.monthlyAmount, r.interestRate, r.startDate, r.maturityDate) })),
+  ].filter(x => {
+    if (!x.date) return false;
+    const d = new Date(x.date);
+    return d >= today && d <= soon90;
+  });
+  const maturingSoonValue = maturingSoon.reduce((s, x) => s + x.value, 0);
+
   const KSVG = (d, s = '#fff') =>
     `<svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:${s};stroke-width:2;stroke-linecap:round;stroke-linejoin:round">${d}</svg>`;
 
@@ -157,41 +174,45 @@ function renderFDRDKpis() {
       icon:  KSVG('<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>'),
       label: 'FD Principal', cls: 'primary',
       value: fmt(Math.round(totalFDPrincipal)),
-      sub:   `${state.fds.length} deposit${state.fds.length !== 1 ? 's' : ''}`,
+      sub:   `${state.fds.length} deposit${state.fds.length !== 1 ? 's' : ''}${fdAvgRate > 0 ? ' · avg ' + fdAvgRate.toFixed(2) + '%' : ''}`,
     },
     {
       icon:  KSVG('<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'),
       label: 'FD Current Value', cls: 'success',
       value: fmt(Math.round(totalFDAccrued)),
       sub:   totalFDPrincipal > 0
-        ? `+${fmt(Math.round(totalFDAccrued - totalFDPrincipal))} accrued`
+        ? `+${fmt(Math.round(totalFDAccrued - totalFDPrincipal))} accrued so far`
         : 'Add FDs to see',
     },
     {
-      icon:  KSVG('<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>', '#f59e0b'),
-      label: 'FD Avg Rate', cls: '',
-      value: fdAvgRate > 0 ? fdAvgRate.toFixed(2) + '%' : '—',
-      sub:   'Weighted by principal',
+      icon:  KSVG('<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'),
+      label: 'FD Total at Maturity', cls: '',
+      value: totalFDMaturity > 0 ? fmt(Math.round(totalFDMaturity)) : '—',
+      sub:   totalFDPrincipal > 0
+        ? `+${fmt(Math.round(totalFDMaturity - totalFDPrincipal))} total interest`
+        : 'Expected at end of tenure',
     },
     {
       icon:  KSVG('<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>'),
       label: 'RD Invested So Far', cls: '',
       value: fmt(Math.round(totalRDInvested)),
-      sub:   `${state.rds.length} RD${state.rds.length !== 1 ? 's' : ''} active`,
+      sub:   `${state.rds.length} RD${state.rds.length !== 1 ? 's' : ''}${rdAvgRate > 0 ? ' · avg ' + rdAvgRate.toFixed(2) + '%' : ''} · ${fmt(totalRDMonthly)}/mo`,
     },
     {
       icon:  KSVG('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),
       label: 'RD Current Value', cls: '',
       value: fmt(Math.round(totalRDAccrued)),
       sub:   totalRDInvested > 0
-        ? `+${fmt(Math.round(totalRDAccrued - totalRDInvested))} accrued`
+        ? `+${fmt(Math.round(totalRDAccrued - totalRDInvested))} accrued so far`
         : 'Add RDs to see',
     },
     {
-      icon:  KSVG('<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>', '#f59e0b'),
-      label: 'RD Avg Rate', cls: '',
-      value: rdAvgRate > 0 ? rdAvgRate.toFixed(2) + '%' : '—',
-      sub:   'Weighted by monthly amt',
+      icon:  KSVG('<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>', '#f59e0b'),
+      label: 'Maturing in 90 Days', cls: maturingSoon.length > 0 ? '' : '',
+      value: maturingSoon.length > 0 ? maturingSoon.length.toString() : '—',
+      sub:   maturingSoon.length > 0
+        ? `${fmt(Math.round(maturingSoonValue))} to be received`
+        : 'No deposits maturing soon',
     },
   ].map(k => `<div class="kpi-card ${k.cls}">
     <div class="kpi-icon">${k.icon}</div>
@@ -292,6 +313,31 @@ export function renderFDSection() {
       </td>` : ''}
     </tr>`;
   }).join('');
+
+  // Footer totals (based on visible/filtered rows)
+  const tfoot = document.getElementById('fdTableFoot');
+  if (sorted.length) {
+    const footPrincipal = sorted.reduce((s, f) => s + (f.principal || 0), 0);
+    const footAccrued   = sorted.reduce((s, f) =>
+      s + fdAccruedValue(f.principal, f.interestRate, f.startDate, f.maturityDate), 0);
+    const footGain      = footAccrued - footPrincipal;
+    const footAvgRate   = footPrincipal > 0
+      ? sorted.reduce((s, f) => s + (f.principal || 0) * (f.interestRate || 0), 0) / footPrincipal
+      : 0;
+    const actionCols    = state.isViewMode ? '' : '<td></td>';
+    tfoot.innerHTML = `<tr class="overview-total-row">
+      <td></td>
+      <td><strong>Total</strong></td>
+      <td class="num"><strong>${fmt(Math.round(footPrincipal))}</strong></td>
+      <td class="num" style="color:#6366f1">${footAvgRate > 0 ? '<strong>' + footAvgRate.toFixed(2) + '%</strong><div style="font-size:10px;font-weight:400;opacity:.6">avg rate</div>' : ''}</td>
+      <td></td><td></td><td></td>
+      <td class="num"><strong>${fmt(Math.round(footAccrued))}</strong></td>
+      <td class="num" style="color:#059669"><strong>+${fmt(Math.round(footGain))}</strong></td>
+      <td></td><td></td>${actionCols}
+    </tr>`;
+  } else {
+    tfoot.innerHTML = '';
+  }
 
   const shown = sorted.length;
   const total = state.fds.length;

@@ -298,9 +298,9 @@ function liveNavDate(n) {
 }
 
 function renderNPSKpis() {
+  // KPIs always show totals across ALL accounts — filter only affects the table
   let totalInvested = 0, totalCurrent = 0, withNav = 0;
-  const npsList = getFilteredNPS();
-  npsList.forEach(n => {
+  state.nps.forEach(n => {
     const inv = n.totalContributed != null ? n.totalContributed : (n.units || 0) * (n.avgBuyNav || 0);
     totalInvested += inv;
     const nav = liveNav(n);
@@ -323,14 +323,14 @@ function renderNPSKpis() {
       icon:  KSVG('<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>'),
       label: 'Total Invested', cls: 'primary',
       value: fmt(Math.round(totalInvested)),
-      sub:   `${npsList.length} scheme${npsList.length !== 1 ? 's' : ''}`,
+      sub:   `${state.nps.length} scheme${state.nps.length !== 1 ? 's' : ''} · all accounts`,
     },
     {
       icon:  KSVG('<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>'),
       label: 'Current Value', cls: 'success',
       value: fmt(Math.round(totalCurrent)),
-      sub:   withNav < npsList.length && npsList.length > 0
-        ? `NAV for ${withNav}/${npsList.length} schemes`
+      sub:   withNav < state.nps.length && state.nps.length > 0
+        ? `NAV for ${withNav}/${state.nps.length} schemes`
         : withNav > 0 ? 'Based on latest NAV' : 'Enter NAV to see value',
     },
     {
