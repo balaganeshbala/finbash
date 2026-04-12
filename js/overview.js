@@ -47,7 +47,8 @@ function rdInstallmentsPaid(startDate) {
 
 function goldCurrentValue(g) {
   const price = g.type === '24K' ? state.goldPrices.price24k : state.goldPrices.price22k;
-  return price > 0 ? (g.weight || 0) * price : 0;
+  // Fall back to invested value (not 0) when price API hasn't loaded yet
+  return price > 0 ? (g.weight || 0) * price : (g.totalInvested || 0);
 }
 
 /* ─────────────────────────────────────────────────────────────────
@@ -193,7 +194,7 @@ function renderFilterBar(allAssets) {
    PORTFOLIO HISTORY LINE CHART
    ───────────────────────────────────────────────────────────────── */
 let _historyChart    = null;
-let _historyPeriod   = '6M';
+let _historyPeriod   = '1M';
 let _chartInitialised = false;
 
 function periodToSinceDate(period) {
@@ -365,6 +366,10 @@ function renderPieChart(assets) {
 // Last computed (filtered) assets — stored so renderOverviewChart() can redraw without recomputing
 let _lastAssets = [];
 
+// Debounced snapshot save — fires 2 s after the last renderOverview() call
+let _snapshotTimer   = null;
+let _pendingSnapshot = null;
+
 // Exported: redraws only the chart on the permanent canvas (call via requestAnimationFrame)
 export function renderOverviewChart() {
   renderPieChart(_lastAssets);
@@ -394,13 +399,22 @@ export function renderOverview() {
   // All assets (unfiltered) — used for filter bar chips + snapshotting
   const allAssets = computeAssets();
 
-  // Save today's snapshot (best-effort, skips if already done today)
+  // Queue a snapshot save 2 s after the last render (prices will have settled by then).
+  // Each new renderOverview() call resets the timer — only the final one fires.
   const snapTotal    = allAssets.reduce((s, a) => s + a.current,  0);
   const snapInvested = allAssets.reduce((s, a) => s + a.invested, 0);
   if (snapTotal > 0 && state.currentUser?.uid) {
     const breakdown = {};
     allAssets.forEach(a => { breakdown[a.label] = Math.round(a.current); });
-    saveSnapshotIfNeeded(state.currentUser.uid, snapTotal, snapInvested, breakdown);
+    _pendingSnapshot = { uid: state.currentUser.uid, snapTotal, snapInvested, breakdown };
+    clearTimeout(_snapshotTimer);
+    _snapshotTimer = setTimeout(async () => {
+      const p = _pendingSnapshot;
+      _pendingSnapshot = null;
+      if (!p) return;
+      const saved = await saveSnapshotIfNeeded(p.uid, p.snapTotal, p.snapInvested, p.breakdown);
+      if (saved && _chartInitialised) renderPortfolioHistoryChart();
+    }, 2000);
   }
 
   // Filtered view for KPIs / table / pie chart

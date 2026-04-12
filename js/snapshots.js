@@ -1,5 +1,5 @@
 import {
-  collection, doc, setDoc, getDocs, query, where, orderBy,
+  collection, doc, setDoc, getDocs, query, where,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { db } from './firebase-init.js';
 
@@ -10,19 +10,20 @@ import { db } from './firebase-init.js';
 
 const snapColRef = uid => collection(db, 'users', uid, 'portfolioSnapshots');
 
-// Track whether we've already saved today in this browser session
+// Track whether we've already saved today — one write per day, no retries
 let _savedDateThisSession = null;
 
 /**
  * Save today's portfolio snapshot to Firestore.
  * - Skips silently if already saved today in this session.
  * - Skips if portfolio has no value yet (prices still loading).
- * - Uses setDoc so re-running overwrites stale same-day data.
+ * - Uses setDoc so a re-run overwrites stale same-day data.
+ * Returns true if a write actually happened.
  */
 export async function saveSnapshotIfNeeded(uid, totalValue, totalInvested, breakdown) {
   const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-  if (_savedDateThisSession === today) return;
-  if (!uid || totalValue <= 0) return;
+  if (!uid || totalValue <= 0) return false;
+  if (_savedDateThisSession === today) return false;  // already saved today
 
   try {
     await setDoc(
@@ -30,24 +31,32 @@ export async function saveSnapshotIfNeeded(uid, totalValue, totalInvested, break
       { date: today, totalValue: Math.round(totalValue), totalInvested: Math.round(totalInvested), breakdown },
     );
     _savedDateThisSession = today;
+    console.info('[snapshots] Snapshot saved for', today, '— value:', Math.round(totalValue));
+    return true;
   } catch (e) {
-    // Snapshots are best-effort — never block the UI
     console.warn('[snapshots] Save failed:', e);
+    return false;
   }
 }
 
 /**
  * Fetch portfolio snapshots from Firestore, sorted oldest → newest.
+ * Sorting is done in JS to avoid needing a Firestore composite index.
  * @param {string}      uid
  * @param {string|null} sinceDate  ISO date "YYYY-MM-DD", or null for all time
  */
 export async function fetchSnapshots(uid, sinceDate = null) {
   if (!uid) return [];
   try {
-    const constraints = [orderBy('date', 'asc')];
-    if (sinceDate) constraints.unshift(where('date', '>=', sinceDate));
-    const snap = await getDocs(query(snapColRef(uid), ...constraints));
-    return snap.docs.map(d => d.data());
+    const col = snapColRef(uid);
+    const q   = sinceDate
+      ? query(col, where('date', '>=', sinceDate))
+      : query(col);
+    const snap = await getDocs(q);
+    const docs = snap.docs.map(d => d.data());
+    // Sort oldest → newest in JS (avoids composite-index requirement on Firestore)
+    docs.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    return docs;
   } catch (e) {
     console.warn('[snapshots] Fetch failed:', e);
     return [];
