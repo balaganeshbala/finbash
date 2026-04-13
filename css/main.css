@@ -1845,7 +1845,9 @@ tbody td {
   }
 
   #goldKpiGrid,
-  #fdKpiGrid {
+  #fdKpiGrid,
+  #npsKpiGrid,
+  #epfKpiGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -1869,7 +1871,9 @@ tbody td {
   }
 
   #goldKpiGrid,
-  #fdKpiGrid {
+  #fdKpiGrid,
+  #npsKpiGrid,
+  #epfKpiGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -2199,18 +2203,11 @@ th[data-mfsort="name"] {
     grid-column: 1;
   }
 
-  #goldKpiGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  #fdKpiGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  #mfKpiGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
+  #goldKpiGrid,
+  #fdKpiGrid,
+  #npsKpiGrid,
+  #epfKpiGrid,
+  #mfKpiGrid,
   #stockKpiGrid {
     grid-template-columns: repeat(2, 1fr);
   }
