@@ -13,7 +13,13 @@ export function toast(msg, type = 'success') {
 // ── Screen switcher ────────────────────────────────────────────────
 export function showSection(id) {
   ['login-screen', 'app-screen'].forEach(s => {
-    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+    // Use '' for app-screen so CSS media query controls the display value (flex on desktop, block on mobile)
+    const show = s === id;
+    if (s === 'app-screen') {
+      document.getElementById(s).style.display = show ? '' : 'none';
+    } else {
+      document.getElementById(s).style.display = show ? 'block' : 'none';
+    }
   });
   if (id === 'login-screen')
     document.getElementById('login-screen').querySelector('.login-screen').style.display = 'flex';

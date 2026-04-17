@@ -61,6 +61,10 @@ if (!isConfigured) {
   };
 
   document.getElementById('btn-logout').addEventListener('click', doSignOut);
+  document.getElementById('sidebar-btn-logout').addEventListener('click', doSignOut);
+  document.getElementById('sidebar-btn-partners').addEventListener('click', () => {
+    document.getElementById('partners-modal').classList.remove('hidden');
+  });
 
   /* ── TAB SWITCHING ── */
   document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -140,7 +144,7 @@ if (!isConfigured) {
     document.getElementById('initial-loader').classList.add('hidden');
 
     if (user) {
-      document.getElementById('app-screen').style.display  = 'block';
+      document.getElementById('app-screen').style.display  = '';
       document.getElementById('login-screen').style.display = 'none';
 
       /* Desktop user info */
@@ -148,6 +152,12 @@ if (!isConfigured) {
       if (user.photoURL) { av.src = user.photoURL; av.style.display = 'block'; }
       else { av.style.display = 'none'; }
       document.getElementById('user-name').textContent = user.displayName || user.email;
+
+      /* Sidebar user info */
+      const sideAv = document.getElementById('sidebar-avatar');
+      if (user.photoURL) { sideAv.src = user.photoURL; sideAv.style.display = 'block'; }
+      else { sideAv.style.display = 'none'; }
+      document.getElementById('sidebar-user-name').textContent = user.displayName || user.email;
 
       /* Mobile user info */
       ['user-avatar-mob', 'mob-avatar'].forEach(id => {
@@ -171,7 +181,7 @@ if (!isConfigured) {
           document.getElementById('view-owner-name').textContent = state.viewOwnerName + "'s";
 
           /* Hide write controls */
-          ['btn-partners', 'mob-btn-partners', 'btn-add-gold', 'btn-add-bond'].forEach(id => {
+          ['btn-partners', 'mob-btn-partners', 'sidebar-btn-partners', 'btn-add-gold', 'btn-add-bond'].forEach(id => {
             document.getElementById(id).style.display = 'none';
           });
           document.getElementById('th-actions').style.display  = 'none';
@@ -191,7 +201,7 @@ if (!isConfigured) {
           document.getElementById('view-banner').style.display = 'none';
 
           /* Restore write controls */
-          ['btn-partners', 'mob-btn-partners', 'btn-add-gold', 'btn-add-bond'].forEach(id => {
+          ['btn-partners', 'mob-btn-partners', 'sidebar-btn-partners', 'btn-add-gold', 'btn-add-bond'].forEach(id => {
             document.getElementById(id).style.display = '';
           });
           document.getElementById('th-actions').style.display  = '';

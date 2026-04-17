@@ -131,8 +131,14 @@
       Viewing <span id="view-owner-name">portfolio</span> &nbsp;—&nbsp; Read Only
     </div>
 
-    <!-- Tab Navigation -->
+    <!-- Tab Navigation (mobile) / Sidebar (desktop) -->
     <div class="tab-bar">
+      <!-- Sidebar logo — shown only in desktop sidebar mode -->
+      <div class="sidebar-logo">
+        <img src="favicon.svg" alt="FinBash" style="width:32px;height:32px;border-radius:7px">
+        <span>FinBash</span>
+      </div>
+
       <button class="tab-btn active" data-tab="overview">
         <svg viewBox="0 0 24 24">
           <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -153,7 +159,6 @@
         </svg>
         Bonds
       </button>
-
       <button class="tab-btn" data-tab="gold">
         <svg viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10" />
@@ -196,12 +201,38 @@
         </svg>
         EPF
       </button>
+
+      <!-- Sidebar footer (desktop only) -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-row">
+          <img id="sidebar-avatar" class="user-avatar" src="" alt="" style="display:none">
+          <span class="sidebar-user-name" id="sidebar-user-name"></span>
+        </div>
+        <div class="sidebar-btn-row">
+          <button id="sidebar-btn-partners" class="btn-sidebar-action">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">
+              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 00-3-3.87" />
+              <path d="M16 3.13a4 4 0 010 7.75" />
+            </svg>Partners
+          </button>
+          <button id="sidebar-btn-logout" class="btn-sidebar-action btn-sidebar-danger">
+            <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>Sign Out
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="container">
 
       <!-- ── OVERVIEW TAB ── -->
       <div id="tab-overview" class="tab-panel active">
+        <h2 class="page-title">Overview</h2>
 
         <!-- Skeleton shown while Firestore data is loading -->
         <div id="overview-loading">
@@ -256,6 +287,7 @@
 
       <!-- ── BONDS TAB ── -->
       <div id="tab-bonds" class="tab-panel">
+        <h2 class="page-title">Bonds</h2>
 
         <!-- Loading -->
         <div id="loading-state" class="loading-state">
@@ -379,6 +411,7 @@
 
       <!-- ── GOLD TAB ── -->
       <div id="tab-gold" class="tab-panel">
+        <h2 class="page-title">Gold</h2>
 
         <!-- Gold Loading -->
         <div id="gold-loading" class="loading-state">
@@ -503,6 +536,7 @@
       <!-- FD & RD TAB                                               -->
       <!-- ══════════════════════════════════════════════════════════ -->
       <div id="tab-fd" class="tab-panel">
+        <h2 class="page-title">Deposits</h2>
 
         <!-- KPI Cards -->
         <div class="kpi-grid" id="fdKpiGrid" style="margin-bottom:22px"></div>
@@ -584,6 +618,7 @@
       <!-- MUTUAL FUNDS TAB                                           -->
       <!-- ══════════════════════════════════════════════════════════ -->
       <div id="tab-mf" class="tab-panel">
+        <h2 class="page-title">Mutual Funds</h2>
 
         <!-- KPI Cards -->
         <div class="kpi-grid" id="mfKpiGrid" style="margin-bottom:22px"></div>
@@ -637,6 +672,7 @@
       <!-- STOCKS TAB                                                 -->
       <!-- ══════════════════════════════════════════════════════════ -->
       <div id="tab-stocks" class="tab-panel">
+        <h2 class="page-title">Stocks</h2>
 
         <!-- KPI Cards -->
         <div class="kpi-grid" id="stockKpiGrid" style="margin-bottom:22px"></div>
@@ -699,6 +735,7 @@
       <!-- NPS TAB                                                    -->
       <!-- ══════════════════════════════════════════════════════════ -->
       <div id="tab-nps" class="tab-panel">
+        <h2 class="page-title">NPS</h2>
 
         <!-- KPI Cards -->
         <div class="kpi-grid" id="npsKpiGrid" style="margin-bottom:22px"></div>
@@ -760,6 +797,7 @@
 
       <!-- ── EPF TAB ── -->
       <div id="tab-epf" class="tab-panel">
+        <h2 class="page-title">EPF</h2>
 
         <!-- KPI cards -->
         <div class="kpi-grid" id="epfKpiGrid"></div>

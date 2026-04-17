@@ -194,7 +194,7 @@ code {
 
 /* ── APP HEADER ── */
 .header {
-  background: linear-gradient(135deg, #0f172a, #1a3a6b, #1e40af);
+  background: #0f172a;
   color: white;
   padding: 16px 40px;
   display: flex;
@@ -642,7 +642,7 @@ code {
   align-items: center;
   justify-content: center;
   gap: 20px;
-  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 60%, #2563eb 100%);
+  background: #0f172a;
 }
 
 #initial-loader .init-logo svg {
@@ -2484,5 +2484,251 @@ th[data-mfsort="name"] {
     margin-left: 8px !important;
     margin-right: 8px !important;
     padding: 14px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SIDEBAR NAVIGATION  (desktop ≥ 1101 px)
+   ═══════════════════════════════════════════════════════ */
+
+/* Hidden by default — shown only in desktop sidebar */
+.sidebar-logo,
+.sidebar-footer {
+  display: none;
+}
+
+/* Page titles inside tab panels — hidden on mobile */
+.page-title {
+  display: none;
+}
+
+@media (min-width: 1101px) {
+
+  /* ── App shell: CSS Grid — sidebar col 1, content col 2 ── */
+  /* JS sets style.display='' to show (CSS takes over) and style.display='none' to hide */
+  #app-screen {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    min-height: 100vh;
+    align-items: start;
+  }
+
+  /* ── Sidebar: explicitly placed in col 1, spans all rows ── */
+  .tab-bar {
+    grid-column: 1;
+    grid-row: 1 / span 100;
+    align-self: stretch;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    background: #0f172a;
+    border-bottom: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 0;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    gap: 0;
+    z-index: 50;
+  }
+
+  .tab-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── All other elements: explicitly placed in col 2 ── */
+  .header,
+  #mobile-menu,
+  #view-banner,
+  .container {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  /* ── Page title (first child of each tab panel) ── */
+  .page-title {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.4px;
+    margin: 0 0 22px;
+  }
+
+  /* ── Sidebar logo header ── */
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 18px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    margin-bottom: 6px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo img {
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo span {
+    font-size: 16px;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+  }
+
+  /* ── Nav items ── */
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 11px 18px 11px 16px;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+    border-radius: 0;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 0;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 11px;
+  }
+
+  .tab-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .tab-btn.active {
+    color: white;
+    background: rgba(59, 130, 246, 0.15);
+    border-bottom-color: transparent;
+    border-left-color: #3b82f6;
+  }
+
+  .tab-btn svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ── Topbar: slimmer, logo in sidebar so hide it here ── */
+  .header {
+    padding: 11px 32px;
+  }
+
+  /* Hide the logo+title (shown in sidebar instead) */
+  .header h1 {
+    display: none;
+  }
+
+  /* The date sub-label stays visible; remove the top margin since h1 is gone */
+  .header-sub {
+    margin-top: 0;
+    font-size: 12.5px;
+    opacity: 0.7;
+  }
+
+  /* User info in topbar is redundant with sidebar footer — hide it */
+  .header-right {
+    display: none;
+  }
+
+  /* Mobile elements not needed on desktop */
+  .header-mobile {
+    display: none;
+  }
+
+  #mobile-menu {
+    display: none !important;
+  }
+
+  /* Container fills column 2 fully — no centering, no max-width cap */
+  .container {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 24px 32px;
+    box-sizing: border-box;
+  }
+
+  .view-banner {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  /* ── Sidebar footer ── */
+  .sidebar-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 14px 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+
+  .sidebar-user-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 2px;
+    overflow: hidden;
+  }
+
+  .sidebar-user-row .user-avatar {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-user-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sidebar-btn-row {
+    display: flex;
+    gap: 6px;
+  }
+
+  .btn-sidebar-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 6px 8px;
+    border-radius: 7px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-sidebar-action:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: white;
+  }
+
+  .btn-sidebar-danger {
+    color: rgba(248, 113, 113, 0.8);
+    border-color: rgba(248, 113, 113, 0.2);
+  }
+
+  .btn-sidebar-danger:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
   }
 }
