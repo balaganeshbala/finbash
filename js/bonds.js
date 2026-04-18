@@ -74,7 +74,6 @@ export function renderDashboard() {
     { icon: KSVG('<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>', '#8b5cf6'),              label: 'Avg YTM',          value: avgYTM.toFixed(2) + '%',         sub: 'Yield to maturity',                  cls: '' },
     { icon: KSVG('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>', '#f59e0b'),                              label: 'Avg Coupon',       value: avgCoupon.toFixed(2) + '%',      sub: 'Across active holdings',             cls: '' },
   ].map(k => `<div class="kpi-card ${k.cls}">
-    <div class="kpi-icon">${k.icon}</div>
     <div class="kpi-label">${k.label}</div>
     <div class="kpi-value">${k.value}</div>
     <div class="kpi-sub">${k.sub}</div>

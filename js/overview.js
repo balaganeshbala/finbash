@@ -370,6 +370,41 @@ let _lastAssets = [];
 let _snapshotTimer   = null;
 let _pendingSnapshot = null;
 
+// Previous-day snapshot for 1D change KPI
+let _prevSnapshot        = null;   // { date, totalValue, totalInvested }
+let _prevSnapshotFetched = false;
+
+function _getYesterday() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function _fmtShortDate(iso) {
+  const [, m, d] = iso.split('-');
+  const mo = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m - 1];
+  return `${+d} ${mo}`;
+}
+
+async function loadPrevSnapshot(uid) {
+  if (_prevSnapshotFetched) return;
+  _prevSnapshotFetched = true;
+
+  const today = new Date().toISOString().slice(0, 10);
+  // Look back up to 30 days for the most recent snapshot strictly before today
+  const since = new Date();
+  since.setDate(since.getDate() - 30);
+  const sinceStr = since.toISOString().slice(0, 10);
+
+  const snapshots = await fetchSnapshots(uid, sinceStr);
+  const prev = [...snapshots].reverse().find(s => s.date < today);
+  if (prev) {
+    _prevSnapshot = prev;
+    // Re-render KPIs now that we have yesterday's data
+    if (state.activeTab === 'overview') renderOverview();
+  }
+}
+
 // Exported: redraws only the chart on the permanent canvas (call via requestAnimationFrame)
 export function renderOverviewChart() {
   renderPieChart(_lastAssets);
@@ -430,6 +465,8 @@ export function renderOverview() {
     document.getElementById('historyPeriodBtns')?.querySelectorAll('.period-btn')
       .forEach(btn => btn.addEventListener('click', () => renderPortfolioHistoryChart(btn.dataset.period)));
     renderPortfolioHistoryChart(_historyPeriod);
+    // Load yesterday's snapshot for 1D change KPI (non-blocking)
+    loadPrevSnapshot(state.currentUser.uid);
   }
 
   // Render filter chips (always based on full asset list)
@@ -448,6 +485,24 @@ export function renderOverview() {
     ? 'Across all assets'
     : `${_activeFilters.size} of ${allAssets.length} categories selected`;
 
+  // 1D Change — compare full portfolio value vs most recent previous snapshot
+  let oneDayCard = '';
+  if (_prevSnapshot) {
+    const prevVal   = _prevSnapshot.totalValue;
+    const dayChange = snapTotal - prevVal;
+    const dayPct    = prevVal > 0 ? (dayChange / prevVal) * 100 : 0;
+    const daySign   = dayChange >= 0 ? '+' : '';
+    const dayColor  = dayChange >= 0 ? '#059669' : '#dc2626';
+    const isYday    = _prevSnapshot.date === _getYesterday();
+    const dayLabel  = isYday ? '1D Change' : `Since ${_fmtShortDate(_prevSnapshot.date)}`;
+    oneDayCard = `
+      <div class="kpi-card">
+        <div class="kpi-label">${dayLabel}</div>
+        <div class="kpi-value" style="color:${dayColor}">${daySign}${fmt(Math.round(Math.abs(dayChange)))}</div>
+        <div class="kpi-sub">${daySign}${dayPct.toFixed(2)}% from ${fmt(Math.round(prevVal))}</div>
+      </div>`;
+  }
+
   // Update KPI cards
   kpisEl.innerHTML = `
     <div class="overview-kpi-grid">
@@ -461,15 +516,11 @@ export function renderOverview() {
         <div class="kpi-value">${fmt(Math.round(totalCurrent))}</div>
         <div class="kpi-sub">${gainSign}${totalRetPct.toFixed(2)}% overall return</div>
       </div>
+      ${oneDayCard}
       <div class="kpi-card">
         <div class="kpi-label">Total Gain / Loss</div>
         <div class="kpi-value" style="color:${gainColor}">${gainSign}${fmt(Math.round(Math.abs(totalGain)))}</div>
         <div class="kpi-sub">${gainSign}${totalRetPct.toFixed(2)}%</div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-label">Asset Classes</div>
-        <div class="kpi-value">${assets.filter(a => a.invested > 0).length}</div>
-        <div class="kpi-sub">Active categories</div>
       </div>
     </div>`;
 

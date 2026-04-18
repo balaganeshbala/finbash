@@ -166,7 +166,6 @@ function renderMFKpis() {
         : fundsWithNav > 0 ? 'No prev NAV available' : '—',
     },
   ].map(k => `<div class="kpi-card ${k.cls}">
-    <div class="kpi-icon">${k.icon}</div>
     <div class="kpi-label">${k.label}</div>
     <div class="kpi-value">${k.value}</div>
     <div class="kpi-sub">${k.sub}</div>
