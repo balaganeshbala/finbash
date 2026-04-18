@@ -2254,9 +2254,9 @@ th[data-mfsort="name"] {
 }
 
 .overview-chip.active {
-  background: #0f172a;
-  border-color: #0f172a;
-  color: #fff;
+  background: #d7e3ff;
+  border-color: #94a3b8;
+  color: #0f172a;
 }
 
 .overview-chip-dot {
