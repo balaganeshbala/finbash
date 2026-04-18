@@ -73,7 +73,12 @@ if (!isConfigured) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
-      document.getElementById('tab-' + state.activeTab).classList.add('active');
+      const incoming = document.getElementById('tab-' + state.activeTab);
+      // Force animation restart even if switching back to same tab rapidly
+      incoming.classList.remove('active');
+      // eslint-disable-next-line no-unused-expressions
+      incoming.offsetWidth; // trigger reflow
+      incoming.classList.add('active');
       // Re-render overview after the tab is visible so Chart.js measures correct dimensions
       // (same pattern as Gold — canvas is permanent in the HTML, chart redraws on tab switch)
       if (state.activeTab === 'overview') {
