@@ -525,6 +525,17 @@ export function renderOverview() {
     </div>`;
 
   // Update summary table
+  const hasPrev     = !!_prevSnapshot;
+  const prevBD      = hasPrev ? (_prevSnapshot.breakdown || {}) : {};
+  const isYday      = hasPrev && _prevSnapshot.date === _getYesterday();
+  const dayColLabel = hasPrev ? (isYday ? '1D Change' : `Since ${_fmtShortDate(_prevSnapshot.date)}`) : '';
+
+  // Total 1D values — use full portfolio (unfiltered snapTotal vs prevSnapshot)
+  const totDayChange  = hasPrev ? snapTotal - _prevSnapshot.totalValue : 0;
+  const totDayPct     = hasPrev && _prevSnapshot.totalValue > 0 ? (totDayChange / _prevSnapshot.totalValue) * 100 : 0;
+  const totDaySign    = totDayChange >= 0 ? '+' : '';
+  const totDayColor   = totDayChange >= 0 ? '#059669' : '#dc2626';
+
   tableEl.innerHTML = `
     <div class="card-title">Asset Summary</div>
     <div class="table-wrap">
@@ -534,6 +545,7 @@ export function renderOverview() {
             <th>Instrument</th>
             <th class="num">Invested</th>
             <th class="num">Current Value</th>
+            ${hasPrev ? `<th class="num">${dayColLabel}</th>` : ''}
             <th class="num">Gain / Loss</th>
             <th class="num">Return %</th>
           </tr>
@@ -545,10 +557,27 @@ export function renderOverview() {
             const col     = gain >= 0 ? '#059669' : '#dc2626';
             const sign    = gain >= 0 ? '+' : '';
             const hasData = a.invested > 0;
+
+            // 1D change per asset
+            let dayCell = '';
+            if (hasPrev) {
+              const prevVal = prevBD[a.label];
+              if (prevVal != null && hasData) {
+                const dc   = a.current - prevVal;
+                const dpct = prevVal > 0 ? (dc / prevVal) * 100 : 0;
+                const ds   = dc >= 0 ? '+' : '';
+                const dc_  = dc >= 0 ? '#059669' : '#dc2626';
+                dayCell = `<td class="num" style="color:${dc_}">${ds}${fmt(Math.round(Math.abs(dc)))}<br><span style="font-size:10.5px;opacity:0.8">${ds}${dpct.toFixed(2)}%</span></td>`;
+              } else {
+                dayCell = `<td class="num" style="color:#94a3b8">—</td>`;
+              }
+            }
+
             return `<tr>
               <td><span class="overview-dot" style="background:${a.color}"></span>${a.label}</td>
               <td class="num">${hasData ? fmt(Math.round(a.invested)) : '—'}</td>
               <td class="num">${hasData ? fmt(Math.round(a.current))  : '—'}</td>
+              ${dayCell}
               <td class="num" style="color:${hasData ? col : 'inherit'}">${hasData ? sign + fmt(Math.round(Math.abs(gain))) : '—'}</td>
               <td class="num" style="color:${hasData ? col : 'inherit'}">${hasData ? sign + retPct.toFixed(2) + '%' : '—'}</td>
             </tr>`;
@@ -559,6 +588,7 @@ export function renderOverview() {
             <td><strong>Total</strong></td>
             <td class="num"><strong>${fmt(Math.round(totalInvested))}</strong></td>
             <td class="num"><strong>${fmt(Math.round(totalCurrent))}</strong></td>
+            ${hasPrev ? `<td class="num" style="color:${totDayColor}"><strong>${totDaySign}${fmt(Math.round(Math.abs(totDayChange)))}</strong><br><span style="font-size:10.5px;opacity:0.8">${totDaySign}${totDayPct.toFixed(2)}%</span></td>` : ''}
             <td class="num" style="color:${gainColor}"><strong>${gainSign}${fmt(Math.round(Math.abs(totalGain)))}</strong></td>
             <td class="num" style="color:${gainColor}"><strong>${gainSign}${totalRetPct.toFixed(2)}%</strong></td>
           </tr>

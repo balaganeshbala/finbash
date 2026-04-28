@@ -203,6 +203,12 @@ function renderStocksKpis() {
 }
 
 /* ─────────────────────────────────────────────────────────────────
+   BY-STOCK EXPAND / COLLAPSE STATE
+   ───────────────────────────────────────────────────────────────── */
+// Keys of currently-expanded stock groups; empty = all collapsed (default)
+const _expandedStockGroups = new Set();
+
+/* ─────────────────────────────────────────────────────────────────
    RENDER  (dispatches to By-Holding or By-Stock view)
    ───────────────────────────────────────────────────────────────── */
 export function renderStocksSection() {
@@ -377,30 +383,58 @@ function renderByStockView() {
     groups[key].holdings.push(s);
   });
 
+  // Pre-compute sortable values per group then sort
+  let groupsArr = Object.entries(groups).map(([key, g]) => {
+    const isUS          = g.market === 'US';
+    const fx            = isUS ? (state.usdInrRate || 0) : 1;
+    const ticker        = tickerSym({ symbol: g.symbol, market: g.market });
+    const totalShares   = g.holdings.reduce((s, h) => s + (h.shares || 0), 0);
+    const totalInvested = g.holdings.reduce((s, h) => s + (h.shares || 0) * (h.avgBuyPrice || 0), 0) * fx;
+    const p             = state.stockPrices[ticker];
+    const cv            = p?.price ? totalShares * p.price * fx : null;
+    const gain          = cv != null ? cv - totalInvested : null;
+    const dayChangePct  = p?.price && p.prevClose ? (p.price - p.prevClose) / p.prevClose : null;
+    return { key, g, totalShares, totalInvested, cv, gain, dayChangePct };
+  });
+
+  if (state.stockSortCol) {
+    groupsArr.sort((a, b) => {
+      let va, vb;
+      if      (state.stockSortCol === 'name')         { va = a.g.name.toLowerCase(); vb = b.g.name.toLowerCase(); }
+      else if (state.stockSortCol === 'shares')        { va = a.totalShares;          vb = b.totalShares; }
+      else if (state.stockSortCol === 'invested')      { va = a.totalInvested;        vb = b.totalInvested; }
+      else if (state.stockSortCol === 'currentValue')  { va = a.cv      ?? -Infinity; vb = b.cv      ?? -Infinity; }
+      else if (state.stockSortCol === 'gain')          { va = a.gain    ?? -Infinity; vb = b.gain    ?? -Infinity; }
+      else if (state.stockSortCol === 'dayChange')     { va = a.dayChangePct ?? -Infinity; vb = b.dayChangePct ?? -Infinity; }
+      else { va = ''; vb = ''; }
+      if (va < vb) return state.stockSortDir === 'asc' ? -1 : 1;
+      if (va > vb) return state.stockSortDir === 'asc' ?  1 : -1;
+      return 0;
+    });
+  }
+
   syncSortIndicators();
 
-  const rows = Object.values(groups).map(g => {
+  const rows = groupsArr.map(({ key, g, totalShares, totalInvested, cv, gain }) => {
     const isUS      = g.market === 'US';
     const fx        = isUS ? (state.usdInrRate || 0) : 1;
     const cur       = isUS ? '$' : '₹';
     const ticker    = tickerSym({ symbol: g.symbol, market: g.market });
-    const totalShares   = g.holdings.reduce((sum, h) => sum + (h.shares || 0), 0);
-    const totalInvested = g.holdings.reduce((sum, h) => sum + (h.shares || 0) * (h.avgBuyPrice || 0), 0) * fx;
     const weightedAvgNative = totalShares > 0
       ? g.holdings.reduce((sum, h) => sum + (h.shares || 0) * (h.avgBuyPrice || 0), 0) / totalShares : 0;
-    const dematList = [...new Set(g.holdings.map(h => h.dematAccount).filter(Boolean))].join(', ');
+    const dematList    = [...new Set(g.holdings.map(h => h.dematAccount).filter(Boolean))].join(', ');
+    const hasMultiple  = g.holdings.length > 1;
+    const isExpanded   = _expandedStockGroups.has(key);
 
     const p      = state.stockPrices[ticker];
-    const cv     = p?.price ? totalShares * p.price * fx : null;
-    const gain   = cv != null ? cv - totalInvested : null;
     const retPct = totalInvested > 0 && gain != null ? (gain / totalInvested) * 100 : null;
     const gainCol = gain != null ? (gain >= 0 ? '#059669' : '#ef4444') : '#94a3b8';
 
     let dayChangeTd = `<td class="num"><span style="color:#94a3b8;font-size:11px">—</span></td>`;
     if (p?.price && p.prevClose) {
-      const diff      = p.price - p.prevClose;              // native currency ($ or ₹)
+      const diff      = p.price - p.prevClose;
       const pct       = (diff / p.prevClose) * 100;
-      const totalDiff = totalShares * diff;                  // native currency total (no FX)
+      const totalDiff = totalShares * diff;
       const col       = diff >= 0 ? '#059669' : '#ef4444';
       const diffStr   = isUS
         ? `${totalDiff >= 0 ? '+' : ''}${cur}${Math.abs(totalDiff).toFixed(2)}`
@@ -410,38 +444,43 @@ function renderByStockView() {
       </td>`;
     }
 
-    // Sub-rows per holding (indented)
-    const subRows = g.holdings.map(h => {
+    // Sub-rows (only for stocks held across multiple demat accounts)
+    const subRows = hasMultiple ? g.holdings.map(h => {
       const hInv    = (h.shares || 0) * (h.avgBuyPrice || 0) * fx;
       const hCv     = p?.price ? (h.shares || 0) * p.price * fx : null;
       const hGain   = hCv != null ? hCv - hInv : null;
       const hRetPct = hInv > 0 && hGain != null ? (hGain / hInv) * 100 : null;
       const hCol    = hGain != null ? (hGain >= 0 ? '#059669' : '#ef4444') : '#94a3b8';
-      return `<tr class="stock-sub-row">
+      return `<tr class="stock-sub-row" data-sub-group="${key}"${isExpanded ? '' : ' style="display:none"'}>
         <td></td>
-        <td style="padding-left:24px;font-size:11.5px;color:#64748b">${h.dematAccount || '—'}</td>
+        <td style="padding-left:32px;font-size:11.5px;color:#64748b">${h.dematAccount || '—'}</td>
         <td class="num" style="font-size:11.5px">${(h.shares || 0).toLocaleString('en-IN')}</td>
         <td class="num" style="font-size:11.5px">${cur}${(h.avgBuyPrice || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
         <td></td>
         <td></td>
         <td class="num" style="font-size:11.5px">${hInv > 0 ? fmt(Math.round(hInv)) : '—'}</td>
         <td class="num" style="font-size:11.5px;font-weight:600">${hCv != null ? fmt(Math.round(hCv)) : '—'}</td>
-        <td class="num" style="font-size:11.5px;font-weight:600;color:${hCol}">
-          ${hGain != null ? (hGain >= 0 ? '+' : '') + fmt(Math.round(hGain)) : '—'}
-          ${hRetPct != null ? `<div style="font-size:10px">${hRetPct >= 0 ? '+' : ''}${hRetPct.toFixed(2)}%</div>` : ''}
-        </td>
+        <td class="num" style="font-size:11.5px;font-weight:600;color:${hCol}">${hGain != null ? (hGain >= 0 ? '+' : '') + fmt(Math.round(hGain)) : '—'}</td>
+        <td class="num" style="font-size:11.5px;font-weight:600;color:${hCol}">${hRetPct != null ? (hRetPct >= 0 ? '+' : '') + hRetPct.toFixed(2) + '%' : '—'}</td>
       </tr>`;
-    }).join('');
+    }).join('') : '';
 
-    return `<tr class="stock-group-header">
-        <td></td>
+    // Chevron only for multi-account stocks
+    const chevron = hasMultiple
+      ? `<button class="stock-expand-btn${isExpanded ? ' expanded' : ''}" data-toggle-group="${key}" title="${isExpanded ? 'Collapse' : 'Expand accounts'}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>`
+      : '';
+
+    return `<tr class="stock-group-header" data-group-key="${key}">
+        <td style="width:32px;padding-right:0">${chevron}</td>
         <td>
           <div class="bond-name">${g.name}</div>
           <div style="font-size:11px;color:#64748b;font-weight:600;margin-top:2px">${ticker} ${marketBadge(g.market)}${dematList ? ` · ${dematList}` : ''}</div>
         </td>
         <td class="num" style="font-weight:700">${totalShares.toLocaleString('en-IN')}</td>
         <td class="num" style="font-weight:700">${cur}${weightedAvgNative.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
-          <div style="font-size:10px;color:#94a3b8;margin-top:1px">${g.holdings.length} account${g.holdings.length > 1 ? 's' : ''}</div>
+          ${hasMultiple ? `<div style="font-size:10px;color:#94a3b8;margin-top:1px">${g.holdings.length} accounts</div>` : ''}
         </td>
         <td class="num">
           ${p?.price
@@ -451,10 +490,8 @@ function renderByStockView() {
         ${dayChangeTd}
         <td class="num">${totalInvested > 0 ? fmt(Math.round(totalInvested)) : '—'}</td>
         <td class="num" style="font-weight:700">${cv != null ? fmt(Math.round(cv)) : '—'}</td>
-        <td class="num" style="font-weight:600;color:${gainCol}">
-          ${gain != null ? (gain >= 0 ? '+' : '') + fmt(Math.round(gain)) : '—'}
-          ${retPct != null ? `<div style="font-size:10px">${retPct >= 0 ? '+' : ''}${retPct.toFixed(2)}%</div>` : ''}
-        </td>
+        <td class="num" style="font-weight:600;color:${gainCol}">${gain != null ? (gain >= 0 ? '+' : '') + fmt(Math.round(gain)) : '—'}</td>
+        <td class="num" style="font-weight:600;color:${gainCol}">${retPct != null ? (retPct >= 0 ? '+' : '') + retPct.toFixed(2) + '%' : '—'}</td>
       </tr>
       ${subRows}`;
   });
@@ -602,8 +639,22 @@ export function initStockListeners() {
       renderStocksSection();
     });
 
-  // Table row actions (By Holding view only)
+  // Table row actions — expand/collapse (By Stock) + edit/delete (By Holding)
   document.getElementById('stockTableBody').addEventListener('click', async e => {
+    // Expand / collapse group in By Stock view
+    const toggleBtn = e.target.closest('[data-toggle-group]');
+    if (toggleBtn) {
+      const key      = toggleBtn.dataset.toggleGroup;
+      const expanded = !_expandedStockGroups.has(key);
+      if (expanded) _expandedStockGroups.add(key); else _expandedStockGroups.delete(key);
+      document.querySelectorAll(`[data-sub-group="${key}"]`).forEach(row => {
+        row.style.display = expanded ? '' : 'none';
+      });
+      toggleBtn.classList.toggle('expanded', expanded);
+      document.querySelector(`[data-group-key="${key}"]`)?.classList.toggle('expanded', expanded);
+      return;
+    }
+
     const btn = e.target.closest('[data-staction]');
     if (!btn) return;
     const { staction, stid } = btn.dataset;
@@ -690,6 +741,7 @@ function updateViewHeaders() {
       <th class="num" data-stsort="invested">Invested</th>
       <th class="num" data-stsort="currentValue">Current Value</th>
       <th class="num" data-stsort="gain">Gain / Loss</th>
+      <th class="num" data-stsort="returnPct">Return %</th>
     </tr>`;
   } else {
     thead.innerHTML = `<tr>
