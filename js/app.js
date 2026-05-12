@@ -31,6 +31,7 @@ import {
   startListeningEPF, initEPFListeners,
 } from './epf.js';
 import { renderOverview, renderOverviewChart } from './overview.js';
+import { resetSnapshotSession } from './snapshots.js';
 
 /* ─────────────────────────────────────────────────────────────────
    BOOT
@@ -251,5 +252,20 @@ if (!isConfigured) {
       showSection('login-screen');
     }
   });
+
+/* ─────────────────────────────────────────────────────────────────
+   GLOBAL REFRESH HOOK
+   Called by the Overview "Refresh" button to re-fetch all live prices
+   and allow the debounced auto-save to capture the freshest values.
+   ───────────────────────────────────────────────────────────────── */
+window.__refreshOverview = async () => {
+  // Clear session lock so the upcoming renderOverview() debounce will re-save
+  resetSnapshotSession();
+  const tasks = [];
+  if (state.stocks.length > 0)   tasks.push(fetchAllPrices());
+  if (state.mfs.length > 0)      tasks.push(fetchAllNavs());
+  if (state.goldItems?.length > 0) loadGoldPrices();
+  await Promise.all(tasks);
+};
 
 } /* end if (isConfigured) */

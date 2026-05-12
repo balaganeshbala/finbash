@@ -418,6 +418,21 @@ window.__renderOverview = () => {
   }
 };
 
+/* ─────────────────────────────────────────────────────────────────
+   FORCE SYNC — overwrites today's Firestore snapshot with current values
+   ───────────────────────────────────────────────────────────────── */
+async function forceSyncSnapshot() {
+  const uid = state.currentUser?.uid;
+  if (!uid) return false;
+  const allAssets    = computeAssets();
+  const snapTotal    = allAssets.reduce((s, a) => s + a.current,  0);
+  const snapInvested = allAssets.reduce((s, a) => s + a.invested, 0);
+  if (snapTotal <= 0) return false;
+  const breakdown = {};
+  allAssets.forEach(a => { breakdown[a.label] = Math.round(a.current); });
+  return await saveSnapshotIfNeeded(uid, snapTotal, snapInvested, breakdown, /* force */ true);
+}
+
 export function renderOverview() {
   // Swap skeleton → real content on first data arrival
   const loadingEl = document.getElementById('overview-loading');
@@ -461,12 +476,57 @@ export function renderOverview() {
   // Initialise the history line chart once (async, non-blocking)
   if (!_chartInitialised && state.currentUser?.uid) {
     _chartInitialised = true;
-    // Attach period button listeners
+
+    // Period buttons
     document.getElementById('historyPeriodBtns')?.querySelectorAll('.period-btn')
       .forEach(btn => btn.addEventListener('click', () => renderPortfolioHistoryChart(btn.dataset.period)));
     renderPortfolioHistoryChart(_historyPeriod);
+
     // Load yesterday's snapshot for 1D change KPI (non-blocking)
     loadPrevSnapshot(state.currentUser.uid);
+
+    // ── Refresh button ── re-fetch all live prices then auto-save snapshot
+    document.getElementById('btn-overview-refresh')?.addEventListener('click', async () => {
+      const btn = document.getElementById('btn-overview-refresh');
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.classList.add('spinning');
+      try {
+        await window.__refreshOverview?.();
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('spinning');
+      }
+    });
+
+    // ── Sync button ── force-overwrite today's snapshot with current values
+    document.getElementById('btn-sync-snapshot')?.addEventListener('click', async () => {
+      const btn = document.getElementById('btn-sync-snapshot');
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.classList.add('spinning');
+      btn.title = 'Syncing…';
+      try {
+        const saved = await forceSyncSnapshot();
+        if (saved) {
+          renderPortfolioHistoryChart();
+          btn.classList.remove('spinning');
+          btn.classList.add('sync-ok');
+          btn.title = 'Synced ✓';
+          setTimeout(() => { btn.classList.remove('sync-ok'); btn.title = 'Sync snapshot'; }, 2500);
+        } else {
+          btn.classList.remove('spinning');
+          btn.title = 'Nothing to sync';
+          setTimeout(() => { btn.title = 'Sync snapshot'; }, 2500);
+        }
+      } catch {
+        btn.classList.remove('spinning');
+        btn.title = 'Sync failed';
+        setTimeout(() => { btn.title = 'Sync snapshot'; }, 2500);
+      } finally {
+        btn.disabled = false;
+      }
+    });
   }
 
   // Render filter chips (always based on full asset list)

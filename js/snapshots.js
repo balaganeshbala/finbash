@@ -20,10 +20,10 @@ let _savedDateThisSession = null;
  * - Uses setDoc so a re-run overwrites stale same-day data.
  * Returns true if a write actually happened.
  */
-export async function saveSnapshotIfNeeded(uid, totalValue, totalInvested, breakdown) {
+export async function saveSnapshotIfNeeded(uid, totalValue, totalInvested, breakdown, force = false) {
   const today = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
   if (!uid || totalValue <= 0) return false;
-  if (_savedDateThisSession === today) return false;  // already saved today
+  if (!force && _savedDateThisSession === today) return false;  // already saved today
 
   try {
     await setDoc(
@@ -31,12 +31,22 @@ export async function saveSnapshotIfNeeded(uid, totalValue, totalInvested, break
       { date: today, totalValue: Math.round(totalValue), totalInvested: Math.round(totalInvested), breakdown },
     );
     _savedDateThisSession = today;
-    console.info('[snapshots] Snapshot saved for', today, '— value:', Math.round(totalValue));
+    console.info('[snapshots] Snapshot saved for', today, '— value:', Math.round(totalValue), force ? '(forced)' : '');
     return true;
   } catch (e) {
     console.warn('[snapshots] Save failed:', e);
     return false;
   }
+}
+
+/**
+ * Clear the session lock so the next saveSnapshotIfNeeded() call will
+ * overwrite today's snapshot even without force=true.
+ * Call this before triggering a price refresh so the debounced auto-save
+ * captures the freshest values.
+ */
+export function resetSnapshotSession() {
+  _savedDateThisSession = null;
 }
 
 /**

@@ -252,7 +252,16 @@
 
         <!-- Real content (hidden until data arrives) -->
         <div id="overview-content" style="display:none">
-          <div id="overview-filter-bar"></div>
+          <div class="overview-toolbar">
+            <div id="overview-filter-bar"></div>
+            <button id="btn-overview-refresh" class="btn-icon-label" title="Refresh all prices">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 4v6h6"/><path d="M23 20v-6h-6"/>
+                <path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
+              </svg>
+              Refresh
+            </button>
+          </div>
           <div id="overview-kpis"></div>
           <div class="overview-main-row">
             <div class="card overview-chart-card">
@@ -273,6 +282,13 @@
                 <button class="period-btn" data-period="1Y">1Y</button>
                 <button class="period-btn" data-period="ALL">All</button>
               </div>
+              <button id="btn-sync-snapshot" class="btn-icon-label btn-sync" title="Sync snapshot">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                  <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                </svg>
+                Sync
+              </button>
             </div>
             <div id="history-chart-wrap">
               <canvas id="portfolio-history-chart"></canvas>

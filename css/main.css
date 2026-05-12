@@ -2374,6 +2374,79 @@ th[data-mfsort="name"] {
   font-variant-numeric: tabular-nums;
 }
 
+/* ── OVERVIEW TOOLBAR (filter bar + refresh button row) ── */
+.overview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.overview-toolbar #overview-filter-bar {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Shared small icon+label button (Refresh / Sync) */
+.btn-icon-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.btn-icon-label svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  transition: transform 0.3s linear;
+}
+
+.btn-icon-label:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+.btn-icon-label:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-icon-label.spinning svg {
+  animation: spin 0.7s linear infinite;
+}
+
+/* Sync success flash */
+.btn-icon-label.sync-ok {
+  border-color: #10b981;
+  color: #059669;
+  background: #f0fdf4;
+}
+
+/* Sync button slight teal tint to distinguish from refresh */
+.btn-sync {
+  border-color: #d1fae5;
+  color: #059669;
+}
+
+.btn-sync:hover {
+  background: #f0fdf4;
+  border-color: #10b981;
+  color: #047857;
+}
+
 /* ── PORTFOLIO HISTORY CHART ── */
 .portfolio-history-card {
   margin-top: 16px;
