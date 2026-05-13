@@ -5,7 +5,7 @@ import {
 
 import { db }    from './firebase-init.js';
 import { state } from './state.js';
-import { fmt }   from './utils.js';
+import { fmt, emptyRow }   from './utils.js';
 import { toast } from './ui.js';
 
 const MFAPI = 'https://api.mfapi.in/mf';
@@ -192,7 +192,7 @@ export function renderMFSection() {
   const inv = sel?.value || '';
 
   if (!state.mfs.length) {
-    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No mutual funds added yet</td></tr>`;
+    tbody.innerHTML = emptyRow('No mutual funds added yet', 'Click "+ Add Fund" to get started', 12);
     document.getElementById('mfTableCount').textContent = '';
     return;
   }

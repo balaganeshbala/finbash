@@ -5,7 +5,7 @@ import {
 
 import { db }    from './firebase-init.js';
 import { state } from './state.js';
-import { fmt }   from './utils.js';
+import { fmt, emptyRow }   from './utils.js';
 import { toast } from './ui.js';
 
 /* ─────────────────────────────────────────────────────────────────
@@ -246,7 +246,7 @@ function renderByHoldingView() {
   const market = document.getElementById('stockMarketFilter')?.value || '';
 
   if (!state.stocks.length) {
-    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No stocks added yet. Click "+ Add Stock" to get started.</td></tr>`;
+    tbody.innerHTML = emptyRow('No stocks added yet', 'Click "+ Add Stock" to get started', 11);
     document.getElementById('stockTableCount').textContent = '';
     return;
   }
@@ -369,7 +369,7 @@ function renderByStockView() {
   );
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No stocks found.</td></tr>`;
+    tbody.innerHTML = emptyRow('No stocks match the current filters', '', 10);
     document.getElementById('stockTableCount').textContent = '';
     return;
   }

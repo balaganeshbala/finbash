@@ -5,7 +5,7 @@ import {
 
 import { db }    from './firebase-init.js';
 import { state } from './state.js';
-import { fmt }   from './utils.js';
+import { fmt, emptyRow }   from './utils.js';
 import { toast } from './ui.js';
 
 /* ─────────────────────────────────────────────────────────────────
@@ -115,8 +115,9 @@ function renderEPFAccounts() {
   const container = document.getElementById('epfAccountList');
 
   if (!state.epf.length) {
-    container.innerHTML = `<div style="text-align:center;padding:48px 24px;color:#94a3b8;font-size:14px">
-      No EPF accounts added yet. Click "+ Add Account" to get started.
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-state-title">No EPF accounts added yet</div>
+      <div class="empty-state-sub">Click "+ Add Account" to get started</div>
     </div>`;
     return;
   }

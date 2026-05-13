@@ -1153,7 +1153,7 @@ tbody tr:hover {
 }
 
 tbody td {
-  padding: 9px 12px;
+  padding: 10px 12px;
   color: #334155;
   vertical-align: middle;
 }
@@ -2344,7 +2344,7 @@ th[data-mfsort="name"] {
 }
 
 .overview-table tbody td {
-  padding: 12px 12px;
+  padding: 10px 12px;
   color: #1e293b;
   vertical-align: middle;
 }
@@ -2820,4 +2820,122 @@ th[data-mfsort="name"] {
     background: rgba(239, 68, 68, 0.15);
     color: #fca5a5;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   POLISH LAYER — consistency, animations, accessibility
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── MODAL ENTRANCE ANIMATION ── */
+@keyframes overlayEnter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.96) translateY(14px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.overlay:not(.hidden) {
+  animation: overlayEnter 0.18s ease forwards;
+}
+
+.overlay:not(.hidden) .modal {
+  animation: modalEnter 0.24s cubic-bezier(0.34, 1.08, 0.64, 1) forwards;
+}
+
+/* ── BUTTON :active + :focus-visible ── */
+.btn-primary:active,
+.btn-add:active,
+.btn-add-partner:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary:active,
+.btn-refresh:active,
+.btn-icon-label:active {
+  transform: scale(0.97);
+}
+
+.btn-icon:active {
+  background: #e2e8f0;
+}
+
+.btn-primary:focus-visible,
+.btn-add:focus-visible,
+.btn-secondary:focus-visible,
+.btn-refresh:focus-visible,
+.btn-icon-label:focus-visible,
+.btn-icon:focus-visible,
+.period-btn:focus-visible,
+.tab-btn:focus-visible,
+.overview-chip:focus-visible,
+.stock-expand-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Normalise transition duration to 0.15s across all interactive buttons */
+.btn-add, .btn-add-partner, .btn-primary {
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn-secondary, .btn-refresh {
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+}
+
+/* ── SORT INDICATOR TRANSITION ── */
+thead th::after {
+  transition: opacity 0.15s, color 0.15s;
+}
+
+/* ── OVERVIEW FILTER CHIP ACTIVE TRANSITION ── */
+.overview-chip {
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+}
+
+.overview-chip:active {
+  transform: scale(0.96);
+}
+
+/* ── PERIOD BUTTON TRANSITIONS ── */
+.period-btn {
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+/* ── TABLE ROW smooth hover ── */
+tbody tr {
+  transition: background 0.12s;
+}
+
+/* ── KPI CARD hover — ensure smooth on all pages ── */
+.kpi-card {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* ── CONSISTENT EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #94a3b8;
+}
+
+.empty-state-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 12px;
+  opacity: 0.4;
+}
+
+.empty-state-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.empty-state-sub {
+  font-size: 12.5px;
+  color: #94a3b8;
 }

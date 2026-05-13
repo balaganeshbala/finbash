@@ -5,7 +5,7 @@ import {
 
 import { db }    from './firebase-init.js';
 import { state } from './state.js';
-import { fmt }   from './utils.js';
+import { fmt, emptyRow }   from './utils.js';
 import { toast } from './ui.js';
 
 /* ─────────────────────────────────────────────────────────────────
@@ -361,7 +361,7 @@ function renderNPSTable() {
 
   const npsList = getFilteredNPS();
   if (!npsList.length) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No NPS schemes added yet. Click "+ Add Scheme" to get started.</td></tr>`;
+    tbody.innerHTML = emptyRow('No NPS schemes added yet', 'Click "+ Add Scheme" to get started', 9);
     tfoot.innerHTML = '';
     return;
   }

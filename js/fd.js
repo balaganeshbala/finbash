@@ -5,7 +5,7 @@ import {
 
 import { db }           from './firebase-init.js';
 import { state }        from './state.js';
-import { fmt, fmtDate } from './utils.js';
+import { fmt, fmtDate, emptyRow } from './utils.js';
 import { toast }        from './ui.js';
 
 /* ─────────────────────────────────────────────────────────────────
@@ -244,7 +244,7 @@ export function renderFDSection() {
   const inv = document.getElementById('fdInvestorFilter')?.value || '';
 
   if (!state.fds.length) {
-    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No FDs added yet</td></tr>`;
+    tbody.innerHTML = emptyRow('No fixed deposits added yet', 'Click "+ Add FD" to get started', 11);
     document.getElementById('fdTableCount').textContent = '';
     return;
   }
@@ -358,7 +358,7 @@ export function renderRDSection() {
   const inv = document.getElementById('rdInvestorFilter')?.value || '';
 
   if (!state.rds.length) {
-    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:32px;color:#94a3b8;font-size:14px">No RDs added yet</td></tr>`;
+    tbody.innerHTML = emptyRow('No recurring deposits added yet', 'Click "+ Add RD" to get started', 12);
     document.getElementById('rdTableCount').textContent = '';
     return;
   }
