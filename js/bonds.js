@@ -93,7 +93,7 @@ export function renderDashboard() {
   const id_ = groupSum(active, 'by', 'faceValue');
   state.chartInst.investor = new Chart(document.getElementById('investorChart'), {
     type: 'doughnut',
-    data: { labels: Object.keys(id_), datasets: [{ data: Object.values(id_), backgroundColor: ['#4f46e5', '#a855f7', '#ec4899', '#f97316'], borderWidth: 3, borderColor: '#fff', hoverOffset: 8 }] },
+    data: { labels: Object.keys(id_), datasets: [{ data: Object.values(id_), backgroundColor: ['#6b72b8', '#8a74b8', '#b07090', '#b88050'], borderWidth: 3, borderColor: '#fff', hoverOffset: 8 }] },
     options: { responsive: true, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmt(ctx.raw)} (${totalFV ? ((ctx.raw / totalFV) * 100).toFixed(1) : 0}%)` } } } },
   });
 
@@ -102,7 +102,7 @@ export function renderDashboard() {
   const de = Object.entries(dd).sort((a, b) => b[1] - a[1]);
   state.chartInst.demat = new Chart(document.getElementById('dematChart'), {
     type: 'doughnut',
-    data: { labels: de.map(([k]) => k), datasets: [{ data: de.map(([, v]) => v), backgroundColor: ['#1e3a8a', '#2563eb', '#60a5fa', '#7c3aed', '#a78bfa', '#0369a1'], borderWidth: 3, borderColor: '#fff', hoverOffset: 8 }] },
+    data: { labels: de.map(([k]) => k), datasets: [{ data: de.map(([, v]) => v), backgroundColor: ['#4a6d8c', '#5c85b0', '#7aaac8', '#6b72b8', '#8a74b8', '#4a8fa8'], borderWidth: 3, borderColor: '#fff', hoverOffset: 8 }] },
     options: { responsive: true, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${fmt(ctx.raw)} (${(ctx.raw / totalFV * 100).toFixed(1)}%)` } } } },
   });
 
@@ -112,7 +112,7 @@ export function renderDashboard() {
     return acc;
   }, {});
   const yrs = Object.keys(mby).sort();
-  const YC  = ['#ef4444', '#f97316', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#10b981'];
+  const YC  = ['#b86060', '#b88050', '#5c85b0', '#8a74b8', '#b07090', '#4a8fa8', '#4a9e7e'];
   state.chartInst.maturity = new Chart(document.getElementById('maturityChart'), {
     type: 'bar',
     data: { labels: yrs, datasets: [{ data: yrs.map(y => mby[y]), backgroundColor: yrs.map((_, i) => YC[i % YC.length]), borderRadius: 7, borderSkipped: false }] },

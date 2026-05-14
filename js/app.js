@@ -34,6 +34,13 @@ import { renderOverview, renderOverviewChart } from './overview.js';
 import { resetSnapshotSession } from './snapshots.js';
 
 /* ─────────────────────────────────────────────────────────────────
+   CHART.JS GLOBAL DEFAULTS
+   ───────────────────────────────────────────────────────────────── */
+if (typeof Chart !== 'undefined') {
+  Chart.defaults.animation = false;
+}
+
+/* ─────────────────────────────────────────────────────────────────
    BOOT
    ───────────────────────────────────────────────────────────────── */
 if (!isConfigured) {

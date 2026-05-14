@@ -127,13 +127,13 @@ function computeAssets() {
   }, 0);
 
   return [
-    { label: 'Bonds',         invested: bondsInvested,             current: bondsInvested,           color: '#3b82f6' },
-    { label: 'Gold',          invested: goldInvested,              current: goldCurrent,              color: '#f59e0b' },
-    { label: 'Deposits',      invested: fdInvested + rdInvested,   current: fdCurrent + rdCurrent,   color: '#8b5cf6' },
-    { label: 'Mutual Funds',  invested: mfInvested,                current: mfCurrent,               color: '#10b981' },
-    { label: 'Stocks',        invested: stInvested,                current: stCurrent,               color: '#ef4444' },
-    { label: 'NPS',           invested: npsInvested,               current: npsCurrent,              color: '#6366f1' },
-    { label: 'EPF',           invested: epfInvested,               current: epfBalance,              color: '#0ea5e9' },
+    { label: 'Bonds',         invested: bondsInvested,             current: bondsInvested,           color: '#5c85b0' },
+    { label: 'Gold',          invested: goldInvested,              current: goldCurrent,              color: '#b8924a' },
+    { label: 'Deposits',      invested: fdInvested + rdInvested,   current: fdCurrent + rdCurrent,   color: '#8a74b8' },
+    { label: 'Mutual Funds',  invested: mfInvested,                current: mfCurrent,               color: '#4a9e7e' },
+    { label: 'Stocks',        invested: stInvested,                current: stCurrent,               color: '#b86060' },
+    { label: 'NPS',           invested: npsInvested,               current: npsCurrent,              color: '#6b72b8' },
+    { label: 'EPF',           invested: epfInvested,               current: epfBalance,              color: '#4a8fa8' },
   ];
 }
 
@@ -241,8 +241,8 @@ async function renderPortfolioHistoryChart(period) {
   const latest    = values[values.length - 1];
   const latestInv = invested[invested.length - 1];
   const isGain    = latest >= latestInv;
-  const lineCol   = isGain ? '#059669' : '#ef4444';
-  const fillCol   = isGain ? 'rgba(5,150,105,0.08)' : 'rgba(239,68,68,0.08)';
+  const lineCol   = isGain ? '#4a9e7e' : '#b86060';
+  const fillCol   = isGain ? 'rgba(74,158,126,0.08)' : 'rgba(184,96,96,0.08)';
   const showDots  = snapshots.length <= 60;
 
   if (_historyChart) { _historyChart.destroy(); _historyChart = null; }
@@ -538,7 +538,7 @@ export function renderOverview() {
   const totalRetPct   = totalInvested > 0 ? (totalGain / totalInvested) * 100 : 0;
 
   const gainColor = totalGain >= 0 ? '#059669' : '#dc2626';
-  const gainSign  = totalGain >= 0 ? '+' : '';
+  const gainSign  = totalGain >= 0 ? '+' : '-';
 
   const allSelected = !_activeFilters || _activeFilters.size === allAssets.length;
   const kpiSubLabel = allSelected
@@ -551,7 +551,7 @@ export function renderOverview() {
     const prevVal   = _prevSnapshot.totalValue;
     const dayChange = snapTotal - prevVal;
     const dayPct    = prevVal > 0 ? (dayChange / prevVal) * 100 : 0;
-    const daySign   = dayChange >= 0 ? '+' : '';
+    const daySign   = dayChange >= 0 ? '+' : '-';
     const dayColor  = dayChange >= 0 ? '#059669' : '#dc2626';
     const isYday    = _prevSnapshot.date === _getYesterday();
     const dayLabel  = isYday ? '1D Change' : `Since ${_fmtShortDate(_prevSnapshot.date)}`;
@@ -593,7 +593,7 @@ export function renderOverview() {
   // Total 1D values — use full portfolio (unfiltered snapTotal vs prevSnapshot)
   const totDayChange  = hasPrev ? snapTotal - _prevSnapshot.totalValue : 0;
   const totDayPct     = hasPrev && _prevSnapshot.totalValue > 0 ? (totDayChange / _prevSnapshot.totalValue) * 100 : 0;
-  const totDaySign    = totDayChange >= 0 ? '+' : '';
+  const totDaySign    = totDayChange >= 0 ? '+' : '-';
   const totDayColor   = totDayChange >= 0 ? '#059669' : '#dc2626';
 
   tableEl.innerHTML = `
@@ -615,7 +615,7 @@ export function renderOverview() {
             const gain    = a.current - a.invested;
             const retPct  = a.invested > 0 ? (gain / a.invested) * 100 : 0;
             const col     = gain >= 0 ? '#059669' : '#dc2626';
-            const sign    = gain >= 0 ? '+' : '';
+            const sign    = gain >= 0 ? '+' : '-';
             const hasData = a.invested > 0;
 
             // 1D change per asset
@@ -625,9 +625,9 @@ export function renderOverview() {
               if (prevVal != null && hasData) {
                 const dc   = a.current - prevVal;
                 const dpct = prevVal > 0 ? (dc / prevVal) * 100 : 0;
-                const ds   = dc >= 0 ? '+' : '';
+                const ds   = dc >= 0 ? '+' : '-';
                 const dc_  = dc >= 0 ? '#059669' : '#dc2626';
-                dayCell = `<td class="num" style="color:${dc_}">${ds}${fmt(Math.round(Math.abs(dc)))}<br><span style="font-size:10.5px;opacity:0.8">${ds}${dpct.toFixed(2)}%</span></td>`;
+                dayCell = `<td class="num" style="color:${dc_}">${ds}${fmt(Math.round(Math.abs(dc)))}<br><span style="font-size:10.5px;opacity:0.8">${dpct.toFixed(2)}%</span></td>`;
               } else {
                 dayCell = `<td class="num" style="color:#94a3b8">—</td>`;
               }

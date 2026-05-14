@@ -14,10 +14,10 @@ export const PLATFORM_BADGE = {
 };
 
 export const PLATFORM_COLORS = {
-  'Stable Money': '#3b82f6',
-  'Aionion':      '#06b6d4',
-  'GoldenPi':     '#10b981',
-  'WintWealth':   '#f59e0b',
+  'Stable Money': '#5c85b0',
+  'Aionion':      '#4a8fa8',
+  'GoldenPi':     '#4a9e7e',
+  'WintWealth':   '#b8924a',
 };
 
 /**
