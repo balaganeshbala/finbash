@@ -1,6 +1,7 @@
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth }          from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore }     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { initializeFirestore, persistentLocalCache }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 export const firebaseConfig = {
   apiKey:            'AIzaSyDjhl-leKVZo4tNSPtR5GUqwcSpoBZhkro',
@@ -18,5 +19,5 @@ export let app, auth, db;
 if (isConfigured) {
   app  = initializeApp(firebaseConfig);
   auth = getAuth(app);
-  db   = getFirestore(app);
+  db   = initializeFirestore(app, { localCache: persistentLocalCache() });
 }
