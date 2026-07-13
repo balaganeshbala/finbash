@@ -49,27 +49,64 @@ export async function deleteGold(id) {
 /* ─────────────────────────────────────────────────────────────────
    GOLD PRICES
    ───────────────────────────────────────────────────────────────── */
+const GOLD_PROXY = 'https://stock-price-proxy.vercel.app/api/gold-price';
+
+async function fetchAndApplyLivePrice(uid, { silent = false } = {}) {
+  const btn = document.getElementById('btn-fetch-live-price');
+  if (btn) { btn.disabled = true; btn.textContent = 'Fetching…'; }
+  try {
+    const res = await fetch(GOLD_PROXY);
+    if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
+    const { price22k, price24k } = await res.json();
+    if (!price22k || !price24k) throw new Error('Invalid prices received');
+
+    state.goldPrices = { price22k, price24k };
+    await setDoc(doc(db, 'users', uid, 'settings', 'goldPrice'), {
+      price22k, price24k, updatedAt: serverTimestamp(),
+    });
+    document.getElementById('price-22k').value = price22k;
+    document.getElementById('price-24k').value = price24k;
+    document.getElementById('gold-price-updated').textContent = 'Updated just now';
+    showGoldPriceView();
+    renderGoldDashboard();
+    if (!silent) toast('Live gold prices fetched ✓', 'success');
+  } catch (err) {
+    if (!silent) toast('Could not fetch live prices: ' + err.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Fetch Live Price'; }
+  }
+}
+
 export async function loadGoldPrices(uid) {
   try {
     const snap = await getDoc(doc(db, 'users', uid, 'settings', 'goldPrice'));
     if (snap.exists()) {
       const d = snap.data();
       state.goldPrices = { price22k: d.price22k || 0, price24k: d.price24k || 0 };
-      // populate edit inputs too (for when user clicks Edit)
       document.getElementById('price-22k').value = state.goldPrices.price22k || '';
       document.getElementById('price-24k').value = state.goldPrices.price24k || '';
       if (d.updatedAt) {
         const dt = d.updatedAt.toDate ? d.updatedAt.toDate() : new Date(d.updatedAt);
         document.getElementById('gold-price-updated').textContent =
           'Updated ' + dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        // Auto-fetch silently if price is from a previous day
+        const priceDate = dt.toISOString().slice(0, 10);
+        const today     = new Date().toISOString().slice(0, 10);
+        if (!state.isViewMode && priceDate !== today) {
+          fetchAndApplyLivePrice(uid, { silent: true });
+        }
       }
-      showGoldPriceView(); // prices exist → show read-only view
+      showGoldPriceView();
+    } else if (!state.isViewMode) {
+      // No prices yet — auto-fetch; fall back to manual edit if it fails
+      showGoldPriceEditMode(false);
+      fetchAndApplyLivePrice(uid, { silent: true });
     } else {
-      showGoldPriceEditMode(false); // no prices yet → show input fields, no cancel
+      showGoldPriceView();
     }
   } catch {
     if (state.isViewMode) {
-      showGoldPriceView(); // show "—" prices without edit option
+      showGoldPriceView();
     } else {
       showGoldPriceEditMode(false);
     }
@@ -412,6 +449,12 @@ export function initGoldListeners() {
       btn.disabled = false;
       btn.textContent = state.editingGoldId ? 'Save Changes' : 'Add Item';
     }
+  });
+
+  /* Fetch Live Price button */
+  document.getElementById('btn-fetch-live-price').addEventListener('click', () => {
+    if (state.isViewMode) return;
+    fetchAndApplyLivePrice(state.currentUser.uid);
   });
 
   /* Edit Prices button → switch to edit mode */
