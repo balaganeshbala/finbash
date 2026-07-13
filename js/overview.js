@@ -214,7 +214,7 @@ function fmtSnapshotLabel(iso, period) {
 
 async function renderPortfolioHistoryChart(period) {
   _historyPeriod = period || _historyPeriod;
-  const uid = state.currentUser?.uid;
+  const uid = state.viewOwnerUid || state.currentUser?.uid;
   const canvas  = document.getElementById('portfolio-history-chart');
   const emptyEl = document.getElementById('history-chart-empty');
   const wrapEl  = document.getElementById('history-chart-wrap');
@@ -422,6 +422,7 @@ window.__renderOverview = () => {
    FORCE SYNC — overwrites today's Firestore snapshot with current values
    ───────────────────────────────────────────────────────────────── */
 async function forceSyncSnapshot() {
+  if (state.isViewMode) return false;
   const uid = state.currentUser?.uid;
   if (!uid) return false;
   const allAssets    = computeAssets();
@@ -453,7 +454,7 @@ export function renderOverview() {
   // Each new renderOverview() call resets the timer — only the final one fires.
   const snapTotal    = allAssets.reduce((s, a) => s + a.current,  0);
   const snapInvested = allAssets.reduce((s, a) => s + a.invested, 0);
-  if (snapTotal > 0 && state.currentUser?.uid) {
+  if (snapTotal > 0 && state.currentUser?.uid && !state.isViewMode) {
     const breakdown = {};
     allAssets.forEach(a => { breakdown[a.label] = Math.round(a.current); });
     _pendingSnapshot = { uid: state.currentUser.uid, snapTotal, snapInvested, breakdown };
@@ -483,7 +484,7 @@ export function renderOverview() {
     renderPortfolioHistoryChart(_historyPeriod);
 
     // Load yesterday's snapshot for 1D change KPI (non-blocking)
-    loadPrevSnapshot(state.currentUser.uid);
+    loadPrevSnapshot(state.viewOwnerUid || state.currentUser.uid);
 
     // ── Refresh button ── re-fetch all live prices then auto-save snapshot
     document.getElementById('btn-overview-refresh')?.addEventListener('click', async () => {
