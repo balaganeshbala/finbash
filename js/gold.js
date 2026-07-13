@@ -275,6 +275,29 @@ export function renderGoldTable() {
     </tr>`;
   }).join('');
 
+  const tfoot = document.getElementById('goldTableFoot');
+  if (filtered.length) {
+    const footWeight   = filtered.reduce((s, g) => s + (g.weight || 0), 0);
+    const footInvested = filtered.reduce((s, g) => s + (g.totalInvested || 0), 0);
+    const footValue    = filtered.reduce((s, g) => s + goldCurrentValue(g), 0);
+    const footProfit   = footValue - footInvested;
+    const actionCols   = state.isViewMode ? '' : '<td></td>';
+    tfoot.innerHTML = `<tr class="overview-total-row">
+      <td></td>
+      <td><strong>Total</strong></td>
+      <td></td>
+      <td class="num"><strong>${footWeight.toFixed(2)}g</strong></td>
+      <td></td>
+      <td class="num"><strong>${footInvested > 0 ? fmt(Math.round(footInvested)) : '—'}</strong></td>
+      <td class="num"><strong>${footValue > 0 ? fmt(Math.round(footValue)) : '—'}</strong></td>
+      <td class="num" style="color:${footProfit >= 0 ? '#059669' : '#ef4444'}"><strong>${footValue > 0 ? (footProfit >= 0 ? '+' : '') + fmt(Math.round(footProfit)) : '—'}</strong></td>
+      <td></td>
+      <td></td>${actionCols}
+    </tr>`;
+  } else {
+    tfoot.innerHTML = '';
+  }
+
   document.getElementById('goldTableCount').textContent =
     `Showing ${filtered.length} of ${state.goldItems.length} items`;
 }

@@ -462,7 +462,7 @@ export function renderOverview() {
       const p = _pendingSnapshot;
       _pendingSnapshot = null;
       if (!p) return;
-      const saved = await saveSnapshotIfNeeded(p.uid, p.snapTotal, p.snapInvested, p.breakdown);
+      const saved = await saveSnapshotIfNeeded(p.uid, p.snapTotal, p.snapInvested, p.breakdown, true);
       if (saved && _chartInitialised) renderPortfolioHistoryChart();
     }, 2000);
   }
