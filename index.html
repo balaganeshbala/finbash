@@ -167,12 +167,18 @@
       </button>
       <button class="tab-btn" data-tab="gold">
         <svg viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-          <line x1="9" y1="9" x2="9.01" y2="9" />
-          <line x1="15" y1="9" x2="15.01" y2="9" />
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M16 8h-6a2 2 0 000 4h4a2 2 0 010 4H8"/>
+          <line x1="12" y1="6" x2="12" y2="18"/>
         </svg>
         Gold
+      </button>
+      <button class="tab-btn" data-tab="silver">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="6"/>
+          <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+        </svg>
+        Silver
       </button>
       <button class="tab-btn" data-tab="fd">
         <svg viewBox="0 0 24 24">
@@ -465,7 +471,7 @@
           <!-- Gold Price Bar -->
           <div class="gold-price-bar">
             <svg
-              style="width:22px;height:22px;fill:none;stroke:rgba(255,255,255,0.9);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"
+              style="width:22px;height:22px;fill:none;stroke:#6b4f1a;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"
               viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="10" />
               <path d="M16 8h-6a2 2 0 000 4h4a2 2 0 010 4H8" />
@@ -492,19 +498,6 @@
 
           <!-- Gold KPIs -->
           <div class="kpi-grid" id="goldKpiGrid" style="margin-bottom:22px"></div>
-
-          <!-- Gold Charts -->
-          <div class="row-3" style="margin-bottom:20px">
-            <div class="card">
-              <div class="card-title">By Karat (Weight)</div><canvas id="goldTypeChart" height="230"></canvas>
-            </div>
-            <div class="card">
-              <div class="card-title">Year-wise Accumulation</div><canvas id="goldYearChart" height="230"></canvas>
-            </div>
-            <div class="card">
-              <div class="card-title">Invested vs Current Value</div><canvas id="goldValueChart" height="230"></canvas>
-            </div>
-          </div>
 
           <!-- Gold Table -->
           <div class="card">
@@ -555,6 +548,109 @@
 
         </div><!-- /gold-dashboard -->
       </div><!-- /tab-gold -->
+
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <!-- SILVER TAB                                                -->
+      <!-- ══════════════════════════════════════════════════════════ -->
+      <div id="tab-silver" class="tab-panel">
+        <h2 class="page-title">Silver</h2>
+
+        <!-- Silver Loading -->
+        <div id="silver-loading" class="loading-state">
+          <div class="spinner"></div>
+          <div class="loading-text">Loading silver portfolio…</div>
+        </div>
+
+        <!-- Silver Empty -->
+        <div id="silver-empty" style="display:none" class="empty-state">
+          <div class="empty-icon">
+            <svg
+              style="width:64px;height:64px;fill:none;stroke:#7e868e;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"
+              viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="6"/>
+              <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+            </svg>
+          </div>
+          <h2>No silver records yet</h2>
+          <p>Add your first silver item to get started.</p>
+          <div class="empty-btns">
+            <button id="btn-add-first-silver" class="btn-primary">＋ Add First Item</button>
+          </div>
+        </div>
+
+        <!-- Silver Dashboard -->
+        <div id="silver-dashboard" style="display:none">
+
+          <!-- Silver Price Bar -->
+          <div class="silver-price-bar">
+            <svg
+              style="width:22px;height:22px;fill:none;stroke:#2d3748;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"
+              viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="6"/>
+              <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+            </svg>
+            <!-- View mode -->
+            <div id="silver-price-view" style="display:none">
+              <div><label>99.9 / gram</label><span id="silver-p999-display"></span></div>
+              <button class="btn-update-price" id="btn-edit-silver-price">Edit Price</button>
+              <span class="gold-price-updated" id="silver-price-updated"></span>
+            </div>
+            <!-- Edit mode -->
+            <div id="silver-price-edit" style="display:none">
+              <div><label>99.9 Price / gram</label><input type="number" id="silver-p999" class="gold-price-input"
+                  placeholder="e.g. 230" step="0.01"></div>
+              <button class="btn-update-price" id="btn-update-silver-price">Save Price</button>
+              <button class="btn-cancel-price" id="btn-fetch-silver-price">Fetch Live Price</button>
+              <button class="btn-cancel-price" id="btn-cancel-silver-price" style="display:none">Cancel</button>
+            </div>
+          </div>
+
+          <!-- Silver KPIs -->
+          <div class="kpi-grid" id="silverKpiGrid" style="margin-bottom:22px"></div>
+
+          <!-- Silver Table -->
+          <div class="card">
+            <div class="card-title">All Silver Holdings</div>
+            <div class="table-controls">
+              <input type="text" id="silverSearchInput" class="search-input" placeholder="Search by name…">
+              <select id="silverGiftFilter">
+                <option value="">All</option>
+                <option value="gifted">Gifted Away</option>
+                <option value="received">Received as Gift</option>
+                <option value="owned">Purchased</option>
+              </select>
+              <button id="btn-add-silver" class="btn-add" style="margin-left:auto">
+                <svg class="icon" style="width:14px;height:14px;stroke:white" viewBox="0 0 24 24">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg> Add Silver
+              </button>
+            </div>
+            <div style="overflow-x:auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th class="sortable" data-ssort="name">Name</th>
+                    <th class="r sortable" data-ssort="weight">Weight (g)</th>
+                    <th class="r sortable" data-ssort="paidPerGram">Paid/g</th>
+                    <th class="r sortable" data-ssort="totalInvested">Invested</th>
+                    <th class="r sortable" data-ssort="currentValue">Current Value</th>
+                    <th class="r sortable" data-ssort="profit">Profit</th>
+                    <th class="sortable" data-ssort="date">Date</th>
+                    <th>Status</th>
+                    <th id="sth-actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="silverTableBody"></tbody>
+                <tfoot id="silverTableFoot"></tfoot>
+              </table>
+            </div>
+            <div class="table-count" id="silverTableCount"></div>
+          </div>
+
+        </div><!-- /silver-dashboard -->
+      </div><!-- /tab-silver -->
 
       <!-- ══════════════════════════════════════════════════════════ -->
       <!-- FD & RD TAB                                               -->
@@ -1037,6 +1133,55 @@
         <div class="modal-footer">
           <button type="button" class="btn-cancel" id="gold-cancel-btn">Cancel</button>
           <button type="submit" class="btn-save" id="gold-save-btn">Add Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ SILVER MODAL ═══ -->
+  <div id="silver-modal" class="overlay hidden">
+    <div class="modal">
+      <div class="modal-hdr">
+        <div class="modal-title" id="silver-modal-title">Add Silver Item</div>
+        <button class="modal-x" id="silver-modal-close">✕</button>
+      </div>
+      <form id="silver-form" autocomplete="off">
+        <div class="form-grid">
+          <div class="field full">
+            <label>Name *</label>
+            <input type="text" id="sf-name" placeholder="e.g. Silver Coin - GRT" required>
+          </div>
+          <div class="field">
+            <label>Date *</label>
+            <input type="date" id="sf-date" required>
+          </div>
+          <div class="field">
+            <label>Weight (grams) *</label>
+            <input type="number" id="sf-weight" placeholder="e.g. 100" step="0.0001" min="0" required>
+          </div>
+          <div class="field">
+            <label>Paid per gram (₹)</label>
+            <input type="number" id="sf-paidPerGram" placeholder="0 if gifted" step="0.01" min="0">
+          </div>
+          <div class="field">
+            <label>Total Invested (₹)</label>
+            <input type="number" id="sf-totalInvested" placeholder="Auto-calculated" step="0.01" min="0">
+            <div class="hint">Auto-fills from weight × paid/gram</div>
+          </div>
+          <div class="field full">
+            <div class="field-row">
+              <input type="checkbox" id="sf-gifted">
+              <label for="sf-gifted">Gifted away</label>
+            </div>
+          </div>
+          <div class="field full" id="sf-gifted-for-field" style="display:none">
+            <label>Gifted For</label>
+            <input type="text" id="sf-giftedFor" placeholder="e.g. Keerthi Marriage">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="silver-cancel-btn">Cancel</button>
+          <button type="submit" class="btn-save" id="silver-save-btn">Add Item</button>
         </div>
       </form>
     </div>

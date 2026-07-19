@@ -20,10 +20,17 @@ export const state = {
   goldItems:      [],
   editingGoldId:  null,
   goldUnsub:      null,
-  goldChartInst:  {},
   goldSortCol:    null,
   goldSortDir:    'asc',
   goldPrices:     { price22k: 0, price24k: 0 },
+
+  // Silver
+  silverItems:      [],
+  editingSilverId:  null,
+  silverUnsub:      null,
+  silverSortCol:    null,
+  silverSortDir:    'asc',
+  silverPrices:     { price999: 0 },
 
   // FD & RD
   fds:            [],

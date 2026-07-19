@@ -38,3 +38,10 @@ export function setGoldState(state) {
   document.getElementById('gold-empty').style.display     = state === 'empty'   ? 'block' : 'none';
   document.getElementById('gold-dashboard').style.display = state === 'data'    ? 'block' : 'none';
 }
+
+// ── Dashboard state (silver tab) ───────────────────────────────────
+export function setSilverState(state) {
+  document.getElementById('silver-loading').style.display   = state === 'loading' ? 'flex'  : 'none';
+  document.getElementById('silver-empty').style.display     = state === 'empty'   ? 'block' : 'none';
+  document.getElementById('silver-dashboard').style.display = state === 'data'    ? 'block' : 'none';
+}

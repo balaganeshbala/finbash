@@ -152,12 +152,6 @@ function goldCurrentValue(g) {
 /* ─────────────────────────────────────────────────────────────────
    DASHBOARD RENDERING
    ───────────────────────────────────────────────────────────────── */
-function destroyGoldCharts() {
-  Object.keys(state.goldChartInst).forEach(k => {
-    if (state.goldChartInst[k]) { state.goldChartInst[k].destroy(); state.goldChartInst[k] = null; }
-  });
-}
-
 export function renderGoldDashboard() {
   const owned = state.goldItems.filter(g => !g.gifted);
   const KSVG  = (d, s = '#94a3b8') =>
@@ -208,37 +202,6 @@ export function renderGoldDashboard() {
     <div class="kpi-value">${k.value}</div>
     <div class="kpi-sub">${k.sub}</div>
   </div>`).join('');
-
-  destroyGoldCharts();
-
-  /* Karat donut */
-  const karatData = {};
-  owned.forEach(g => { karatData[g.type || '?'] = (karatData[g.type || '?'] || 0) + (g.weight || 0); });
-  state.goldChartInst.type = new Chart(document.getElementById('goldTypeChart'), {
-    type: 'doughnut',
-    data: { labels: Object.keys(karatData), datasets: [{ data: Object.values(karatData), backgroundColor: ['#b8924a', '#c9a55a'], borderWidth: 3, borderColor: '#fff', hoverOffset: 8 }] },
-    options: { responsive: true, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12, usePointStyle: true } }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${Number(ctx.raw).toFixed(2)}g` } } } },
-  });
-
-  /* Year-wise bar */
-  const yearData = {};
-  owned.forEach(g => {
-    if (g.date) { const yr = new Date(g.date).getFullYear(); yearData[yr] = (yearData[yr] || 0) + (g.weight || 0); }
-  });
-  const goldYrs = Object.keys(yearData).sort();
-  const GOLD_COLORS = ['#b8924a', '#a07840', '#8a6535', '#c9a55a', '#d4b470', '#dfc48a'];
-  state.goldChartInst.year = new Chart(document.getElementById('goldYearChart'), {
-    type: 'bar',
-    data: { labels: goldYrs, datasets: [{ data: goldYrs.map(y => yearData[y]), backgroundColor: goldYrs.map((_, i) => GOLD_COLORS[i % GOLD_COLORS.length]), borderRadius: 7, borderSkipped: false }] },
-    options: { responsive: true, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${Number(ctx.raw).toFixed(2)}g` } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 11 } } }, y: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, callback: v => v + 'g' } } } },
-  });
-
-  /* Invested vs Current Value */
-  state.goldChartInst.value = new Chart(document.getElementById('goldValueChart'), {
-    type: 'bar',
-    data: { labels: ['Invested', 'Current Value'], datasets: [{ data: [Math.round(paidInvested), Math.round(totalCurrentValue)], backgroundColor: ['#94a3b8', '#b8924a'], borderRadius: 7, borderSkipped: false }] },
-    options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${fmt(ctx.raw)}` } } }, scales: { x: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 10 }, callback: v => '₹' + (v / 100000).toFixed(1) + 'L' } }, y: { grid: { display: false } } } },
-  });
 
   renderGoldTable();
 }

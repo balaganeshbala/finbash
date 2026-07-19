@@ -16,6 +16,10 @@ import {
   renderGoldDashboard, initGoldListeners,
 } from './gold.js';
 import {
+  startListeningSilver, loadSilverPrices,
+  renderSilverDashboard, initSilverListeners,
+} from './silver.js';
+import {
   startListeningFD, startListeningRD, initFDListeners,
 } from './fd.js';
 import {
@@ -56,12 +60,13 @@ if (!isConfigured) {
   const doSignOut = async () => {
     if (state.firestoreUnsub) { state.firestoreUnsub(); state.firestoreUnsub = null; }
     if (state.goldUnsub)      { state.goldUnsub();      state.goldUnsub      = null; }
+    if (state.silverUnsub)    { state.silverUnsub();    state.silverUnsub    = null; }
     if (state.fdUnsub)        { state.fdUnsub();        state.fdUnsub        = null; }
     if (state.rdUnsub)        { state.rdUnsub();        state.rdUnsub        = null; }
     if (state.mfUnsub)        { state.mfUnsub();        state.mfUnsub        = null; }
     if (state.stockUnsub)     { state.stockUnsub();     state.stockUnsub     = null; }
     if (state.npsUnsub)       { state.npsUnsub();       state.npsUnsub       = null; }
-    state.bonds = []; state.goldItems = []; state.fds = []; state.rds = [];
+    state.bonds = []; state.goldItems = []; state.silverItems = []; state.fds = []; state.rds = [];
     state.mfs = []; state.mfNavs = {}; state.stocks = []; state.stockPrices = {};
     state.nps = [];
     state.isViewMode = false; state.viewOwnerUid = null; state.currentViewers = [];
@@ -102,6 +107,9 @@ if (!isConfigured) {
       // measures the correct dimensions and animates from the right origin
       if (state.activeTab === 'gold' && state.goldItems.length > 0) {
         requestAnimationFrame(() => renderGoldDashboard());
+      }
+      if (state.activeTab === 'silver' && state.silverItems.length > 0) {
+        requestAnimationFrame(() => renderSilverDashboard());
       }
       // Refresh MF NAVs when switching to MF tab (at most once every 5 minutes)
       if (state.activeTab === 'mf' && state.mfs.length > 0) {
@@ -144,6 +152,7 @@ if (!isConfigured) {
   /* ── WIRE ALL MODULE LISTENERS ── */
   initBondListeners();
   initGoldListeners();
+  initSilverListeners();
   initFDListeners();
   initMFListeners();
   initStockListeners();
@@ -194,15 +203,18 @@ if (!isConfigured) {
           document.getElementById('view-owner-name').textContent = state.viewOwnerName + "'s";
 
           /* Hide write controls */
-          ['btn-partners', 'mob-btn-partners', 'sidebar-btn-partners', 'btn-add-gold', 'btn-add-bond'].forEach(id => {
+          ['btn-partners', 'mob-btn-partners', 'sidebar-btn-partners', 'btn-add-gold', 'btn-add-bond', 'btn-add-silver'].forEach(id => {
             document.getElementById(id).style.display = 'none';
           });
           document.getElementById('th-actions').style.display  = 'none';
           document.getElementById('gth-actions').style.display = 'none';
+          document.getElementById('sth-actions').style.display = 'none';
 
           startListening(state.viewOwnerUid);
           startListeningGold(state.viewOwnerUid);
           loadGoldPrices(state.viewOwnerUid);
+          startListeningSilver(state.viewOwnerUid);
+          loadSilverPrices(state.viewOwnerUid);
           startListeningFD(state.viewOwnerUid);
           startListeningRD(state.viewOwnerUid);
           startListeningMF(state.viewOwnerUid);
@@ -214,15 +226,18 @@ if (!isConfigured) {
           document.getElementById('view-banner').style.display = 'none';
 
           /* Restore write controls */
-          ['btn-partners', 'mob-btn-partners', 'sidebar-btn-partners', 'btn-add-gold', 'btn-add-bond'].forEach(id => {
+          ['btn-partners', 'mob-btn-partners', 'sidebar-btn-partners', 'btn-add-gold', 'btn-add-bond', 'btn-add-silver'].forEach(id => {
             document.getElementById(id).style.display = '';
           });
           document.getElementById('th-actions').style.display  = '';
           document.getElementById('gth-actions').style.display = '';
+          document.getElementById('sth-actions').style.display = '';
 
           startListening(user.uid);
           startListeningGold(user.uid);
           loadGoldPrices(user.uid);
+          startListeningSilver(user.uid);
+          loadSilverPrices(user.uid);
           startListeningFD(user.uid);
           startListeningRD(user.uid);
           startListeningMF(user.uid);
@@ -236,6 +251,8 @@ if (!isConfigured) {
         startListening(user.uid);
         startListeningGold(user.uid);
         loadGoldPrices(user.uid);
+        startListeningSilver(user.uid);
+        loadSilverPrices(user.uid);
         startListeningFD(user.uid);
         startListeningRD(user.uid);
         startListeningMF(user.uid);
@@ -246,13 +263,14 @@ if (!isConfigured) {
     } else {
       if (state.firestoreUnsub) { state.firestoreUnsub(); state.firestoreUnsub = null; }
       if (state.goldUnsub)      { state.goldUnsub();      state.goldUnsub      = null; }
+      if (state.silverUnsub)    { state.silverUnsub();    state.silverUnsub    = null; }
       if (state.fdUnsub)        { state.fdUnsub();        state.fdUnsub        = null; }
       if (state.rdUnsub)        { state.rdUnsub();        state.rdUnsub        = null; }
       if (state.mfUnsub)        { state.mfUnsub();        state.mfUnsub        = null; }
       if (state.stockUnsub)     { state.stockUnsub();     state.stockUnsub     = null; }
       if (state.npsUnsub)       { state.npsUnsub();       state.npsUnsub       = null; }
       if (state.epfUnsub)       { state.epfUnsub();       state.epfUnsub       = null; }
-      state.bonds = []; state.goldItems = []; state.fds = []; state.rds = [];
+      state.bonds = []; state.goldItems = []; state.silverItems = []; state.fds = []; state.rds = [];
       state.mfs = []; state.mfNavs = {}; state.stocks = []; state.stockPrices = {};
       state.nps = []; state.epf = [];
       state.isViewMode = false;

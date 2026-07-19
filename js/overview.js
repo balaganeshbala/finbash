@@ -51,6 +51,11 @@ function goldCurrentValue(g) {
   return price > 0 ? (g.weight || 0) * price : (g.totalInvested || 0);
 }
 
+function silverCurrentValue(s) {
+  const price = state.silverPrices.price999;
+  return price > 0 ? (s.weight || 0) * price : (s.totalInvested || 0);
+}
+
 /* ─────────────────────────────────────────────────────────────────
    COMPUTE TOTALS PER ASSET CLASS
    ───────────────────────────────────────────────────────────────── */
@@ -65,6 +70,13 @@ function computeAssets() {
     .filter(g => (g.totalInvested || 0) > 0)
     .reduce((s, g) => s + (g.totalInvested || 0), 0);
   const goldCurrent  = ownedGold.reduce((s, g) => s + goldCurrentValue(g), 0);
+
+  // Silver — exclude gifted items
+  const ownedSilver    = (state.silverItems || []).filter(s => !s.gifted);
+  const silverInvested = ownedSilver
+    .filter(s => (s.totalInvested || 0) > 0)
+    .reduce((s, i) => s + (i.totalInvested || 0), 0);
+  const silverCurrent  = ownedSilver.reduce((s, i) => s + silverCurrentValue(i), 0);
 
   // FD — invested = principal, current = accrued value up to today
   const fdInvested = state.fds.reduce((s, f) => s + (f.principal || 0), 0);
@@ -129,6 +141,7 @@ function computeAssets() {
   return [
     { label: 'Bonds',         invested: bondsInvested,             current: bondsInvested,           color: '#5c85b0' },
     { label: 'Gold',          invested: goldInvested,              current: goldCurrent,              color: '#b8924a' },
+    { label: 'Silver',        invested: silverInvested,            current: silverCurrent,            color: '#718096' },
     { label: 'Deposits',      invested: fdInvested + rdInvested,   current: fdCurrent + rdCurrent,   color: '#8a74b8' },
     { label: 'Mutual Funds',  invested: mfInvested,                current: mfCurrent,               color: '#4a9e7e' },
     { label: 'Stocks',        invested: stInvested,                current: stCurrent,               color: '#b86060' },
@@ -616,7 +629,7 @@ export function renderOverview() {
             const gain    = a.current - a.invested;
             const retPct  = a.invested > 0 ? (gain / a.invested) * 100 : 0;
             const col     = gain >= 0 ? '#059669' : '#dc2626';
-            const sign    = gain >= 0 ? '+' : '-';
+            const sign    = gain >= 0 ? '+' : '';
             const hasData = a.invested > 0;
 
             // 1D change per asset
@@ -626,7 +639,7 @@ export function renderOverview() {
               if (prevVal != null && hasData) {
                 const dc   = a.current - prevVal;
                 const dpct = prevVal > 0 ? (dc / prevVal) * 100 : 0;
-                const ds   = dc >= 0 ? '+' : '-';
+                const ds   = dc >= 0 ? '+' : '';
                 const dc_  = dc >= 0 ? '#059669' : '#dc2626';
                 dayCell = `<td class="num" style="color:${dc_}">${ds}${fmt(Math.round(Math.abs(dc)))}<br><span style="font-size:10.5px;opacity:0.8">${dpct.toFixed(2)}%</span></td>`;
               } else {

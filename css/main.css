@@ -639,6 +639,97 @@ code {
   color: #6b21a8;
 }
 
+/* ── SILVER PRICE BAR ── */
+.silver-price-bar {
+  background: #f4f6f9;
+  border: 1.5px solid #c8d4e0;
+  color: #2d3748;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.silver-price-bar label {
+  font-size: 11.5px;
+  font-weight: 700;
+  opacity: 0.7;
+  display: block;
+  margin-bottom: 4px;
+}
+
+#silver-price-view,
+#silver-price-edit {
+  flex: 1;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 0 16px;
+  align-items: center;
+}
+
+#silver-price-view>div,
+#silver-price-edit>div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+#silver-price-view div span {
+  font-weight: 700;
+  font-size: 15px;
+  color: #2d3748;
+}
+
+.silver-price-bar .gold-price-input {
+  border-color: #c8d4e0;
+  color: #2d3748;
+}
+
+.silver-price-bar .gold-price-input::placeholder {
+  color: #718096;
+  opacity: 0.6;
+}
+
+.silver-price-bar .gold-price-input:focus {
+  border-color: #4a5568;
+}
+
+.silver-price-bar .btn-update-price {
+  background: #4a5568;
+  border-color: #2d3748;
+}
+
+.silver-price-bar .btn-update-price:hover {
+  background: #2d3748;
+}
+
+.silver-price-bar .btn-cancel-price {
+  border-color: #c8d4e0;
+  color: #4a5568;
+}
+
+.silver-price-bar .btn-cancel-price:hover {
+  background: #edf2f7;
+}
+
+@media(max-width:600px) {
+  .silver-price-bar {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .silver-price-bar>svg {
+    display: none;
+  }
+
+  #silver-price-view,
+  #silver-price-edit {
+    grid-template-columns: 1fr auto;
+    gap: 10px 12px;
+  }
+}
+
 /* ── CONTAINER ── */
 .container {
   max-width: 1440px;
@@ -951,6 +1042,7 @@ code {
   display: block;
   max-width: 100%;
 }
+
 
 .row-2 {
   display: grid;
@@ -1791,7 +1883,8 @@ tbody td {
 }
 
 /* Gold KPI grid: 4 columns by default (overrides the 6-col base) */
-#goldKpiGrid {
+#goldKpiGrid,
+#silverKpiGrid {
   grid-template-columns: repeat(4, 1fr);
 }
 
@@ -1836,6 +1929,7 @@ tbody td {
   }
 
   #goldKpiGrid,
+  #silverKpiGrid,
   #fdKpiGrid,
   #npsKpiGrid,
   #epfKpiGrid {
@@ -1862,6 +1956,7 @@ tbody td {
   }
 
   #goldKpiGrid,
+  #silverKpiGrid,
   #fdKpiGrid,
   #npsKpiGrid,
   #epfKpiGrid {
@@ -1887,6 +1982,7 @@ tbody td {
   .kpi-grid,
   #kpiGrid,
   #goldKpiGrid,
+  #silverKpiGrid,
   #fdKpiGrid,
   #mfKpiGrid,
   #stockKpiGrid,
@@ -2241,6 +2337,7 @@ th[data-mfsort="name"] {
   }
 
   #goldKpiGrid,
+  #silverKpiGrid,
   #fdKpiGrid,
   #npsKpiGrid,
   #epfKpiGrid,
