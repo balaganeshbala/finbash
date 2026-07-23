@@ -831,7 +831,7 @@ code {
 
 .skel-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
   margin-bottom: 22px;
 }
@@ -842,17 +842,23 @@ code {
 
 .skel-row {
   display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 16px;
+  grid-template-columns: 340px 1fr;
+  gap: 18px;
+  align-items: start;
   margin-top: 4px;
 }
 
 .skel-chart {
-  height: 300px;
+  height: 360px;
 }
 
 .skel-table {
-  height: 300px;
+  height: 360px;
+}
+
+.skel-history {
+  height: 220px;
+  margin-top: 18px;
 }
 
 /* ── EMPTY STATE ── */
@@ -2417,6 +2423,38 @@ th[data-mfsort="name"] {
 .overview-chart-card {
   display: flex;
   flex-direction: column;
+}
+
+.overview-chart-card .card-title {
+  margin-bottom: 20px;
+}
+
+#overview-pie {
+  margin-bottom: 28px;
+}
+
+#pie-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 16px;
+  padding: 0 8px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.pie-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pie-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .overview-table-card {

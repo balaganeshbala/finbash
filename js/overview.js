@@ -335,15 +335,22 @@ function renderPieChart(assets) {
 
   if (overviewChart) { overviewChart.destroy(); overviewChart = null; }
 
-  const active = assets.filter(a => a.current > 0);
+  const active = assets.filter(a => a.invested > 0);
   if (!active.length) return;
+
+  const legendEl = document.getElementById('pie-legend');
+  if (legendEl) {
+    legendEl.innerHTML = active.map(a =>
+      `<span class="pie-legend-item"><span class="pie-legend-dot" style="background:${a.color}"></span>${a.label}</span>`
+    ).join('');
+  }
 
   overviewChart = new Chart(canvas.getContext('2d'), {
     type: 'doughnut',
     data: {
       labels:   active.map(a => a.label),
       datasets: [{
-        data:            active.map(a => Math.round(a.current)),
+        data:            active.map(a => Math.round(a.invested)),
         backgroundColor: active.map(a => a.color),
         borderColor:     '#fff',
         borderWidth:     3,
@@ -355,10 +362,7 @@ function renderPieChart(assets) {
       maintainAspectRatio: true,
       cutout:            '62%',
       plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { font: { size: 12, weight: '600' }, padding: 16, usePointStyle: true, pointStyleWidth: 10 },
-        },
+        legend: { display: false },
         tooltip: {
           callbacks: {
             label: ctx => {
@@ -371,6 +375,17 @@ function renderPieChart(assets) {
       },
     },
   });
+
+  if (legendEl) {
+    legendEl.querySelectorAll('.pie-legend-item').forEach((item, i) => {
+      item.style.cursor = 'pointer';
+      item.addEventListener('click', () => {
+        overviewChart.toggleDataVisibility(i);
+        overviewChart.update();
+        item.style.opacity = overviewChart.getDataVisibility(i) ? '1' : '0.4';
+      });
+    });
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────
