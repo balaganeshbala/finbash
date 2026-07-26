@@ -203,12 +203,22 @@ if (!isConfigured) {
           document.getElementById('view-owner-name').textContent = state.viewOwnerName + "'s";
 
           /* Hide write controls */
-          ['btn-partners', 'mob-btn-partners', 'sidebar-btn-partners', 'btn-add-gold', 'btn-add-bond', 'btn-add-silver'].forEach(id => {
-            document.getElementById(id).style.display = 'none';
+          [
+            'btn-partners', 'mob-btn-partners', 'sidebar-btn-partners',
+            'btn-add-gold', 'btn-add-first-gold',
+            'btn-add-silver', 'btn-add-first-silver',
+            'btn-add-bond', 'btn-add-first',
+            'btn-add-fd', 'btn-add-rd',
+            'btn-add-mf', 'btn-add-stock', 'btn-add-nps', 'btn-add-epf',
+            'btn-sync-snapshot',
+          ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
           });
-          document.getElementById('th-actions').style.display  = 'none';
-          document.getElementById('gth-actions').style.display = 'none';
-          document.getElementById('sth-actions').style.display = 'none';
+          ['th-actions', 'gth-actions', 'sth-actions', 'fdth-actions', 'rdth-actions', 'mfth-actions', 'stth-actions', 'npsth-actions'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+          });
 
           startListening(state.viewOwnerUid);
           startListeningGold(state.viewOwnerUid);
@@ -226,12 +236,22 @@ if (!isConfigured) {
           document.getElementById('view-banner').style.display = 'none';
 
           /* Restore write controls */
-          ['btn-partners', 'mob-btn-partners', 'sidebar-btn-partners', 'btn-add-gold', 'btn-add-bond', 'btn-add-silver'].forEach(id => {
-            document.getElementById(id).style.display = '';
+          [
+            'btn-partners', 'mob-btn-partners', 'sidebar-btn-partners',
+            'btn-add-gold', 'btn-add-first-gold',
+            'btn-add-silver', 'btn-add-first-silver',
+            'btn-add-bond', 'btn-add-first',
+            'btn-add-fd', 'btn-add-rd',
+            'btn-add-mf', 'btn-add-stock', 'btn-add-nps', 'btn-add-epf',
+            'btn-sync-snapshot',
+          ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = '';
           });
-          document.getElementById('th-actions').style.display  = '';
-          document.getElementById('gth-actions').style.display = '';
-          document.getElementById('sth-actions').style.display = '';
+          ['th-actions', 'gth-actions', 'sth-actions', 'fdth-actions', 'rdth-actions', 'mfth-actions', 'stth-actions', 'npsth-actions'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = '';
+          });
 
           startListening(user.uid);
           startListeningGold(user.uid);
@@ -284,8 +304,8 @@ if (!isConfigured) {
    and allow the debounced auto-save to capture the freshest values.
    ───────────────────────────────────────────────────────────────── */
 window.__refreshOverview = async () => {
-  // Clear session lock so the upcoming renderOverview() debounce will re-save
-  resetSnapshotSession();
+  // Clear session lock so the upcoming renderOverview() debounce will re-save (owner only)
+  if (!state.isViewMode) resetSnapshotSession();
   const tasks = [];
   if (state.stocks.length > 0)   tasks.push(fetchAllPrices());
   if (state.mfs.length > 0)      tasks.push(fetchAllNavs());

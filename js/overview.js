@@ -588,7 +588,7 @@ export function renderOverview() {
       <div class="kpi-card">
         <div class="kpi-label">${dayLabel}</div>
         <div class="kpi-value" style="color:${dayColor}">${daySign}${fmt(Math.round(Math.abs(dayChange)))}</div>
-        <div class="kpi-sub">${daySign}${dayPct.toFixed(2)}% from ${fmt(Math.round(prevVal))}</div>
+        <div class="kpi-sub">${daySign}${Math.abs(dayPct).toFixed(2)}% from ${fmt(Math.round(prevVal))}</div>
       </div>`;
   }
 
@@ -644,7 +644,7 @@ export function renderOverview() {
             const gain    = a.current - a.invested;
             const retPct  = a.invested > 0 ? (gain / a.invested) * 100 : 0;
             const col     = gain >= 0 ? '#059669' : '#dc2626';
-            const sign    = gain >= 0 ? '+' : '';
+            const sign    = gain >= 0 ? '+' : '-';
             const hasData = a.invested > 0;
 
             // 1D change per asset
@@ -654,9 +654,9 @@ export function renderOverview() {
               if (prevVal != null && hasData) {
                 const dc   = a.current - prevVal;
                 const dpct = prevVal > 0 ? (dc / prevVal) * 100 : 0;
-                const ds   = dc >= 0 ? '+' : '';
+                const ds   = dc >= 0 ? '+' : '-';
                 const dc_  = dc >= 0 ? '#059669' : '#dc2626';
-                dayCell = `<td class="num" style="color:${dc_}">${ds}${fmt(Math.round(Math.abs(dc)))}<br><span style="font-size:10.5px;opacity:0.8">${dpct.toFixed(2)}%</span></td>`;
+                dayCell = `<td class="num" style="color:${dc_}">${ds}${fmt(Math.round(Math.abs(dc)))}<br><span style="font-size:10.5px;opacity:0.8">${ds}${Math.abs(dpct).toFixed(2)}%</span></td>`;
               } else {
                 dayCell = `<td class="num" style="color:#94a3b8">—</td>`;
               }
@@ -668,7 +668,7 @@ export function renderOverview() {
               <td class="num">${hasData ? fmt(Math.round(a.current))  : '—'}</td>
               ${dayCell}
               <td class="num" style="color:${hasData ? col : 'inherit'}">${hasData ? sign + fmt(Math.round(Math.abs(gain))) : '—'}</td>
-              <td class="num" style="color:${hasData ? col : 'inherit'}">${hasData ? sign + retPct.toFixed(2) + '%' : '—'}</td>
+              <td class="num" style="color:${hasData ? col : 'inherit'}">${hasData ? sign + Math.abs(retPct).toFixed(2) + '%' : '—'}</td>
             </tr>`;
           }).join('')}
         </tbody>
@@ -677,9 +677,9 @@ export function renderOverview() {
             <td><strong>Total</strong></td>
             <td class="num"><strong>${fmt(Math.round(totalInvested))}</strong></td>
             <td class="num"><strong>${fmt(Math.round(totalCurrent))}</strong></td>
-            ${hasPrev ? `<td class="num" style="color:${totDayColor}"><strong>${totDaySign}${fmt(Math.round(Math.abs(totDayChange)))}</strong><br><span style="font-size:10.5px;opacity:0.8">${totDaySign}${totDayPct.toFixed(2)}%</span></td>` : ''}
+            ${hasPrev ? `<td class="num" style="color:${totDayColor}"><strong>${totDaySign}${fmt(Math.round(Math.abs(totDayChange)))}</strong><br><span style="font-size:10.5px;opacity:0.8">${totDaySign}${Math.abs(totDayPct).toFixed(2)}%</span></td>` : ''}
             <td class="num" style="color:${gainColor}"><strong>${gainSign}${fmt(Math.round(Math.abs(totalGain)))}</strong></td>
-            <td class="num" style="color:${gainColor}"><strong>${gainSign}${totalRetPct.toFixed(2)}%</strong></td>
+            <td class="num" style="color:${gainColor}"><strong>${gainSign}${Math.abs(totalRetPct).toFixed(2)}%</strong></td>
           </tr>
         </tfoot>
       </table>
