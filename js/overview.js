@@ -207,6 +207,7 @@ function renderFilterBar(allAssets) {
    PORTFOLIO HISTORY LINE CHART
    ───────────────────────────────────────────────────────────────── */
 let _historyChart    = null;
+let _returnsChart    = null;
 let _historyPeriod   = '1M';
 let _chartInitialised = false;
 
@@ -250,13 +251,21 @@ async function renderPortfolioHistoryChart(period) {
   const labels   = snapshots.map(s => fmtSnapshotLabel(s.date, _historyPeriod));
   const values   = snapshots.map(s => s.totalValue   ?? 0);
   const invested = snapshots.map(s => s.totalInvested ?? 0);
+  const returns  = values.map((v, i) => v - invested[i]);
 
-  const latest    = values[values.length - 1];
+  const latest   = values[values.length - 1];
   const latestInv = invested[invested.length - 1];
   const isGain    = latest >= latestInv;
   const lineCol   = isGain ? '#4a9e7e' : '#b86060';
   const fillCol   = isGain ? 'rgba(74,158,126,0.08)' : 'rgba(184,96,96,0.08)';
   const showDots  = snapshots.length <= 60;
+  const fmtAxis   = v => {
+    const a = Math.abs(v), sign = v < 0 ? '-' : '';
+    return a >= 1e7 ? sign + '₹' + (a / 1e7).toFixed(1) + 'Cr'
+         : a >= 1e5 ? sign + '₹' + (a / 1e5).toFixed(1) + 'L'
+         : a >= 1e3 ? sign + '₹' + (a / 1e3).toFixed(0) + 'K'
+         : sign + '₹' + a;
+  };
 
   if (_historyChart) { _historyChart.destroy(); _historyChart = null; }
 
@@ -313,11 +322,54 @@ async function renderPortfolioHistoryChart(period) {
           grid: { color: '#f1f5f9' },
           ticks: {
             font: { size: 11 }, color: '#94a3b8',
-            callback: v => v >= 1e7 ? '₹' + (v / 1e7).toFixed(1) + 'Cr'
-                        : v >= 1e5 ? '₹' + (v / 1e5).toFixed(1) + 'L'
-                        : v >= 1e3 ? '₹' + (v / 1e3).toFixed(0) + 'K'
-                        : '₹' + v,
+            callback: fmtAxis,
           },
+        },
+      },
+    },
+  });
+
+  if (_returnsChart) { _returnsChart.destroy(); _returnsChart = null; }
+
+  _returnsChart = new Chart(document.getElementById('returns-history-chart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Returns',
+        data: returns,
+        borderColor: lineCol,
+        borderWidth: 2,
+        pointRadius: showDots ? 2 : 0,
+        pointHoverRadius: 4,
+        fill: { target: 'origin', above: 'rgba(74,158,126,0.12)', below: 'rgba(184,96,96,0.12)' },
+        tension: 0.35,
+      }],
+    },
+    options: {
+      responsive: true,
+      aspectRatio: 4,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const inv = invested[ctx.dataIndex];
+              const pct = inv > 0 ? ` (${(ctx.parsed.y / inv * 100).toFixed(2)}%)` : '';
+              return ` Returns: ${fmt(ctx.parsed.y)}${pct}`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11 }, color: '#94a3b8', maxTicksLimit: 8 },
+        },
+        y: {
+          grid: { color: ctx => ctx.tick.value === 0 ? '#cbd5e1' : '#f1f5f9' },
+          ticks: { font: { size: 11 }, color: '#94a3b8', callback: fmtAxis },
         },
       },
     },

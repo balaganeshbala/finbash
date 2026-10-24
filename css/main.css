@@ -2645,6 +2645,18 @@ th[data-mfsort="name"] {
   max-height: 300px;
 }
 
+.history-canvas-box {
+  position: relative;
+}
+
+.returns-history-title {
+  margin-top: 24px;
+}
+
+#returns-history-chart {
+  max-height: 180px;
+}
+
 @media(max-width: 600px) {
   .portfolio-history-header {
     flex-direction: column;
