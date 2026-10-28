@@ -42,7 +42,8 @@ async function fetchNav(schemeCode) {
   try {
     // Use the full scheme endpoint (not /latest) — it returns history newest-first,
     // so data[0] = today's NAV and data[1] = previous trading day's NAV.
-    const res  = await fetch(`${MFAPI}/${schemeCode}`);
+    // Cache-buster: mfapi.in drops the CORS header on cached (HIT) responses.
+    const res  = await fetch(`${MFAPI}/${schemeCode}?t=${Date.now()}`);
     const json = await res.json();
     const data = json.data;
     if (!data?.length) return null;
@@ -344,7 +345,7 @@ let searchTimer = null;
 async function searchFunds(q) {
   if (!q || q.length < 2) { hideFundDropdown(); return; }
   try {
-    const res  = await fetch(`${MFAPI}/search?q=${encodeURIComponent(q)}`);
+    const res  = await fetch(`${MFAPI}/search?q=${encodeURIComponent(q)}&t=${Date.now()}`);
     const list = await res.json();
     showFundDropdown(Array.isArray(list) ? list.slice(0, 9) : []);
   } catch { hideFundDropdown(); }
@@ -392,7 +393,7 @@ async function fetchAndFillMeta(code) {
   status.style.color = '#94a3b8';
   status.textContent = 'Verifying scheme code…';
   try {
-    const res  = await fetch(`${MFAPI}/${code}/latest`);
+    const res  = await fetch(`${MFAPI}/${code}/latest?t=${Date.now()}`);
     const json = await res.json();
     if (!json.meta?.scheme_name) {
       status.style.color = '#ef4444';
